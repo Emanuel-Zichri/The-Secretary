@@ -11,12 +11,12 @@
 
         public SpaceDetails() { }
 
-        public static int Register(SpaceDetails space)
+        public static int Register(int workrequestID,SpaceDetails space)
         {
             DBservices db = new DBservices();
             try
             {
-                return db.InsertSpaceDetails(space);
+                return db.InsertSpaceDetails(workrequestID,space);
             }
             catch (Exception ex)
             {

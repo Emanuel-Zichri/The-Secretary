@@ -61,7 +61,7 @@ public class DBservices
     //--------------------------------------------------------------------------------------------------
     // This method Register new client to the database 
     //--------------------------------------------------------------------------------------------------
-   public int Register(Customer newCustomer)
+    public int Register(Customer newCustomer)
     {
         SqlConnection con;
         SqlCommand cmd;
@@ -72,8 +72,9 @@ public class DBservices
         catch (Exception ex)
         {
             // write to log
-            throw (ex);
+            throw ex;
         }
+
         Dictionary<string, object> paramDic = new Dictionary<string, object>();
         paramDic.Add("@FirstName", newCustomer.FirstName);
         paramDic.Add("@LastName", newCustomer.LastName);
@@ -83,16 +84,20 @@ public class DBservices
         paramDic.Add("@Street", newCustomer.Street);
         paramDic.Add("@Number", newCustomer.Number);
         paramDic.Add("@Notes", newCustomer.Notes);
-        cmd = CreateCommandWithStoredProcedureGeneral("InsertCustomer", con, paramDic);          // create the command
+
+        cmd = CreateCommandWithStoredProcedureGeneral("InsertCustomer", con, paramDic); // create the command
+
         try
         {
-            int numEffected = cmd.ExecuteNonQuery(); // execute the command
-            return numEffected;
+            // Using ExecuteScalar to fetch the returned new customer id from the stored procedure
+            object result = cmd.ExecuteScalar();
+            int newCustomerID = Convert.ToInt32(result);
+            return newCustomerID;
         }
         catch (Exception ex)
         {
             // write to log
-            throw (ex);
+            throw ex;
         }
         finally
         {
@@ -103,10 +108,11 @@ public class DBservices
             }
         }
     }
+
     //--------------------------------------------------------------------------------------------------
     // This method insert space details 
     //--------------------------------------------------------------------------------------------------
-    public int InsertSpaceDetails(SpaceDetails space)
+    public int InsertSpaceDetails(int workrequestID, SpaceDetails space)
     {
         SqlConnection con;
         SqlCommand cmd;
@@ -122,7 +128,7 @@ public class DBservices
 
         Dictionary<string, object> paramDic = new Dictionary<string, object>()
     {
-        { "@RequestID", space.RequestID },
+        { "@RequestID", workrequestID },
         { "@Size", space.Size },
         { "@FloorType", space.FloorType },
         { "@MediaURL", space.MediaURL },
@@ -150,7 +156,7 @@ public class DBservices
     //--------------------------------------------------------------------------------------------------
     // This method insert work request
     //--------------------------------------------------------------------------------------------------
-    public int InsertWorkRequest(WorkRequest request)
+    public int InsertWorkRequest(int costumerID)
     {
         SqlConnection con;
         SqlCommand cmd;
@@ -167,9 +173,8 @@ public class DBservices
         cmd = new SqlCommand("InsertWorkRequest", con);
         cmd.CommandType = CommandType.StoredProcedure;
 
-        cmd.Parameters.AddWithValue("@CustomerID", request.CustomerID);
-        cmd.Parameters.AddWithValue("@Status", request.Status ?? (object)DBNull.Value);
-        cmd.Parameters.AddWithValue("@Notes", request.Notes ?? (object)DBNull.Value);
+        cmd.Parameters.AddWithValue("@CustomerID", costumerID);
+
 
         SqlParameter outputIdParam = new SqlParameter("@RequestID", SqlDbType.Int)
         {
