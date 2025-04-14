@@ -1,4 +1,5 @@
 ﻿namespace FinalProject.BL
+
 { 
 
 	public class NewRequest
@@ -8,3 +9,4 @@
 
 	}
 }
+

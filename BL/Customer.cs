@@ -13,7 +13,6 @@
         public string Number { get; set; }
         public string Notes { get; set; }
 
-
         public Customer() { }
 
         public static int Register(Customer newCustomer)
