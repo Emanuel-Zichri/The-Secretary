@@ -7,6 +7,8 @@
         public DateTime CreatedAt { get; set; }
         public string Status { get; set; }
         public string Notes { get; set; }
+        public DateTime? PlannedDate { get; set; }
+        public DateTime? CompletedDate { get; set; }
 
         public static int Register(int costumerID)
         {
