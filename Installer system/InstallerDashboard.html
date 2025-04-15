@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>מסך הבית - דוד פרקטים</title>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --main-color: #b46a2c;
+      --highlight-color: #e6f2f2;
+      --gray: #f4f4f4;
+      --text-dark: #333;
+      --card-radius: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Heebo', sans-serif;
+      background-color: #fafafa;
+      color: var(--text-dark);
+    }
+
+    .container {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      width: 240px;
+      background-color: #fff;
+      padding: 20px;
+      border-left: 1px solid #ddd;
+    }
+
+    .sidebar .logo {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .sidebar nav a {
+      display: flex;
+      align-items: center;
+      padding: 12px;
+      color: var(--text-dark);
+      text-decoration: none;
+      border-radius: 8px;
+      margin-bottom: 8px;
+    }
+
+    .sidebar nav a:hover,
+    .sidebar nav a.active {
+      background-color: var(--highlight-color);
+      font-weight: bold;
+    }
+
+    .main {
+      flex: 1;
+      padding: 30px;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+
+    .search-box input {
+      padding: 10px;
+      border-radius: 20px;
+      border: 1px solid #ccc;
+      width: 250px;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .dashboard {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 20px;
+    }
+
+    .calendar,
+    .chart,
+    .stats-grid {
+      background: #fff;
+      border-radius: var(--card-radius);
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 16px;
+      margin-top: 30px;
+    }
+
+    .stat-card {
+      background: var(--gray);
+      border-radius: var(--card-radius);
+      padding: 15px;
+      text-align: center;
+    }
+
+    .stat-card h3 {
+      margin: 10px 0 0;
+      font-size: 24px;
+      color: var(--main-color);
+    }
+
+    .stat-card p {
+      margin: 6px 0 0;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <aside class="sidebar">
+      <div class="logo">
+        <img src="picturs/logo.png" alt="לוגו" width="100">
+      </div>
+      <nav>
+        <a href="#" class="active">מסך הבית</a>
+        <a href="#">לעומק</a>
+        <a href="#">סטטוסים לביצוע</a>
+        <a href="#">ניהול התקנות</a>
+        <a href="#">לקוחות</a>
+        <a href="#">יומן</a>
+        <a href="#">הגדרות</a>
+        <a href="#">התנתקות</a>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <div class="top-bar">
+        <div class="search-box">
+          <input type="text" placeholder="...חפש כאן">
+        </div>
+        <div class="user-info">
+          <strong>דוד</strong>
+          <span>משתמש ראשי</span>
+        </div>
+      </div>
+
+      <h2>מסך הבית</h2>
+
+      <div class="dashboard">
+        <section class="calendar">
+          <h3>יומן</h3>
+          <p>כאן יוצג היומן השבועי בצבעים כמו בתמונה (ניתן להחליף ברכיב React או iframe של קלנדר בהמשך).</p>
+        </section>
+
+        <section class="chart">
+          <h3>היסטוריית סכומי התקנות</h3>
+          <p>גרף עמודות חודשי - מומלץ להשתמש בספרייה כגון Chart.js בעתיד.</p>
+        </section>
+      </div>
+
+      <section class="stats-grid">
+        <div class="stat-card">
+          <p>ממתין לקביעת תאריך</p>
+          <h3>2</h3>
+        </div>
+        <div class="stat-card">
+          <p>עבודות לביצוע</p>
+          <h3>4</h3>
+        </div>
+        <div class="stat-card">
+          <p>טיוטה להצעת מחיר</p>
+          <h3>3</h3>
+        </div>
+        <div class="stat-card">
+          <p>התקשרות להצעה</p>
+          <h3>1</h3>
+        </div>
+        <div class="stat-card">
+          <p>ממתין לסרטון</p>
+          <h3>5</h3>
+        </div>
+        <div class="stat-card">
+          <p>נשלח ללוגין</p>
+          <h3>0</h3>
+        </div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>
