@@ -132,7 +132,8 @@ public class DBservices
         { "@Size", space.Size },
         { "@FloorType", space.FloorType },
         { "@MediaURL", space.MediaURL },
-        { "@Notes", space.Notes }
+        { "@Notes", space.Notes },
+        { "@ParquetType", space.ParquetType }
     };
 
         cmd = CreateCommandWithStoredProcedureGeneral("InsertSpaceDetails", con, paramDic);
@@ -199,7 +200,102 @@ public class DBservices
         }
     }
 
-    
+    //--------------------------------------------------------------------------------------------------
+    // This method Read from DB to dashboard or to specific customer
+    //--------------------------------------------------------------------------------------------------
+    public object GetDashboardData(DashboardFilterDto filter)
+    {
+        SqlConnection con;
+        SqlCommand cmd;
+
+        try
+        {
+            con = connect("myProjDB");
+        }
+        catch (Exception ex)
+        {
+            throw (ex);
+        }
+
+        List<object> dashboardTable = new List<object>();
+
+        try
+        {
+            // יצירת מילון של פרמטרים
+            Dictionary<string, object> paramDic = new Dictionary<string, object>
+        {
+            { "@CustomerID", (object?)filter.CustomerID ?? DBNull.Value },
+            { "@City", (object?)filter.City ?? DBNull.Value },
+            { "@FromDate", (object?)filter.FromDate ?? DBNull.Value },
+            { "@ToDate", (object?)filter.ToDate ?? DBNull.Value },
+            { "@FloorType", (object?)filter.FloorType ?? DBNull.Value },
+            { "@Status", (object?)filter.Status ?? DBNull.Value }
+        };
+
+            // יצירת פקודה עם הפרוצדורה והפרמטרים
+            cmd = CreateCommandWithStoredProcedureGeneral("GetDashboardData", con, paramDic);
+            SqlDataReader reader = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+
+            while (reader.Read())
+            {
+                var row = new Dictionary<string, object>
+    {
+        { "CustomerID", reader["CustomerID"] },
+        { "FirstName", reader["FirstName"].ToString() },
+        { "LastName", reader["LastName"].ToString() },
+        { "Phone", reader["Phone"].ToString() },
+        { "City", reader["City"].ToString() },
+        { "CustomerCreatedAt", reader["CustomerCreatedAt"] },
+
+        { "RequestID", reader["RequestID"] },
+        { "PlannedDate", reader["PlannedDate"] != DBNull.Value ? (DateTime?)reader["PlannedDate"] : null },
+        { "CompletedDate", reader["CompletedDate"] != DBNull.Value ? (DateTime?)reader["CompletedDate"] : null },
+        { "Status", reader["Status"].ToString() },
+
+        // עבור לקוח ספציפי ישמש לבניית כרטיס הלקוח בהמשך-ייתכן ונצטרך לעדכן לינק לסרטון והערות
+        { "SpaceID", ColumnExists(reader, "SpaceID") ? reader["SpaceID"] : null },
+        { "Size", ColumnExists(reader, "Size") ? reader["Size"] : null },
+        { "FloorType", ColumnExists(reader, "FloorType") ? reader["FloorType"].ToString() : null },
+        { "Parquet", ColumnExists(reader, "Parquet") ? reader["Parquet"].ToString() : null },
+        { "SpaceNotes", ColumnExists(reader, "SpaceNotes") ? reader["SpaceNotes"].ToString() : null },
+
+        // עבור תצוגה מקובצת- כלומר לא נשלח מזהה לקוח
+        { "SpaceCount", ColumnExists(reader, "SpaceCount") ? reader["SpaceCount"] : null },
+        { "TotalSpaceSize", ColumnExists(reader, "TotalSpaceSize") ? reader["TotalSpaceSize"] : null }
+    };
+
+                dashboardTable.Add(row);
+            }
+            reader.Close();
+        }
+        catch (Exception ex)
+        {
+            throw (ex);
+        }
+        finally
+        {
+            if (con != null)
+            {
+                con.Close();
+            }
+        }
+
+        return dashboardTable;
+
+
+    }
+
+    private bool ColumnExists(SqlDataReader reader, string columnName)
+    {
+        for (int i = 0; i < reader.FieldCount; i++)
+        {
+            if (reader.GetName(i).Equals(columnName, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
 
     //--------------------------------------------------------------------------------------------------
     // This method Read all games for a specific user 

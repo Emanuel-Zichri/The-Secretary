@@ -8,6 +8,7 @@
         public string FloorType { get; set; }
         public string MediaURL { get; set; }
         public string Notes { get; set; }
+        public string ParquetType { get; set; }
 
         public SpaceDetails() { }
 
