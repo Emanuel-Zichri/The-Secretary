@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>הצעת מחיר</title>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Heebo', sans-serif;
+      background: #fff;
+      color: #333;
+      margin: 0;
+      padding: 0;
+      max-width: 480px;
+      margin: auto;
+    }
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px;
+    }
+    .logo img { width: 100px; }
+    .back-btn {
+      font-size: 22px;
+      cursor: pointer;
+    }
+    h1 {
+      text-align: center;
+      font-size: 22px;
+      font-weight: 700;
+      margin: 0;
+    }
+    .progress-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+      margin: 16px 24px 24px;
+    }
+    .progress-bar::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background-color: #e0e0e0;
+      z-index: 0;
+    }
+    .progress-step {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background-color: #fff;
+      border: 2px solid #dcdcdc;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .progress-step.active {
+      background-color: #666;
+      border-color: #666;
+    }
+    .progress-step.done {
+      background-color: #b46a2c;
+      border-color: #b46a2c;
+    }
+    .progress-step.done::after {
+      content: "\2713";
+      color: white;
+      font-size: 14px;
+    }
+    .summary-section {
+      padding: 16px;
+    }
+    .summary-section ul {
+      list-style: none;
+      padding: 0;
+    }
+    .summary-section ul li {
+      margin-bottom: 8px;
+    }
+    .price-box {
+      background: #f9f9f9;
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      padding: 16px;
+      margin: 16px;
+      text-align: center;
+    }
+    .price-range {
+      color: #b46a2c;
+      font-size: 20px;
+      font-weight: bold;
+    }
+    .duration-range {
+      color: #f44336;
+      font-weight: bold;
+      font-size: 16px;
+    }
+    .btn-next {
+      background: #b46a2c;
+      color: white;
+      border: none;
+      border-radius: 999px;
+      padding: 16px;
+      font-weight: bold;
+      font-size: 16px;
+      width: 90%;
+      margin: 32px auto;
+      display: block;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <div class="back-btn" onclick="window.history.back()">&#8592;</div>
+    <div class="logo"><img src="/picturs/logo.png" alt="לוגו"></div>
+  </div>
+  
+  <h1>הצעת מחיר</h1>
+  <div class="progress-bar">
+    <div class="progress-step done"></div>
+    <div class="progress-step done"></div>
+    <div class="progress-step done"></div>
+    <div class="progress-step active"></div>
+    <div class="progress-step"></div>
+  </div>
+
+  <div class="summary-section">
+    <h3>נכון לפרטים שהזנתם:</h3>
+    <ul id="summary-list"></ul>
+
+    <div class="price-box">
+      <div>הצעת המחיר היא:</div>
+      <div class="price-range" id="priceRange"></div>
+      <small>(לא כולל מע"מ)</small>
+      <div style="margin-top:10px;">הזמן המשוער לביצוע ההתקנה הינו:</div>
+      <div class="duration-range" id="durationRange"></div>
+    </div>
+    <div>המחיר או זמן ההתקנה עשוי להשתנות בהתאם לשינויים בעת ההתקנה או במידה והנתונים שהוזנו שונים מהנתונים בפועל*</div>
+  </div>
+ 
+  <button class="btn-next" onclick="goNext()">עדיפות לתאריך התקנה</button>
+
+  <script>
+    function loadQuote() {
+      const data = JSON.parse(localStorage.getItem('installationData')) || {};
+      const { customerDetails = {}, spaceDetails = [] } = data;
+
+      let totalSize = 0;
+      spaceDetails.forEach(s => totalSize += Number(s.size));
+
+      let pricePerM = 0;
+      const parquetType = localStorage.getItem('selectedParquet') || '';
+
+      if (parquetType.includes('עץ')) pricePerM = 70;
+      else if (parquetType.includes('למינציה')) pricePerM = 40;
+      else if (parquetType.includes('פישבון')) pricePerM = 90;
+
+      const estimatedPrice = totalSize * pricePerM;
+      const low = Math.round(estimatedPrice * 0.8);
+      const high = Math.round(estimatedPrice * 1.2);
+
+      const installDays = Math.ceil(totalSize / 20); // נניח 20 מ"ר ביום
+
+      document.getElementById('summary-list').innerHTML = `
+        <li>${totalSize} מ"ר פרקט ${parquetType} - כולל התקנה</li>
+        <li>${spaceDetails.length} חללים</li>
+      `;
+      document.getElementById('priceRange').innerText = `${low} - ${high} ש"ח`;
+      document.getElementById('durationRange').innerText = `${installDays - 1} - ${installDays + 1} ימים`;
+    }
+
+    function goNext() {
+      window.location.href = 'InstallDateSelection.html';
+    }
+
+    window.onload = loadQuote;
+  </script>
+</body>
+</html>
