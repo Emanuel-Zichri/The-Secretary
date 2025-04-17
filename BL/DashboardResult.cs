@@ -8,6 +8,7 @@
         public string Phone { get; set; }
         public string City { get; set; }
         public DateTime CustomerCreatedAt { get; set; }
+        public string? Email { get; set; }
         public int RequestID { get; set; }
         public DateTime? PlannedDate { get; set; }
         public DateTime? CompletedDate { get; set; }
