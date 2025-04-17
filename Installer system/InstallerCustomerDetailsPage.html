@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>פרטי לקוח</title>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --main-color: #b46a2c;
+      --text-dark: #333;
+      --light-gray: #f5f5f5;
+      --radius: 12px;
+    }
+
+    body {
+  overflow-x: hidden;
+      margin: 0;
+      font-family: 'Heebo', sans-serif;
+      background-color: #fafafa;
+    }
+
+    .container {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+  width: 200px;
+  background-color: #fff;
+  padding: 20px;
+  border-left: 1px solid #ddd;
+  height: 100vh;
+  position: fixed;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  overflow-y: auto;
+  box-sizing: border-box;
+  z-index: 1000;
+}
+
+    .sidebar .logo {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .sidebar nav a {
+      display: block;
+      padding: 12px;
+      color: var(--text-dark);
+      text-decoration: none;
+      border-radius: 8px;
+      margin-bottom: 8px;
+    }
+
+    .sidebar nav a.active {
+      background-color: #e6f2f2;
+      font-weight: bold;
+    }
+
+    .main {
+  margin-right: 200px;
+  width: calc(100% - 200px);
+      flex: 1;
+      padding: 30px;
+    }
+
+    .section {
+      background: #fff;
+      border-radius: var(--radius);
+      padding: 30px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+      margin-bottom: 20px;
+    }
+
+    .section h2 {
+      margin-top: 0;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 15px;
+    }
+
+    .info-item {
+      font-size: 15px;
+    }
+
+    .info-item label {
+      font-weight: bold;
+      margin-left: 6px;
+    }
+
+    .info-item input {
+      padding: 6px;
+      width: 90%;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    .edit-btn {
+      margin-top: 10px;
+    }
+
+    .btn {
+      background-color: var(--main-color);
+      color: #fff;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-right: 10px;
+    }
+
+    .btn-secondary {
+      background-color: #ccc;
+      color: #333;
+    }
+      .quantity-control {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .quantity-control button {
+      background-color: var(--main-color);
+      color: #fff;
+      border: none;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .quantity-control .quantity-display {
+      min-width: 20px;
+      text-align: center;
+    }
+
+    html, body {
+      height: 100%;
+    }
+
+    .container {
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    main.main {
+      overflow-x: hidden;
+    }
+    .edit-input {
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 6px;
+  width: 90%;
+}
+
+</style>
+</head>
+<body>
+<div class="container">
+  <aside class="sidebar">
+    <div class="logo">
+      <img src="/picturs/logo.png" alt="לוגו" width="100">
+    </div>
+    <nav>
+      <a href="#">מסך הבית</a>
+      <a href="#">לעומק</a>
+      <a href="#">סטטוסים לביצוע</a>
+      <a href="#">ניהול התקנות</a>
+      <a href="InstallerCustomersPage.html" class="active">לקוחות</a>
+      <a href="#">יומן</a>
+      <a href="#">הגדרות</a>
+      <a href="#">התנתקות</a>
+    </nav>
+  </aside>
+  <main class="main">
+    <div class="section" style="text-align:center; margin-bottom: 30px;">
+      <h2>התקדמות טיפול בלקוח</h2>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px;">
+        <div style="flex:1; text-align:center;">
+          <div class="progress-circle" style="width:30px; height:30px; border-radius:50%; background:#ccc; margin:auto;"></div>
+          <span>צפייה בסרטון</span>
+        </div>
+        <div style="flex:1; text-align:center;">
+          <div class="progress-circle" style="width:30px; height:30px; border-radius:50%; background:var(--main-color); margin:auto;"></div>
+          <span>הצעת מחיר</span>
+        </div>
+        <div style="flex:1; text-align:center;">
+          <div class="progress-circle" style="width:30px; height:30px; border-radius:50%; background:#ccc; margin:auto;"></div>
+          <span>אישור מקדמה</span>
+        </div>
+        <div style="flex:1; text-align:center;">
+          <div class="progress-circle" style="width:30px; height:30px; border-radius:50%; background:#ccc; margin:auto;"></div>
+          <span>ביצוע התקנה</span>
+        </div>
+      </div>
+    </div>
+    <div class="section">
+      <h2 id="customerName">פרטי לקוח</h2>
+      <div class="info-grid">
+        <div class="info-item"><label>טלפון:</label><span id="phoneText" class="editable">-</span></div>
+<div class="info-item"><label>אימייל:</label><span id="emailText" class="editable">-</span></div>
+<div class="info-item"><label>עיר:</label><span id="cityText" class="editable">-</span></div>
+<div class="info-item"><label>רחוב:</label><span id="streetText" class="editable">-</span></div>
+<div class="info-item"><label>סטטוס:</label><span id="statusText" class="editable">-</span></div>
+
+      </div>
+      <div class="edit-btn">
+        <button class="btn btn-secondary" onclick="enableEdit()" id="editBtn">✏️ ערוך</button>
+      </div>
+      <div id="editActions" style="display: none;">
+        <button class="btn" onclick="saveChanges()">שמור שינויים</button>
+        <button class="btn btn-secondary" onclick="cancelEdit()">בטל</button>
+      </div>
+      
+    </div>
+    <div class="section">
+      <h2>סרטון תיעוד ההתקנה</h2>
+      <video id="video" controls style="width: 100%; max-width: 600px; display: block; margin: auto">
+        <source src="video-placeholder.mp4" type="video/mp4">
+        הדפדפן שלך לא תומך בניגון וידאו
+      </video>
+    </div>
+    <div class="section">
+      <h2>מחשבון חכם</h2>
+      <div class="info-grid" id="priceCalculator">
+  <div class="info-item">
+    <label>סוג פרקט:</label>
+    <select id="floorType" onchange="updateInstallationPrice()" style="padding: 6px; width: 90%; border: 1px solid #ccc; border-radius: 6px;">
+      <option value="spc">SPC/למינציה (60 ש"ח למ"ר)</option>
+      <option value="wood">עץ (85 ש"ח למ"ר)</option>
+      <option value="fishbone">פישבון (150 ש"ח למ"ר)</option>
+    </select>
+  </div>
+  <div class="info-item">
+    <label>שטח התקנה (מ"ר):</label>
+<input type="number" data-label="שטח התקנה" data-price="70" value="0" min="0" onchange="updateQuantityDisplay(this)" style="width: 80px; padding: 6px;">
+<div class="quantity-control">
+  <button type="button" onclick="adjustQuantityInput(this, -1)">-</button>
+  <span class="quantity-display">0</span>
+  <button type="button" onclick="adjustQuantityInput(this, 1)">+</button>
+</div>
+  </div>
+  <div class="info-item">
+    <label>מחיר פח דבק:</label>
+    <input type="hidden" data-label="מחיר פח דבק" data-price="350">
+    <div class="quantity-control">
+      <button type="button" onclick="adjustQuantity(this, -1)">-</button>
+      <span class="quantity-display">0</span>
+      <button type="button" onclick="adjustQuantity(this, 1)">+</button>
+    </div>
+  </div>
+  <div class="info-item">
+    <label>קיצור פלינתי:</label>
+    <input type="hidden" data-label="קיצור פלינתי" data-price="150">
+    <div class="quantity-control">
+      <button type="button" onclick="adjustQuantity(this, -1)">-</button>
+      <span class="quantity-display">0</span>
+      <button type="button" onclick="adjustQuantity(this, 1)">+</button>
+    </div>
+  </div>
+  <div class="info-item">
+    <label>יצירת דלת פנים:</label>
+    <input type="hidden" data-label="יצירת דלת פנים" data-price="150">
+    <div class="quantity-control">
+      <button type="button" onclick="adjustQuantity(this, -1)">-</button>
+      <span class="quantity-display">0</span>
+      <button type="button" onclick="adjustQuantity(this, 1)">+</button>
+    </div>
+  </div>
+  <div class="info-item">
+    <label>קיצור פולימרי:</label>
+    <input type="hidden" data-label="קיצור פולימרי" data-price="60">
+    <div class="quantity-control">
+      <button type="button" onclick="adjustQuantity(this, -1)">-</button>
+      <span class="quantity-display">0</span>
+      <button type="button" onclick="adjustQuantity(this, 1)">+</button>
+    </div>
+  </div>
+  <div class="info-item">
+    <label>קיצור מסד:</label>
+    <input type="hidden" data-label="קיצור מסד" data-price="500">
+    <div class="quantity-control">
+      <button type="button" onclick="adjustQuantity(this, -1)">-</button>
+      <span class="quantity-display">0</span>
+      <button type="button" onclick="adjustQuantity(this, 1)">+</button>
+    </div>
+  </div>
+  <div class="info-item">
+    <label>קיצור שוקל:</label>
+    <input type="hidden" data-label="קיצור שוקל" data-price="30">
+    <div class="quantity-control">
+      <button type="button" onclick="adjustQuantity(this, -1)">-</button>
+      <span class="quantity-display">0</span>
+      <button type="button" onclick="adjustQuantity(this, 1)">+</button>
+    </div>
+  </div>
+  <div class="info-item">
+    <label>הגעה נוספת:</label>
+    <input type="hidden" data-label="הגעה נוספת" data-price="500">
+    <div class="quantity-control">
+      <button type="button" onclick="adjustQuantity(this, -1)">-</button>
+      <span class="quantity-display">0</span>
+      <button type="button" onclick="adjustQuantity(this, 1)">+</button>
+    </div>
+  </div>
+  <div class="info-item">
+    <label>סף אלומיניום:</label>
+    <input type="hidden" data-label="סף אלומיניום" data-price="50">
+    <div class="quantity-control">
+      <button type="button" onclick="adjustQuantity(this, -1)">-</button>
+      <span class="quantity-display">0</span>
+      <button type="button" onclick="adjustQuantity(this, 1)">+</button>
+    </div>
+  </div>
+  <div class="info-item">
+    <label>תוספת קיר אלכסון:</label>
+    <input type="hidden" data-label="קיר אלכסון" data-price="50">
+    <div class="quantity-control">
+      <button type="button" onclick="adjustQuantity(this, -1)">-</button>
+      <span class="quantity-display">0</span>
+      <button type="button" onclick="adjustQuantity(this, 1)">+</button>
+    </div>
+  </div>
+  <div class="info-item">
+    <label>תוספת חדר עם ארון:</label>
+    <input type="hidden" data-label="חדר עם ארון" data-price="200">
+    <div class="quantity-control">
+      <button type="button" onclick="adjustQuantity(this, -1)">-</button>
+      <span class="quantity-display">0</span>
+      <button type="button" onclick="adjustQuantity(this, 1)">+</button>
+    </div>
+  </div>
+</div>
+      <div class="edit-btn" style="display: flex; justify-content: space-between;">
+  <button class="btn" onclick="addCustomItem()">+ הוסף פרמטר נוסף</button>
+  <div>
+    <label style="margin-inline-start:10px; font-weight: bold;">הנחה (%):</label>
+    <input type="number" id="discountPercent" value="0" style="width: 60px; padding: 4px; margin-left: 10px; border-radius: 6px; border: 1px solid #ccc;">
+    <button class="btn" onclick="calculateQuote()">חשב</button>
+  </div>
+</div>
+    </div>
+    <div class="section">
+      <h2>טיוטת הצעת מחיר</h2>
+      <div id="quotePreview">
+  <p><strong>לקוח:</strong> <span id="previewName">-</span></p>
+  <ul id="quoteLines"></ul>
+  <p><strong>סה"כ לפני הנחה:</strong> <span id="previewRawTotal">-</span> ₪</p>
+  <p><strong>הנחה:</strong> <span id="previewDiscount">0%</span></p>
+  <p><strong>סה"כ לאחר הנחה ולפני מע"מ:</strong> <span id="previewSubtotal">-</span> ₪</p>
+  <p><strong>מע"מ (17%):</strong> <span id="previewVAT">-</span> ₪</p>
+  <p><strong>סה"כ לתשלום:</strong> <span id="previewTotal">-</span> ₪</p>
+  <p><strong>כולל פרקט, התקנה והנחה (אם קיימת).</strong></p>
+</div>
+    </div>
+    <div class="section">
+      <h2>צ'קליסט משימות לביצוע</h2>
+      <div class="checklist">
+        <label><input type="checkbox" data-key="WatchedVideo"> צפייה בסרטון לקוח</label>
+        <label><input type="checkbox" data-key="GeneratedQuote"> טיוטה להצעת מחיר</label>
+        <label><input type="checkbox" data-key="SentQuote"> שליחת טיוטה ללקוח</label>
+        <label><input type="checkbox" data-key="DepositPaid"> העברת מקדמה</label>
+        <label><input type="checkbox" data-key="InstallationScheduled"> תיאום התקנה</label>
+        <label><input type="checkbox" data-key="InstallationDone"> התקנה בוצעה</label>
+        <label><input type="checkbox" data-key="FeedbackReceived"> קבלת משוב</label>
+      </div>
+    </div>
+  </main>
+</div>
+<script>
+function addCustomItem() {
+  const container = document.getElementById("priceCalculator");
+  const div = document.createElement("div");
+  div.classList.add("info-item");
+  div.innerHTML = `
+    <label>שם פרמטר:</label>
+    <input type="text" data-label="" placeholder="לדוג' נסיעה לאילת" onchange="this.dataset.label=this.value">
+    <label>מחיר:</label>
+    <input type="number" data-price="0">
+    <div class="quantity-control">
+      <button type="button" onclick="adjustQuantity(this, -1)">-</button>
+      <span class="quantity-display">0</span>
+      <button type="button" onclick="adjustQuantity(this, 1)">+</button>
+    </div>
+  `;
+  container.appendChild(div);
+}
+
+function adjustQuantity(button, delta) {
+  const display = button.parentElement.querySelector(".quantity-display");
+  let quantity = parseInt(display.textContent) || 0;
+  quantity = Math.max(0, quantity + delta);
+  display.textContent = quantity;
+}
+
+function adjustQuantityInput(button, delta) {
+  const container = button.closest(".info-item");
+  const input = container.querySelector("input[type='number']");
+  const display = container.querySelector(".quantity-display");
+  let quantity = parseInt(input.value) || 0;
+  quantity = Math.max(0, quantity + delta);
+  input.value = quantity;
+  display.textContent = quantity;
+}
+
+function updateQuantityDisplay(input) {
+  const display = input.parentElement.querySelector(".quantity-display");
+  display.textContent = input.value;
+}
+function calculateQuote() {
+  let total = 0;
+  const items = document.querySelectorAll("#priceCalculator .info-item");
+  let quoteLines = [];
+
+  items.forEach(item => {
+    const labelInput = item.querySelector("input[data-label], select[data-label]");
+    const priceInput = item.querySelector("input[data-price]");
+    const quantityDisplay = item.querySelector(".quantity-display");
+
+    if (!labelInput || !priceInput || !quantityDisplay) return;
+
+    const label = labelInput.dataset.label || labelInput.value || '---';
+    const price = parseFloat(priceInput.dataset.price || priceInput.value || 0);
+    const quantity = parseInt(quantityDisplay.textContent) || parseInt(labelInput.value) || 0;
+    const lineTotal = price * quantity;
+
+    if (quantity > 0) {
+      total += lineTotal;
+      quoteLines.push(`${label}: ${quantity} × ${price} = ${lineTotal} ש"ח`);
+    }
+  });
+
+  const discount = parseFloat(document.getElementById('discountPercent').value) || 0;
+  const discountedTotal = total * (1 - discount / 100);
+  const vat = discountedTotal * 0.17;
+  const finalTotal = discountedTotal + vat;
+  const floorTypeText = document.getElementById('floorType').selectedOptions[0].text;
+
+  document.getElementById('previewName').innerText = document.getElementById('customerName')?.innerText || '-';
+  document.getElementById('previewRawTotal').innerText = total.toFixed(2);
+  document.getElementById('previewDiscount').innerText = discount + '%';
+  document.getElementById('previewSubtotal').innerText = discountedTotal.toFixed(2);
+  document.getElementById('previewVAT').innerText = vat.toFixed(2);
+  document.getElementById('previewTotal').innerText = finalTotal.toFixed(2);
+
+  const quoteLinesContainer = document.getElementById('quoteLines');
+  quoteLinesContainer.innerHTML = `<li><strong>סוג פרקט:</strong> ${floorTypeText}</li>` + quoteLines.map(line => `<li>${line}</li>`).join('');
+}function updateInstallationPrice() {
+  const type = document.getElementById('floorType').value;
+  const installItem = document.querySelector("input[data-label='שטח התקנה']");
+  const priceMap = {
+    spc: 60,
+    wood: 85,
+    fishbone: 150
+  };
+  if (installItem) installItem.dataset.price = priceMap[type];
+}
+const urlParams = new URLSearchParams(window.location.search);
+const customerId = urlParams.get("id");
+
+if (customerId) {
+  ajaxCall(
+    'POST',
+    'http://localhost:5283/api/Dashboard/GetDashboardData',
+    JSON.stringify({ CustomerID: customerId }),
+    function (data) {
+      if (Array.isArray(data) && data.length > 0) {
+        const customer = data[0];
+        document.getElementById("customerName").innerText = customer.FirstName + " " + customer.LastName;
+        document.getElementById("phoneText").innerText = customer.Phone;
+        document.getElementById("emailText").innerText = customer.Email;
+        document.getElementById("cityText").innerText = customer.City;
+        document.getElementById("streetText").innerText = customer.Street;
+        document.getElementById("statusText").innerText = customer.Status;
+
+        // אם יש וידאו (כמו קודם)
+        if (customer.MediaURL) {
+          const video = document.getElementById("video");
+          const source = video.querySelector("source");
+          source.src = customer.MediaURL;
+          video.load();
+        }
+      }
+    },
+    function (err) {
+      console.error("שגיאה בטעינת פרטי לקוח:", err);
+    }
+  );
+}
+
+function enableEdit() {
+  const fields = ['phone', 'email', 'city', 'street', 'status'];
+  fields.forEach(field => {
+    const span = document.getElementById(field + 'Text');
+    const currentValue = span.innerText;
+    const input = document.createElement('input');
+    input.type = field === 'email' ? 'email' : 'text';
+    input.value = currentValue;
+    input.id = field;
+    input.className = 'edit-input';
+    span.replaceWith(input);
+  });
+  document.getElementById('editBtn').style.display = 'none';
+  document.getElementById('editActions').style.display = 'block';
+}
+
+function cancelEdit() {
+  const fields = ['phone', 'email', 'city', 'street', 'status'];
+  fields.forEach(field => {
+    const input = document.getElementById(field);
+    if (input) {
+      const span = document.createElement('span');
+      span.className = 'editable';
+      span.id = field + 'Text';
+      span.innerText = input.defaultValue;
+      input.replaceWith(span);
+    }
+  });
+  document.getElementById('editBtn').style.display = 'block';
+  document.getElementById('editActions').style.display = 'none';
+}
+
+function saveChanges() {
+  const updatedData = {
+    CustomerID: customerId,
+    Phone: document.getElementById("phone").value,
+    Email: document.getElementById("email").value,
+    City: document.getElementById("city").value,
+    Street: document.getElementById("street").value,
+    Status: document.getElementById("status").value
+  };
+
+  fetch("http://localhost:5283/api/Dashboard/UpdateCustomerDetails", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(updatedData)
+  })
+    .then(res => {
+      if (!res.ok) throw new Error("שגיאה בעדכון");
+      return res.json();
+    })
+    .then(() => {
+      const fields = ['phone', 'email', 'city', 'street', 'status'];
+      fields.forEach(field => {
+        const input = document.getElementById(field);
+        const span = document.createElement('span');
+        span.className = 'editable';
+        span.id = field + 'Text';
+        span.innerText = input.value;
+        input.replaceWith(span);
+      });
+      document.getElementById('editBtn').style.display = 'block';
+      document.getElementById('editActions').style.display = 'none';
+      alert("השינויים נשמרו בהצלחה");
+    })
+    .catch(err => {
+      console.error("שגיאה בשמירה:", err);
+      alert("ארעה שגיאה במהלך השמירה");
+    });
+}
+
+</script>
+</body>
+</html>

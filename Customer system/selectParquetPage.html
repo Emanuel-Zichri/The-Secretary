@@ -125,18 +125,22 @@
   }
 
   function validateSelection() {
-    const selected = document.querySelector('input[name="parquet"]:checked');
-    if (!selected) {
-      alert('אנא בחרו פרקט לפני מעבר לשלב הבא');
-      return;
-    }
-    localStorage.setItem('selectedParquet', selected.value);
-    window.location.href = 'InstallDetailsPage.html';
+  const selected = document.querySelector('input[name="parquet"]:checked');
+  if (!selected) {
+    alert('אנא בחרו פרקט לפני מעבר לשלב הבא');
+    return;
   }
+
+  localStorage.setItem('ParquetType', selected.value);
+  window.location.href = 'InstallDetailsPage.html';
+}
+
+
 
   function goBack() {
     window.history.back();
   }
+
 
   window.onload = () => {
     selectTab(document.querySelector('.tab.active'), 'solid');

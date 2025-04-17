@@ -157,7 +157,7 @@
       spaceDetails.forEach(s => totalSize += Number(s.size));
 
       let pricePerM = 0;
-      const parquetType = localStorage.getItem('selectedParquet') || '';
+      const parquetType = localStorage.getItem('ParquetType') || '';
 
       if (parquetType.includes('עץ')) pricePerM = 70;
       else if (parquetType.includes('למינציה')) pricePerM = 40;

@@ -170,46 +170,54 @@
         alert("לא ניתן להסיר את החלל האחרון.");
       }
     }
-
     function saveAllRooms() {
-      const roomDivs = document.querySelectorAll('.room-entry');
-      const spaceDetails = [];
-      let isValid = true;
+  const roomDivs = document.querySelectorAll('.room-entry');
+  const spaceDetails = [];
+  let isValid = true;
 
-      roomDivs.forEach((div, index) => {
-        const inputs = div.querySelectorAll('input');
-        const floorType = inputs[0]?.value.trim();
-        const size = parseFloat(inputs[1]?.value.trim());
-        const notes = inputs[2]?.value.trim();
-        const mediaFile = inputs[3]?.files[0];
+  const parquetType = localStorage.getItem('ParquetType'); // ⬅️ זה נשאר כך
 
-        if (!floorType || isNaN(size)) {
-          isValid = false;
-          div.style.borderColor = 'red';
-        } else {
-          div.style.borderColor = '#ddd';
-          spaceDetails.push({
-            spaceID: index,
-            requestID: 0,
-            size: size,
-            floorType: floorType,
-            mediaURL: mediaFile ? mediaFile.name : '',
-            notes: notes || ''
-          });
-        }
+  roomDivs.forEach((div, index) => {
+    const inputs = div.querySelectorAll('input');
+    const floorType = inputs[0]?.value.trim();
+    const size = parseFloat(inputs[1]?.value.trim());
+    const notes = inputs[2]?.value.trim();
+    const mediaFile = inputs[3]?.files[0];
+
+    if (!floorType || isNaN(size)) {
+      isValid = false;
+      div.style.borderColor = 'red';
+    } else {
+      div.style.borderColor = '#ddd';
+      spaceDetails.push({
+        spaceID: index,
+        requestID: 0,
+        size: size,
+        floorType: floorType,
+        mediaURL: mediaFile ? mediaFile.name : '',
+        notes: notes || '',
+        ParquetType: parquetType 
       });
-
-      if (!isValid) {
-        alert("אנא מלא את כל השדות הדרושים לפני ההמשך.");
-        return;
-      }
-
-      const existingData = localStorage.getItem('installationData');
-      const parsed = existingData ? JSON.parse(existingData) : {};
-      parsed.spaceDetails = spaceDetails;
-      localStorage.setItem('installationData', JSON.stringify(parsed));
-      window.location.href = 'customerDetails.html';
     }
+  });
+
+  if (!isValid) {
+    alert("אנא מלא את כל השדות הדרושים לפני ההמשך.");
+    return;
+  }
+
+  // עכשיו שמירה של כל הנתונים
+  const existingData = localStorage.getItem('installationData');
+  const parsed = existingData ? JSON.parse(existingData) : {};
+  parsed.spaceDetails = spaceDetails;
+
+  localStorage.setItem('installationData', JSON.stringify(parsed));
+  console.log("installationData:", parsed); // ✅ בדיקה
+  window.location.href = 'customerDetails.html';
+}
+
+
+
 
     function showPopup(event) {
       const popup = document.getElementById('popup');

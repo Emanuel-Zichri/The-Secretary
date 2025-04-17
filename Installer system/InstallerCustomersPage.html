@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>לקוחות</title>
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="/ajaxCall.js"></script>
+
   <style>
     :root {
       --main-color: #b46a2c;
@@ -12,30 +15,25 @@
       --light-gray: #f5f5f5;
       --radius: 12px;
     }
-
     body {
       margin: 0;
       font-family: 'Heebo', sans-serif;
       background-color: #fafafa;
     }
-
     .container {
       display: flex;
       min-height: 100vh;
     }
-
     .sidebar {
       width: 200px;
       background-color: #fff;
       padding: 20px;
       border-left: 1px solid #ddd;
     }
-
     .sidebar .logo {
       text-align: center;
       margin-bottom: 40px;
     }
-
     .sidebar nav a {
       display: block;
       padding: 12px;
@@ -44,75 +42,63 @@
       border-radius: 8px;
       margin-bottom: 8px;
     }
-
     .sidebar nav a.active {
       background-color: #e6f2f2;
       font-weight: bold;
     }
-
     .main {
       flex: 1;
       padding: 30px;
     }
-
     .top-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 20px;
     }
-
     .customers-table {
       background: #fff;
       border-radius: var(--radius);
       padding: 20px;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
     }
-
     table {
       width: 100%;
       border-collapse: collapse;
     }
-
     th, td {
       padding: 12px 10px;
       border-bottom: 1px solid #eee;
       text-align: right;
       font-size: 14px;
     }
-
     th {
       background-color: #f9f9f9;
       font-weight: bold;
     }
-
     tr:hover {
       background-color: #f1f1f1;
     }
-
     .status {
       color: var(--main-color);
       font-weight: bold;
     }
-
-    .actions {
-      display: flex;
-      gap: 10px;
-    }
-
-    .actions span {
-      cursor: pointer;
-      font-size: 16px;
-    }
-
     a.customer-link {
       color: var(--main-color);
       text-decoration: none;
       font-weight: bold;
+      cursor: pointer;
     }
-
     a.customer-link:hover {
       text-decoration: underline;
+    }
+    .actions {
+      display: flex;
+      gap: 10px;
+    }
+    .actions span {
+      cursor: pointer;
+      font-size: 16px;
     }
   </style>
 </head>
@@ -120,7 +106,7 @@
 <div class="container">
   <aside class="sidebar">
     <div class="logo">
-      <img src="logo.png" alt="לוגו" width="100">
+      <img src="/picturs/logo.png" alt="לוגו" width="100">
     </div>
     <nav>
       <a href="#">מסך הבית</a>
@@ -133,144 +119,127 @@
       <a href="#">התנתקות</a>
     </nav>
   </aside>
-
   <main class="main">
     <div class="top-bar">
       <h2>לקוחות</h2>
       <input type="text" placeholder="חפש לקוח..." style="padding: 8px 14px; border-radius: 20px; border: 1px solid #ccc;">
     </div>
-
     <div class="customers-table">
-      <h4 style="margin-bottom: 10px;">12 לקוחות קיימים</h4>
+      <h4 style="margin-bottom: 10px;">רשימת לקוחות</h4>
       <table>
         <thead>
-        <tr>
-          <th>#</th>
-          <th>שם לקוח</th>
-          <th>מייל</th>
-          <th>טלפון</th>
-          <th>סטטוס</th>
-          <th>תאריך יצירה</th>
-          <th>פעולות</th>
-        </tr>
+          <tr>
+            <th>#</th>
+            <th>שם לקוח</th>
+            <th>מייל</th>
+            <th>טלפון</th>
+            <th>סטטוס</th>
+            <th>תאריך יצירה</th>
+            <th>פעולות</th>
+          </tr>
         </thead>
-        <tbody>
-        <tr>
-          <td>01</td>
-          <td><a href="customer-details.html?id=1" class="customer-link">שמעון שמעוני</a></td>
-          <td>cathy@gmail.com</td>
-          <td>0521234567</td>
-          <td class="status">עבודה לביצוע</td>
-          <td>24/04/2024</td>
-          <td class="actions">
-            <span title="ערוך" onclick="editCustomer(1)">✏️</span>
-            <span title="צפה">👁️</span>
-            <span title="מחק" onclick="deleteCustomer(1)">🗑️</span>
-          </td>
-        </tr>
-        <tr>
-          <td>02</td>
-          <td><a href="customer-details.html?id=2" class="customer-link">שירית כהן</a></td>
-          <td>cathy@gmail.com</td>
-          <td>0521234567</td>
-          <td class="status">ממתין למקדמה</td>
-          <td>24/04/2024</td>
-          <td class="actions">
-            <span onclick="editCustomer(2)">✏️</span><span>👁️</span><span onclick="deleteCustomer(2)">🗑️</span>
-          </td>
-        </tr>
-        <tr>
-          <td>03</td>
-          <td><a href="customer-details.html?id=3" class="customer-link">יוסי יוספי</a></td>
-          <td>cathy@gmail.com</td>
-          <td>0521234567</td>
-          <td class="status">צפייה בסרטון</td>
-          <td>24/04/2024</td>
-          <td class="actions">
-            <span onclick="editCustomer(3)">✏️</span><span>👁️</span><span onclick="deleteCustomer(3)">🗑️</span>
-          </td>
-        </tr>
+        <tbody id="customersBody">
+          <tr><td colspan="7">טוען נתונים...</td></tr>
         </tbody>
       </table>
     </div>
   </main>
 </div>
-
 <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    ajaxCall(
+      'POST',
+      'http://localhost:5283/api/Dashboard/GetDashboardData',
+      JSON.stringify({}),
+      function (data) {
+        const tbody = document.getElementById('customersBody');
+        tbody.innerHTML = '';
+        if (Array.isArray(data)) {
+          data.forEach((c, index) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td>${index + 1}</td>
+              <td><a href="InstallerCustomerDetailsPage.html?id=${c.CustomerID}" class="customer-link">${c.FirstName} ${c.LastName}</a></td>
+              <td>${c.email || c.Email || ''}</td>
+              <td>${c.Phone}</td>
+              <td class="status">${c.Status}</td>
+              <td>${new Date(c.CustomerCreatedAt).toLocaleDateString('he-IL')}</td>
+              <td class="actions">
+                <span title="ערוך" onclick="editCustomer(${c.CustomerID})">✏️</span>
+                <span title="מחק" onclick="deleteCustomer(${c.CustomerID})">🗑️</span>
+              </td>
+            `;
+            tbody.appendChild(tr);
+          });
+        } else {
+          tbody.innerHTML = '<tr><td colspan="7">שגיאה בטעינת לקוחות</td></tr>';
+        }
+      },
+      function (err) {
+        console.error(err);
+        document.getElementById('customersBody').innerHTML = '<tr><td colspan="7">שגיאה בטעינת לקוחות</td></tr>';
+      }
+    );
+  });
+
   function editCustomer(id) {
-    const row = document.querySelector(`tr td:has(a[href*='id=${id}'])`).parentElement;
+    const row = document.querySelector(`tr td a[href*='id=${id}']`).closest('tr');
     const nameCell = row.querySelector('td:nth-child(2)');
     const emailCell = row.querySelector('td:nth-child(3)');
     const phoneCell = row.querySelector('td:nth-child(4)');
 
-    const currentName = nameCell.innerText.trim();
-    const currentEmail = emailCell.innerText.trim();
-    const currentPhone = phoneCell.innerText.trim();
+    const name = nameCell.innerText.trim();
+    const email = emailCell.innerText.trim();
+    const phone = phoneCell.innerText.trim();
 
-    nameCell.innerHTML = `<input type='text' id='nameInput${id}' value='${currentName}' style='width:100%; padding:4px;'>`;
-    emailCell.innerHTML = `<input type='email' id='emailInput${id}' value='${currentEmail}' style='width:100%; padding:4px;'>`;
-    phoneCell.innerHTML = `<input type='tel' id='phoneInput${id}' value='${currentPhone}' style='width:100%; padding:4px;'>`;
+    nameCell.innerHTML = `<input type='text' value='${name}' id='nameInput${id}' style='width: 95%; padding: 4px;'>`;
+    emailCell.innerHTML = `<input type='email' value='${email}' id='emailInput${id}' style='width: 95%; padding: 4px;'>`;
+    phoneCell.innerHTML = `<input type='tel' value='${phone}' id='phoneInput${id}' style='width: 95%; padding: 4px;'>`;
 
     const actionsCell = row.querySelector('.actions');
-    actionsCell.innerHTML = `<button onclick='saveCustomer(${id})'>שמור</button> <button onclick='cancelEdit(${id})'>בטל</button>`;
+    actionsCell.innerHTML = `
+      <button onclick='saveCustomer(${id})'>שמור</button>
+      <button onclick='cancelEdit(${id}, "${name}", "${email}", "${phone}")'>בטל</button>
+    `;
   }
 
   function saveCustomer(id) {
     const row = document.querySelector(`tr td input#nameInput${id}`).closest('tr');
-    const nameValue = document.getElementById(`nameInput${id}`).value;
-    const emailValue = document.getElementById(`emailInput${id}`).value;
-    const phoneValue = document.getElementById(`phoneInput${id}`).value;
+    const name = document.getElementById(`nameInput${id}`).value;
+    const email = document.getElementById(`emailInput${id}`).value;
+    const phone = document.getElementById(`phoneInput${id}`).value;
 
-    row.querySelector('td:nth-child(2)').innerHTML = `<a href='customer-details.html?id=${id}' class='customer-link'>${nameValue}</a>`;
-    row.querySelector('td:nth-child(3)').innerText = emailValue;
-    row.querySelector('td:nth-child(4)').innerText = phoneValue;
+    row.querySelector('td:nth-child(2)').innerHTML = `<a href='InstallerCustomerDetailsPage.html?id=${id}' class='customer-link'>${name}</a>`;
+    row.querySelector('td:nth-child(3)').innerText = email;
+    row.querySelector('td:nth-child(4)').innerText = phone;
 
     const actionsCell = row.querySelector('.actions');
     actionsCell.innerHTML = `
       <span title='ערוך' onclick='editCustomer(${id})'>✏️</span>
-      <span title='צפה'>👁️</span>
       <span title='מחק' onclick='deleteCustomer(${id})'>🗑️</span>
     `;
   }
 
-  function cancelEdit(id) {
+  function cancelEdit(id, name, email, phone) {
     const row = document.querySelector(`tr td input#nameInput${id}`).closest('tr');
-    saveCustomer(id); // פשוט נשמור את מה שהיה קודם, לשם הדגמה בלבד ניתן להחליף לאחזור מהשרת או להחזיר לתצוגה מקורית
+    row.querySelector('td:nth-child(2)').innerHTML = `<a href='InstallerCustomerDetailsPage.html?id=${id}' class='customer-link'>${name}</a>`;
+    row.querySelector('td:nth-child(3)').innerText = email;
+    row.querySelector('td:nth-child(4)').innerText = phone;
+
+    const actionsCell = row.querySelector('.actions');
+    actionsCell.innerHTML = `
+      <span title='ערוך' onclick='editCustomer(${id})'>✏️</span>
+      <span title='מחק' onclick='deleteCustomer(${id})'>🗑️</span>
+    `;
   }
 
   function deleteCustomer(id) {
-    if (confirm("האם אתה בטוח שברצונך למחוק את הלקוח?")) {
-      const row = document.querySelector(`tr td:has(a[href*='id=${id}'])`).parentElement;
+    if (confirm('האם אתה בטוח שברצונך למחוק את הלקוח?')) {
+      const row = document.querySelector(`tr td a[href*='id=${id}']`).closest('tr');
       row.remove();
     }
   }
 </script>
-<script>
-  function editCustomer(id) {
-    const row = document.querySelector(`tr td:has(a[href*='id=${id}'])`).parentElement;
-    const nameCell = row.querySelector('td:nth-child(2)');
-    const emailCell = row.querySelector('td:nth-child(3)');
-    const phoneCell = row.querySelector('td:nth-child(4)');
 
-    const currentName = nameCell.innerText;
-    const currentEmail = emailCell.innerText;
-    const currentPhone = phoneCell.innerText;
-
-    const newName = prompt("ערוך שם לקוח:", currentName);
-    const newEmail = prompt("ערוך אימייל:", currentEmail);
-    const newPhone = prompt("ערוך טלפון:", currentPhone);
-
-    if (newName) nameCell.innerHTML = `<a href='customer-details.html?id=${id}' class='customer-link'>${newName}</a>`;
-    if (newEmail) emailCell.innerText = newEmail;
-    if (newPhone) phoneCell.innerText = newPhone;
-  }
-
-  function deleteCustomer(id) {
-    if (confirm("האם אתה בטוח שברצונך למחוק את הלקוח?")) {
-      const row = document.querySelector(`tr td:has(a[href*='id=${id}'])`).parentElement;
-      row.remove();
-    }
-  }
-</script>
 </body>
 </html>
