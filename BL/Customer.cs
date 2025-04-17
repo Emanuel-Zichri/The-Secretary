@@ -13,6 +13,7 @@ namespace FinalProject.BL
         public string? Street { get; set; }
         public string? Number { get; set; }
         public string? Notes { get; set; }
+        public bool? IsActive { get; set; } = true; 
 
         public Customer() { }
 
@@ -42,6 +43,35 @@ namespace FinalProject.BL
             catch (Exception ex)
             {
                 Console.WriteLine($"Error updating customer: {ex.Message}");
+                return 0;
+            }
+
+        }
+        public static int Deactivate(int customerID)
+        {
+            DBservices dbServices = new DBservices();
+            try
+            {
+                int result = dbServices.DeactivateCustomer(customerID);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error deactivating customer: {ex.Message}");
+                return 0;
+            }
+        }
+        public static int Reactivate(int customerID)
+        {
+            DBservices dbServices = new DBservices();
+            try
+            {
+                int result = dbServices.ReactivateCustomer(customerID);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error reactivating customer: {ex.Message}");
                 return 0;
             }
         }

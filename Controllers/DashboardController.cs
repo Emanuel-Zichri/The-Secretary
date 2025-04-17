@@ -21,5 +21,29 @@ namespace FinalProject.Controllers
                 return new { error = ex.Message };
             }
         }
+        [HttpPost("DeactivateCustomer")]
+        public int DeactivateCustomer([FromBody] int customerID)
+        {
+            try
+            {
+                return Customer.Deactivate(customerID);
+            }
+            catch
+            {
+                return 0;
+            }
+        }
+        [HttpPost("ReactivateCustomer")]
+        public int ReactivateCustomer([FromBody] int customerID)
+        {
+            try
+            {
+                return Customer.Reactivate(customerID);
+            }
+            catch
+            {
+                return 0;
+            }
+        }
     }
 }
