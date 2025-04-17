@@ -246,6 +246,9 @@ public class DBservices
         { "LastName", reader["LastName"].ToString() },
         { "Phone", reader["Phone"].ToString() },
         { "City", reader["City"].ToString() },
+        { "Street", reader["Street"].ToString() },
+        { "Number", reader["Number"].ToString() },
+        { "Notes", reader["Notes"] != DBNull.Value ? reader["Notes"].ToString() : null },
         { "CustomerCreatedAt", reader["CustomerCreatedAt"] },
         { "Email", reader["Email"] != DBNull.Value ? reader["Email"].ToString() : null },
 
@@ -525,6 +528,107 @@ public class DBservices
                 con.Close();
         }
     }
+    //--------------------------------------------------------------------------------------------------
+    // This method deactivate a specific user 
+    //--------------------------------------------------------------------------------------------------
+    public int DeactivateCustomer(int customerID)
+    {
+        SqlConnection con;
+        SqlCommand cmd;
+        try
+        {
+            con = connect("myProjDB");
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+        Dictionary<string, object> paramDic = new Dictionary<string, object>();
+        paramDic.Add("@CustomerID", customerID);
+        cmd = CreateCommandWithStoredProcedureGeneral("DeactivateCustomer", con, paramDic);
+        try
+        {
+            int numEffected = cmd.ExecuteNonQuery();
+            return numEffected;
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+        finally
+        {
+            if (con != null)
+                con.Close();
+        }
+    }
+    //--------------------------------------------------------------------------------------------------
+    // This method reactivate a specific user 
+    //--------------------------------------------------------------------------------------------------
+    public int ReactivateCustomer(int customerID)
+    {
+        SqlConnection con;
+        SqlCommand cmd;
+        try
+        {
+            con = connect("myProjDB");
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+        Dictionary<string, object> paramDic = new Dictionary<string, object>();
+        paramDic.Add("@CustomerID", customerID);
+        cmd = CreateCommandWithStoredProcedureGeneral("ReactivateCustomer", con, paramDic);
+        try
+        {
+            int numEffected = cmd.ExecuteNonQuery();
+            return numEffected;
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+        finally
+        {
+            if (con != null)
+                con.Close();
+        }
+    }
+    //--------------------------------------------------------------------------------------------------
+    // This method insert a new Quote
+    //--------------------------------------------------------------------------------------------------
+    public int InsertQuote(Quote quote)
+    {
+        SqlConnection con;
+        SqlCommand cmd;
+        try
+        {
+            con = connect("myProjDB");
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+        Dictionary<string, object> paramDic = new Dictionary<string, object>();
+        paramDic.Add("@RequestID", quote.RequestID);
+        paramDic.Add("@TotalPrice", quote.TotalPrice);
+        cmd = CreateCommandWithStoredProcedureGeneral("AddQuote", con, paramDic); // create the command
+        try
+        {
+            object result = cmd.ExecuteScalar();
+            return Convert.ToInt32(result);
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+        finally
+        {
+            if (con != null)
+                con.Close();
+        }
+    }
+
     //--------------------------------------------------------------------------------------------------
     // This method Read all games for a specific user 
     //--------------------------------------------------------------------------------------------------
