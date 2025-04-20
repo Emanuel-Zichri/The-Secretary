@@ -6,7 +6,9 @@
         public int RequestID { get; set; }
         public DateTime CreatedAt { get; set; }
         public decimal TotalPrice { get; set; }
-        
+        public decimal? DiscountAmount { get; set; }
+        public decimal? DiscountPercent { get; set; }
+
 
         public static int InsertQuote(Quote quote)
         {
