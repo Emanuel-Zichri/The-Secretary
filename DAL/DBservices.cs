@@ -612,6 +612,8 @@ public class DBservices
         Dictionary<string, object> paramDic = new Dictionary<string, object>();
         paramDic.Add("@RequestID", quote.RequestID);
         paramDic.Add("@TotalPrice", quote.TotalPrice);
+        paramDic.Add("@DiscountAmount", quote.DiscountAmount ?? (object)DBNull.Value);
+        paramDic.Add("@DiscountPercent", quote.DiscountPercent ?? (object)DBNull.Value);
         cmd = CreateCommandWithStoredProcedureGeneral("AddQuote", con, paramDic); // create the command
         try
         {
@@ -627,6 +629,117 @@ public class DBservices
             if (con != null)
                 con.Close();
         }
+    }
+    //--------------------------------------------------------------------------------------------------
+    // This method add quoteitem 
+    //--------------------------------------------------------------------------------------------------
+    public int AddQuoteItem(QuoteItem item)
+    {
+        SqlConnection con;
+        SqlCommand cmd;
+        try
+        {
+            con = connect("myProjDB");
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+        Dictionary<string, object> paramDic = new Dictionary<string, object>
+    {
+        { "@QuoteID", item.QuoteID },
+        { "@CalculatorItemID", item.CalculatorItemID ?? (object)DBNull.Value },
+        { "@CustomItemName", string.IsNullOrWhiteSpace(item.CustomItemName) ? DBNull.Value : item.CustomItemName },
+        { "@PriceForItem", item.PriceForItem },
+        { "@Quantity", item.Quantity },
+        { "@FinalPrice", item.FinalPrice },
+        { "@Notes", string.IsNullOrWhiteSpace(item.Notes) ? DBNull.Value : item.Notes }
+    };
+        cmd = CreateCommandWithStoredProcedureGeneral("AddQuoteItem", con, paramDic); // create the command
+        try
+        {
+            object result = cmd.ExecuteScalar();
+            return Convert.ToInt32(result);
+
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+        finally
+        {
+            if (con != null)
+                con.Close();
+        }
+    }
+    //--------------------------------------------------------------------------------------------------
+    // This method return quotes for a specific customer
+    //--------------------------------------------------------------------------------------------------
+    public List<QuoteItemExtended> GetQuoteItemExtendedByCustomerID(int customerID)
+    {
+        SqlConnection con;
+        SqlCommand cmd;
+        try
+        {
+            con = connect("myProjDB");
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+
+        List<QuoteItemExtended> items = new List<QuoteItemExtended>();
+
+        try
+        {
+            Dictionary<string, object> paramDic = new Dictionary<string, object>
+        {
+            { "@CustomerID", customerID }
+        };
+
+            cmd = CreateCommandWithStoredProcedureGeneral("GetQuoteDetailsByCustomerID", con, paramDic);
+            SqlDataReader reader = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+
+            while (reader.Read())
+            {
+                QuoteItemExtended item = new QuoteItemExtended
+                {
+                    QuoteItemID = Convert.ToInt32(reader["QuoteItemID"]),
+                    QuoteID = Convert.ToInt32(reader["QuoteID"]),
+                    RequestID = Convert.ToInt32(reader["RequestID"]),
+                    CalculatorItemID = reader["CalculatorItemID"] != DBNull.Value ? (int?)Convert.ToInt32(reader["CalculatorItemID"]) : null,
+                    CustomItemName = reader["CustomItemName"].ToString(),
+                    PriceForItem = Convert.ToDecimal(reader["PriceForItem"]),
+                    Quantity = Convert.ToInt32(reader["Quantity"]),
+                    FinalPrice = Convert.ToDecimal(reader["FinalPrice"]),
+                    Notes = reader["Notes"]?.ToString(),
+
+                    PlannedDate = reader["PlannedDate"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(reader["PlannedDate"]) : null,
+                    CompletedDate = reader["CompletedDate"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(reader["CompletedDate"]) : null,
+                    Status = reader["Status"].ToString(),
+
+                    TotalPrice = Convert.ToDecimal(reader["TotalPrice"]),
+                    DiscountAmount = reader["DiscountAmount"] != DBNull.Value ? (decimal?)Convert.ToDecimal(reader["DiscountAmount"]) : null,
+                    DiscountPercent = reader["DiscountPercent"] != DBNull.Value ? (decimal?)Convert.ToDecimal(reader["DiscountPercent"]) : null,
+                    CreatedAt = Convert.ToDateTime(reader["CreatedAt"])
+                };
+
+                items.Add(item);
+            }
+
+            reader.Close();
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+        finally
+        {
+            if (con != null)
+                con.Close();
+        }
+
+        return items;
     }
 
     //--------------------------------------------------------------------------------------------------
