@@ -743,6 +743,287 @@ public class DBservices
     }
 
     //--------------------------------------------------------------------------------------------------
+    // This method add new parquetType 
+    //--------------------------------------------------------------------------------------------------
+    public int AddParquetType(ParquetType newParquet)
+    {
+        SqlConnection con;
+        SqlCommand cmd;
+        try
+        {
+            con = connect("myProjDB");
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+        Dictionary<string, object> paramDic = new Dictionary<string, object>();
+        paramDic.Add("@TypeName", newParquet.TypeName);
+        paramDic.Add("@PricePerUnit", newParquet.PricePerUnit);
+        paramDic.Add("@ImageURL", newParquet.ImageURL);
+        cmd = CreateCommandWithStoredProcedureGeneral("AddParquetType", con, paramDic); // create the command
+        try
+        {
+            int newParquetID = cmd.ExecuteNonQuery();
+            return newParquetID;
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+        finally
+        {
+            if (con != null)
+                con.Close();
+        }
+    }
+    //--------------------------------------------------------------------------------------------------
+    // This method updates parquetType 
+    //--------------------------------------------------------------------------------------------------
+    public int updateParquetType(ParquetType parquetType)
+    {
+        SqlConnection con;
+        SqlCommand cmd;
+        try
+        {
+            con = connect("myProjDB");
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+        Dictionary<string, object> paramDic = new Dictionary<string, object>();
+        paramDic.Add("@ParquetTypeID", parquetType.ParquetTypeID);
+        paramDic.Add("@TypeName", parquetType.TypeName);
+        paramDic.Add("@PricePerUnit", parquetType.PricePerUnit);
+        paramDic.Add("@ImageURL", parquetType.ImageURL);
+        cmd = CreateCommandWithStoredProcedureGeneral("UpdateParquetType", con, paramDic); // create the command
+        try
+        {
+            int numEffected = cmd.ExecuteNonQuery();
+            return numEffected;
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+        finally
+        {
+            if (con != null)
+                con.Close();
+        }
+    }
+    //--------------------------------------------------------------------------------------------------
+    // This method Read all parquetTypes
+    //--------------------------------------------------------------------------------------------------
+    public List<ParquetType> GetAllParquetTypes()
+    {
+        SqlConnection con;
+        SqlCommand cmd;
+        try
+        {
+            con = connect("myProjDB");
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+        List<ParquetType> parquetTypes = new List<ParquetType>();
+        try
+        {
+            Dictionary<string, object> paramDic = new Dictionary<string, object>();
+            cmd = CreateCommandWithStoredProcedureGeneral("GetAllParquetTypes", con, paramDic); // create the command
+            SqlDataReader reader = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+            while (reader.Read())
+            {
+                ParquetType p = new ParquetType
+                {
+                    ParquetTypeID = Convert.ToInt32(reader["ParquetTypeID"]),
+                    TypeName = reader["TypeName"].ToString(),
+                    PricePerUnit = Convert.ToDecimal(reader["PricePerUnit"]),
+                    ImageURL = reader["ImageURL"].ToString(),
+                    IsActive = Convert.ToBoolean(reader["IsActive"])
+                };
+                parquetTypes.Add(p);
+            }
+            reader.Close();
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+        finally
+        {
+            if (con != null)
+                con.Close();
+        }
+        return parquetTypes;
+    }
+    //--------------------------------------------------------------------------------------------------
+    // This method soft delete parquetType 
+    //--------------------------------------------------------------------------------------------------
+    public int DeleteParquetType(int id)
+    {
+        SqlConnection con;
+        SqlCommand cmd;
+        try
+        {
+            con = connect("myProjDB");
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+        Dictionary<string, object> paramDic = new Dictionary<string, object>();
+        paramDic.Add("@ParquetTypeID", id);
+        cmd = CreateCommandWithStoredProcedureGeneral("DeleteParquetType", con, paramDic); // create the command
+        try
+        {
+            int numEffected = cmd.ExecuteNonQuery();
+            return numEffected;
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+        finally
+        {
+            if (con != null)
+                con.Close();
+        }
+    }
+    //--------------------------------------------------------------------------------------------------
+    // This method Read all uncreated candidates
+    //--------------------------------------------------------------------------------------------------
+    public List<CalculatorItemCandidate> GetUncreatedPopularCandidates(int minOccurrences = 3)
+    {
+        SqlConnection con;
+        SqlCommand cmd;
+
+        try
+        {
+            con = connect("myProjDB");
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+
+        List<CalculatorItemCandidate> candidates = new List<CalculatorItemCandidate>();
+
+        try
+        {
+            Dictionary<string, object> paramDic = new Dictionary<string, object>
+        {
+            { "@MinOccurrences", minOccurrences }
+        };
+
+            cmd = CreateCommandWithStoredProcedureGeneral("GetUncreatedPopularCandidates", con, paramDic);
+            SqlDataReader reader = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+
+            while (reader.Read())
+            {
+                CalculatorItemCandidate candidate = new CalculatorItemCandidate
+                {
+                    CandidateID = Convert.ToInt32(reader["CandidateID"]),
+                    CustomItemName = reader["CustomItemName"].ToString(),
+                    SuggestedPrice = Convert.ToDecimal(reader["SuggestedPrice"]),
+                    SuggestedDescription = reader["SuggestedDescription"].ToString(),
+                    Occurrences = Convert.ToInt32(reader["Occurrences"])
+                };
+
+                candidates.Add(candidate);
+            }
+
+            reader.Close();
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+        finally
+        {
+            if (con != null)
+                con.Close();
+        }
+
+        return candidates;
+    }
+    //--------------------------------------------------------------------------------------------------
+    // This method creates a new calculator item from a candidate
+    //--------------------------------------------------------------------------------------------------
+    public int CreatePriceCalculatorItemFromCandidate(string itemName)
+    {
+        SqlConnection con;
+        SqlCommand cmd;
+        try
+        {
+            con = connect("myProjDB");
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+        Dictionary<string, object> paramDic = new Dictionary<string, object>
+    {
+        { "@CustomItemName", itemName }
+    };
+        cmd = CreateCommandWithStoredProcedureGeneral("CreatePriceCalculatorItemFromCandidate", con, paramDic); // create the command
+        try
+        {
+            int result = cmd.ExecuteNonQuery();
+            return result;
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+        finally
+        {
+            if (con != null)
+                con.Close();
+        }
+    }
+    //--------------------------------------------------------------------------------------------------
+    // This method rejects a candidate
+    //--------------------------------------------------------------------------------------------------
+    public int RejectCalculatorItemCandidate(string customItemName)
+    {
+        SqlConnection con;
+        SqlCommand cmd;
+
+        try
+        {
+            con = connect("myProjDB");
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+
+        Dictionary<string, object> paramDic = new Dictionary<string, object>
+    {
+        { "@CustomItemName", customItemName }
+    };
+
+        cmd = CreateCommandWithStoredProcedureGeneral("RejectCalculatorItemCandidate", con, paramDic);
+
+        try
+        {
+            int rowsAffected = cmd.ExecuteNonQuery();
+            return rowsAffected;
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+        finally
+        {
+            if (con != null)
+                con.Close();
+        }
+    }
+    //--------------------------------------------------------------------------------------------------
     // This method Read all games for a specific user 
     //--------------------------------------------------------------------------------------------------
     //public List<Game> ReadUserGames(int userId)

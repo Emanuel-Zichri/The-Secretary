@@ -1,6 +1,7 @@
 ﻿using FinalProject.BL;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using static FinalProject.BL.CalculatorItemCandidate;
 
 namespace FinalProject.Controllers
 {
@@ -61,5 +62,38 @@ namespace FinalProject.Controllers
                 return null;
             }
         }
+        [HttpGet("GetPopularCandidates")]
+        public List<CalculatorItemCandidate> GetPopularCandidates()
+        {
+            return CalculatorItemCandidate.GetCandidates();
+        }
+        [HttpPost("CreateFromCandidate")]
+        public int CreateFromCandidate([FromBody] string customItemName)
+        {
+            try
+            {
+                int result = CalculatorItemCandidate.AddCalcItem(customItemName);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return 0;
+            }
+        }
+        [HttpPost("RejectCandidate")]
+        public int RejectCandidate([FromBody] string customItemName)
+        {
+            try
+            {
+                int result = CalculatorItemCandidate.RejectCandidate(customItemName);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return 0;
+            }
+        }
+
+
     }
 }
