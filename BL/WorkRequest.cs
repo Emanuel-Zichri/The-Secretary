@@ -7,13 +7,15 @@
         public DateTime CreatedAt { get; set; }
         public string Status { get; set; }
         public string Notes { get; set; }
+        public DateTime? PlannedDate { get; set; }
+        public DateTime? CompletedDate { get; set; }
 
-        public static int Register(WorkRequest request)
+        public static int Register(int costumerID)
         {
             DBservices db = new DBservices();
             try
             {
-                return db.InsertWorkRequest(request);
+                return db.InsertWorkRequest(costumerID);
             }
             catch (Exception ex)
             {

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>התחברות - דוד פרקטים</title>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --main-color: #b46a2c;
+      --bg-light: #ffffff;
+      --text-dark: #333333;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Heebo', sans-serif;
+      margin: 0;
+      background-color: var(--bg-light);
+    }
+
+    .header-bg {
+      background-color: var(--main-color);
+      height: 250px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .login-container {
+      background: #fff;
+      max-width: 380px;
+      width: 100%;
+      margin: -80px auto 0 auto;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      border-radius: 12px;
+      padding: 40px 30px;
+      text-align: center;
+      position: relative;
+      z-index: 10;
+    }
+
+    .login-container img {
+      width: 120px;
+      margin-bottom: 10px;
+    }
+
+    h2 {
+      margin: 10px 0;
+      font-size: 26px;
+      color: var(--text-dark);
+    }
+
+    .form-group {
+      text-align: right;
+      margin: 20px 0;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--text-dark);
+      font-size: 14px;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 15px;
+    }
+
+    .form-group .toggle-password {
+      position: absolute;
+      left: 10px;
+      top: 38px;
+      cursor: pointer;
+    }
+
+    .forgot-password {
+      display: block;
+      margin: 10px 0;
+      font-size: 13px;
+      color: var(--main-color);
+      text-decoration: none;
+    }
+
+    .login-btn {
+      background-color: var(--main-color);
+      color: white;
+      border: none;
+      padding: 12px;
+      width: 100%;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .register-link {
+      margin-top: 20px;
+      font-size: 14px;
+    }
+
+    .register-link a {
+      color: #d35c2c;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .back-arrow {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      color: white;
+      font-size: 20px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header-bg">
+    <div class="back-arrow">&#8592;</div>
+  </div>
+
+  <div class="login-container">
+    <img src="/picturs/logo.png" alt="דוד פרקטים">
+    <h2>ברוך הבא!</h2>
+    <p style="margin-bottom: 25px;">התחבר לחשבונך</p>
+
+    <div class="form-group">
+      <label for="email">מייל</label>
+      <input type="email" id="email" placeholder="davidpaurqets@gmail.com" />
+    </div>
+
+    <div class="form-group" style="position: relative;">
+      <label for="password">סיסמה</label>
+      <input type="password" id="password" placeholder="הכנס את הסיסמה" />
+      <span class="toggle-password" onclick="togglePassword()">👁</span>
+    </div>
+
+    <a href="#" class="forgot-password">שכחת את הסיסמה?</a>
+
+    <button class="login-btn">התחבר</button>
+
+    <div class="register-link">
+      אין לך חשבון? <a href="#">הרשם</a>
+    </div>
+  </div>
+
+  <script>
+    function togglePassword() {
+      const passwordInput = document.getElementById("password");
+      const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
+      passwordInput.setAttribute("type", type);
+    }
+  </script>
+</body>
+</html>

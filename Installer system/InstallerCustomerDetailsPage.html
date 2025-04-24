@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>פרטי לקוח</title>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="/ajaxCall.js"></script>
+  <style>
+    :root {
+      --main-color: #b46a2c;
+      --text-dark: #333;
+      --light-gray: #f5f5f5;
+      --radius: 12px;
+    }
+
+    body {
+  overflow-x: hidden;
+      margin: 0;
+      font-family: 'Heebo', sans-serif;
+      background-color: #fafafa;
+    }
+
+    .container {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+  width: 200px;
+  background-color: #fff;
+  padding: 20px;
+  border-left: 1px solid #ddd;
+  height: 100vh;
+  position: fixed;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  overflow-y: auto;
+  box-sizing: border-box;
+  z-index: 1000;
+}
+
+    .sidebar .logo {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .sidebar nav a {
+      display: block;
+      padding: 12px;
+      color: var(--text-dark);
+      text-decoration: none;
+      border-radius: 8px;
+      margin-bottom: 8px;
+    }
+
+    .sidebar nav a.active {
+      background-color: #e6f2f2;
+      font-weight: bold;
+    }
+
+    .main {
+  margin-right: 200px;
+  width: calc(100% - 200px);
+      flex: 1;
+      padding: 30px;
+    }
+
+    .section {
+      background: #fff;
+      border-radius: var(--radius);
+      padding: 30px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+      margin-bottom: 20px;
+    }
+
+    .section h2 {
+      margin-top: 0;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 15px;
+    }
+
+    .info-item {
+      font-size: 15px;
+    }
+
+    .info-item label {
+      font-weight: bold;
+      margin-left: 6px;
+    }
+
+    .info-item input {
+      padding: 6px;
+      width: 90%;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    .edit-btn {
+      margin-top: 10px;
+    }
+
+    .btn {
+      background-color: var(--main-color);
+      color: #fff;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-right: 10px;
+    }
+
+    .btn-secondary {
+      background-color: #ccc;
+      color: #333;
+    }
+      .quantity-control {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .quantity-control button {
+      background-color: var(--main-color);
+      color: #fff;
+      border: none;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .quantity-control .quantity-display {
+      min-width: 20px;
+      text-align: center;
+    }
+
+    html, body {
+      height: 100%;
+    }
+
+    .container {
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    main.main {
+      overflow-x: hidden;
+    }
+    .edit-input {
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 6px;
+  width: 90%;
+}
+.calculator-item {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 6px;
+  margin: 6px;
+  background-color: #fff;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  width: 100%;
+  max-width: 140px;
+  min-height: 120px;
+}
+
+.calculator-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2px;
+}
+
+.calculator-title {
+  font-weight: bold;
+  font-size: 14px; /* ✅ הגדלה של שם האובייקט */
+  color: var(--text-dark);
+  line-height: 1.1;
+  max-width: 85px;
+  word-break: break-word;
+}
+
+.calculator-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  align-items: center;
+  font-size: 14px;
+}
+
+.calculator-actions button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 15px;
+  padding: 0;
+  margin: 2px 0; 
+  line-height: 1;
+}
+.calculator-actions span {
+  display: block;
+}
+
+
+.calculator-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px; /* ✅ צמצום הרווחים */
+  font-size: 11px;
+  margin-top: 2px;
+}
+
+.quantity-control {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.quantity-control button {
+  padding: 2px 6px;
+  font-size: 12px;
+  border-radius: 4px;
+}
+
+.quantity-control .quantity-display {
+  min-width: 18px;
+  text-align: center;
+  font-size: 12px;
+}
+#priceCalculator {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+
+
+
+</style>
+</head>
+<body>
+<div class="container">
+  <aside class="sidebar">
+    <div class="logo">
+      <img src="/picturs/logo.png" alt="לוגו" width="100">
+    </div>
+    <nav>
+      <a href="#">מסך הבית</a>
+      <a href="#">לעומק</a>
+      <a href="#">סטטוסים לביצוע</a>
+      <a href="#">ניהול התקנות</a>
+      <a href="InstallerCustomersPage.html" class="active">לקוחות</a>
+      <a href="#">יומן</a>
+      <a href="#">הגדרות</a>
+      <a href="#">התנתקות</a>
+    </nav>
+  </aside>
+  <main class="main">
+    <div class="section" style="text-align:center; margin-bottom: 30px;">
+      <h2>התקדמות טיפול בלקוח</h2>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px;">
+        <div style="flex:1; text-align:center;">
+          <div class="progress-circle" style="width:30px; height:30px; border-radius:50%; background:#ccc; margin:auto;"></div>
+          <span>צפייה בסרטון</span>
+        </div>
+        <div style="flex:1; text-align:center;">
+          <div class="progress-circle" style="width:30px; height:30px; border-radius:50%; background:var(--main-color); margin:auto;"></div>
+          <span>הצעת מחיר</span>
+        </div>
+        <div style="flex:1; text-align:center;">
+          <div class="progress-circle" style="width:30px; height:30px; border-radius:50%; background:#ccc; margin:auto;"></div>
+          <span>אישור מקדמה</span>
+        </div>
+        <div style="flex:1; text-align:center;">
+          <div class="progress-circle" style="width:30px; height:30px; border-radius:50%; background:#ccc; margin:auto;"></div>
+          <span>ביצוע התקנה</span>
+        </div>
+      </div>
+    </div>
+    <div style="display: flex; gap: 20px; flex-wrap: wrap; align-items:flex-start;">
+
+        <!-- כרטיסיית פרטי לקוח -->
+        <div class="section" style="flex:1; min-width:300px;">
+            <h2>פרטי לקוח</h2>
+            <div id="customerName" style="font-weight:bold; font-size: 18px; margin-bottom: 10px;"></div>
+            <div class="info-grid">
+          
+            <div class="info-item"><label>טלפון:</label><span id="phoneText">-</span></div>
+            <div class="info-item"><label>אימייל:</label><span id="emailText">-</span></div>
+            <div class="info-item"><label>עיר:</label><span id="cityText">-</span></div>
+            <div class="info-item"><label>רחוב:</label><span id="streetText">-</span></div>
+            <div class="info-item"><label>סטטוס:</label><span id="statusText">-</span></div>
+          </div>
+        </div>
+      
+        <!-- כרטיסיית פרטי חללים -->
+        <div class="section" style="flex:2; min-width:300px;">
+          <h2>פרטי החללים להתקנה</h2>
+          <table style="width:100%; border-collapse: collapse; direction: rtl; text-align: right;">
+            <thead>
+                <tr>
+                  <th style="padding: 10px; background-color: #f9f9f9;">#</th>
+                  <th style="padding: 10px; background-color: #f9f9f9;">סוג חלל</th>
+                  <th style="padding: 10px; background-color: #f9f9f9;">סוג פרקט</th>
+                  <th style="padding: 10px; background-color: #f9f9f9;">שטח (מ"ר)</th>
+                  <th style="padding: 10px; background-color: #f9f9f9;">הערות</th>
+                </tr>
+              </thead>
+              
+            <tbody id="spacesDetails">
+              <tr><td colspan="4">טוען פרטי חללים...</td></tr>
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="2" style="padding: 10px; font-weight: bold;">סה"כ שטח להתקנה:</td>
+                <td colspan="2" id="totalSpace" style="padding: 10px; font-weight: bold;">0 מ"ר</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      
+      </div>
+      
+      <div style="margin-top: 10px;">
+        <button class="btn" id="editBtn" onclick="enableEdit()">✏️ ערוך</button>
+        <button class="btn" id="saveBtn" onclick="saveChanges()" style="display:none;">💾 שמור שינויים</button>
+        <button class="btn btn-secondary" id="cancelBtn" onclick="cancelEdit()" style="display:none;">❌ בטל</button>
+      </div>
+      
+   
+      
+      
+    <div class="section">
+      <h2>סרטון תיעוד ההתקנה</h2>
+      <video id="video" controls style="width: 100%; max-width: 600px; display: block; margin: auto">
+        <source src="video-placeholder.mp4" type="video/mp4">
+        הדפדפן שלך לא תומך בניגון וידאו
+      </video>
+    </div>
+    <div class="section">
+      <h2>מחשבון חכם</h2>
+      <div style="margin-bottom: 15px;">
+        <strong>סוג פרקט שנבחר:</strong> <span id="selectedFloorType">לא נבחר</span><br>
+      
+        <div class="info-item" style="margin: 10px 0;">
+          <label>בחר סוג פרקט:</label>
+          <select id="floorType" onchange="updateInstallationPrice()" style="padding: 6px; width: 200px; border: 1px solid #ccc; border-radius: 6px;">
+            <option value="spc">SPC/למינציה (60 ש"ח למ"ר)</option>
+            <option value="wood">עץ (85 ש"ח למ"ר)</option>
+            <option value="fishbone">פישבון (150 ש"ח למ"ר)</option>
+          </select>
+        </div>
+      
+        <strong>מחיר למ"ר:</strong>
+        <input type="number" id="pricePerMeter" value="0" style="width: 80px; padding: 4px; margin-right: 6px;"> ₪
+        <br>
+        <strong>סה"כ מ"ר:</strong> <span id="totalMeters">0</span> מ"ר
+      </div>
+      
+      
+      <div style="text-align: left; margin-bottom: 10px;">
+        <button class="btn" onclick="openAddItemPopup()">➕ הוסף פרמטר קבוע</button>
+      </div>
+      
+      <div class="info-grid" id="priceCalculator">
+  <div class="info-item">
+    <label>שטח התקנה (מ"ר):</label>
+<input type="number" data-label="שטח התקנה" data-price="70" value="0" min="0" onchange="updateQuantityDisplay(this)" style="width: 80px; padding: 6px;">
+<div class="quantity-control">
+  <button type="button" onclick="adjustQuantityInput(this, -1)">-</button>
+  <span class="quantity-display">0</span>
+  <button type="button" onclick="adjustQuantityInput(this, 1)">+</button>
+</div>
+  </div>
+  <div class="calculator-item" data-label="פח דבק" data-price="350">
+    <div class="calculator-header">
+      <div class="calculator-title">פח דבק</div>
+      <div class="calculator-actions">
+        <button title="הסבר"><span>ℹ️</span></button>
+        <button title="ערוך"><span>✏️</span></button>
+        <button title="מחק"><span>🗑️</span></button>
+      </div>
+    </div>
+    <div class="calculator-body">
+      <div>
+        <label>כמות:</label>
+        <div class="quantity-control">
+          <button onclick="adjustQuantity(this, -1)">-</button>
+          <span class="quantity-display">0</span>
+          <button onclick="adjustQuantity(this, 1)">+</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  </div>
+  <div class="edit-btn" style="display: flex; justify-content: space-between;">
+    <button class="btn" onclick="addCustomItem()">+ הוסף פרמטר זמני</button>
+    <div>
+      <label style="margin-inline-start:10px; font-weight: bold;">הנחה (%):</label>
+      <input type="number" id="discountPercent" value="0" style="width: 60px; padding: 4px; margin-left: 10px; border-radius: 6px; border: 1px solid #ccc;">
+      <button class="btn" onclick="calculateQuote()">חשב</button>
+
+</div>
+    </div>
+    <div class="section">
+      <h2>טיוטת הצעת מחיר</h2>
+      <div id="quotePreview">
+  <p><strong>לקוח:</strong> <span id="previewName">-</span></p>
+  <ul id="quoteLines"></ul>
+  <p><strong>סה"כ לפני הנחה:</strong> <span id="previewRawTotal">-</span> ₪</p>
+  <p><strong>הנחה:</strong> <span id="previewDiscount">0%</span></p>
+  <p><strong>סה"כ לאחר הנחה ולפני מע"מ:</strong> <span id="previewSubtotal">-</span> ₪</p>
+  <p><strong>מע"מ (18%):</strong> <span id="previewVAT">-</span> ₪</p>
+  <p><strong>סה"כ לתשלום:</strong> <span id="previewTotal">-</span> ₪</p>
+  <p><strong>כולל פרקט, התקנה והנחה (אם קיימת).</strong></p>
+</div>
+    </div>
+    <div class="section">
+      <h2>צ'קליסט משימות לביצוע</h2>
+      <div class="checklist">
+        <label><input type="checkbox" data-key="WatchedVideo"> צפייה בסרטון לקוח</label>
+        <label><input type="checkbox" data-key="GeneratedQuote"> טיוטה להצעת מחיר</label>
+        <label><input type="checkbox" data-key="SentQuote"> שליחת טיוטה ללקוח</label>
+        <label><input type="checkbox" data-key="DepositPaid"> העברת מקדמה</label>
+        <label><input type="checkbox" data-key="InstallationScheduled"> תיאום התקנה</label>
+        <label><input type="checkbox" data-key="InstallationDone"> התקנה בוצעה</label>
+        <label><input type="checkbox" data-key="FeedbackReceived"> קבלת משוב</label>
+      </div>
+    </div>
+  </main>
+</div>
+<!-- פופאפ להוספת פרמטר חדש -->
+<div id="addItemPopup" style="display:none; position:fixed; top:30%; left:50%; transform:translate(-50%, -50%); background:white; padding:20px; border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.2); z-index:2000;">
+  <h3>פרט פרמטר חדש</h3>
+  <label>שם:</label><br>
+  <input id="popupItemName" type="text" style="width:100%; margin-bottom:10px;"><br>
+  <label>מחיר:</label><br>
+  <input id="popupItemPrice" type="number" style="width:100%; margin-bottom:10px;"><br>
+  <label>תיאור:</label><br>
+  <textarea id="popupItemDesc" style="width:100%; margin-bottom:10px;"></textarea><br>
+  <button class="btn" onclick="submitNewItem()">✔️ שמור</button>
+  <button class="btn btn-secondary" onclick="closeAddItemPopup()">❌ ביטול</button>
+</div>
+
+<div id="infoPopup" style="display:none; position:absolute; background:white; border:1px solid #ccc; padding:10px; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.1); z-index:3000;">
+  <div id="infoText">תיאור</div>
+</div>
+
+
+<div id="editPopup" style="display:none; position:fixed; top:30%; left:50%; transform:translate(-50%, -50%); background:white; padding:20px; border-radius:10px; box-shadow:0 0 15px rgba(0,0,0,0.3); z-index:3000;">
+  <h3>עריכת פריט</h3>
+  <label>שם:</label>
+  <input id="editItemName" style="width:100%; margin-bottom:10px;"><br>
+  <label>מחיר:</label>
+  <input id="editItemPrice" type="number" style="width:100%; margin-bottom:10px;"><br>
+  <label>תיאור:</label>
+  <textarea id="editItemDesc" style="width:100%; margin-bottom:10px;"></textarea><br>
+  <input type="hidden" id="editItemId">
+  <button class="btn" onclick="submitEditItem(this)">✔️ שמור</button>
+  <button class="btn btn-secondary" onclick="closeEditPopup()">❌ ביטול</button>
+</div>
+
+<script>
+function addCustomItem() {
+  const container = document.getElementById("priceCalculator");
+  const div = document.createElement("div");
+  div.classList.add("calculator-item");
+  div.setAttribute("data-label", "");
+  div.setAttribute("data-price", "0");
+  div.innerHTML = `
+    <div class="calculator-header">
+      <div class="calculator-title"><input type="text" placeholder="שם פרמטר זמני" oninput="this.closest('.calculator-item').dataset.label = this.value" style="width: 90%; padding: 6px;"></div>
+      <div class="calculator-actions">
+        <button title="הסבר"><span>ℹ️</span></button>
+        <button title="ערוך"><span>✏️</span></button>
+        <button title="מחק" onclick="this.closest('.calculator-item').remove(); calculateQuote();"><span>🗑️</span></button>
+      </div>
+    </div>
+    <div class="calculator-body">
+      <div>
+        <label>מחיר:</label>
+        <input type="number" value="0" oninput="this.closest('.calculator-item').dataset.price = this.value" style="width: 80px; padding: 6px;">
+      </div>
+      <div>
+        <label>כמות:</label>
+        <div class="quantity-control">
+          <button onclick="adjustQuantity(this, -1)">-</button>
+          <span class="quantity-display">0</span>
+          <button onclick="adjustQuantity(this, 1)">+</button>
+        </div>
+      </div>
+    </div>
+  `;
+  container.appendChild(div);
+}
+
+
+function adjustQuantity(button, delta) {
+  const item = button.closest(".calculator-item");
+  const display = item.querySelector(".quantity-display");
+  let quantity = parseInt(display.textContent) || 0;
+  quantity = Math.max(0, quantity + delta);
+  display.textContent = quantity;
+
+  // עדכון גם ל־input אם יש
+  const quantityInput = item.querySelector('input[type="number"]');
+  if (quantityInput) {
+    quantityInput.value = quantity;
+  }
+}
+
+function adjustQuantityInput(button, delta) {
+  const container = button.closest(".info-item, .calculator-item");
+  const input = container.querySelector("input[type='number']");
+  const display = container.querySelector(".quantity-display");
+  let quantity = parseInt(input.value) || 0;
+  quantity = Math.max(0, quantity + delta);
+  input.value = quantity;
+  display.textContent = quantity;
+
+  
+}
+
+function updateQuantityDisplay(input) {
+  const display = input.parentElement.querySelector(".quantity-display");
+  display.textContent = input.value;
+
+  
+}
+
+function calculateQuote() {
+  let total = 0;
+  let quoteLines = [];
+// חישוב מחיר לפי פרקט × מ"ר
+const floorPrice = parseFloat(document.getElementById("pricePerMeter").value) || 0;
+const meters = parseFloat(document.getElementById("totalMeters").innerText) || 0;
+
+if (floorPrice > 0 && meters > 0) {
+  const floorTotal = floorPrice * meters;
+  total += floorTotal;
+  quoteLines.push(`התקנת פרקט: ${meters} × ${floorPrice} = ${floorTotal.toFixed(2)} ש"ח`);
+}
+
+  const items = document.querySelectorAll(".calculator-item");
+
+  items.forEach(item => {
+    // מנסה לשלוף label משם פרמטר או מה־dataset
+    const label =
+      item.dataset.label ||
+      item.querySelector(".calculator-title")?.textContent?.trim() ||
+      item.querySelector(".calculator-title input")?.value?.trim() ||
+      "ללא שם";
+
+    // מנסה לשלוף price מ־dataset או מ־input
+    let price = parseFloat(item.dataset.price);
+    if (isNaN(price)) {
+      const priceInput = item.querySelector("input[type='number']");
+      if (priceInput) {
+        price = parseFloat(priceInput.value);
+      }
+    }
+
+    // כמות תמיד מתוך quantity-display
+    const quantity = parseInt(item.querySelector(".quantity-display")?.textContent) || 0;
+
+    if (quantity > 0 && !isNaN(price)) {
+      const lineTotal = price * quantity;
+      total += lineTotal;
+      quoteLines.push(`${label}: ${quantity} × ${price} = ${lineTotal.toFixed(2)} ש"ח`);
+    } else {
+      console.warn("⚠️ פריט לא חושב:", { label, price, quantity });
+    }
+  });
+
+  const discount = parseFloat(document.getElementById("discountPercent").value) || 0;
+  const discountedTotal = total * (1 - discount / 100);
+  const vat = discountedTotal * 0.17;
+  const finalTotal = discountedTotal + vat;
+
+  document.getElementById("previewName").innerText = document.getElementById("customerName")?.innerText || "-";
+  document.getElementById("previewRawTotal").innerText = total.toFixed(2);
+  document.getElementById("previewDiscount").innerText = discount + "%";
+  document.getElementById("previewSubtotal").innerText = discountedTotal.toFixed(2);
+  document.getElementById("previewVAT").innerText = vat.toFixed(2);
+  document.getElementById("previewTotal").innerText = finalTotal.toFixed(2);
+
+  const quoteLinesContainer = document.getElementById("quoteLines");
+  quoteLinesContainer.innerHTML = quoteLines.map(line => `<li>${line}</li>`).join("");
+}
+
+
+document.addEventListener('DOMContentLoaded', () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const customerId = urlParams.get("id");
+
+  if (!customerId) {
+    alert("לא נמצא מזהה לקוח ב-URL!");
+    return;
+  }
+
+  ajaxCall(
+    'POST',
+    'http://localhost:5283/api/Dashboard/GetDashboardData',
+    JSON.stringify({ CustomerID: customerId }),
+    function (data) {
+  console.log("🎯 נתונים מהשרת:", data);
+
+  if (!Array.isArray(data) || data.length === 0) {
+    alert("לא נמצאו נתונים עבור לקוח זה.");
+    return;
+  }
+
+  // פרטי לקוח — מתוך הרשומה הראשונה
+const item = data[0];
+$("#customerName").text(`${item.FirstName || ''} ${item.LastName || ''}`);
+$("#phoneText").text(item.Phone || '-');
+$("#emailText").text(item.Email || '-');
+$("#cityText").text(item.City || '-');
+$("#streetText").text(item.Street || '-');
+$("#statusText").text(item.Status || '-');
+
+if (item.MediaURL) {
+  const video = $("#video source");
+  video.attr('src', item.MediaURL);
+  $("#video")[0].load();
+}
+
+if (item.FloorType) {
+  $('#floorType').val(item.FloorType);
+  updateInstallationPrice();
+}
+
+// טבלת כל החללים
+const spacesContainer = $("#spacesDetails");
+spacesContainer.empty();
+
+let totalSize = 0;
+let spaceIndex = 1;
+
+data.forEach((spaceItem) => {
+  if (spaceItem.SpaceID) {
+    const size = parseFloat(spaceItem.Size || 0);
+    totalSize += size;
+
+    spacesContainer.append(`
+      <tr style="text-align:right;" data-spaceid="${spaceItem.SpaceID}">
+        <td style="padding: 8px; border-bottom: 1px solid #ddd;">${spaceIndex++}</td>
+        <td style="padding: 8px; border-bottom: 1px solid #ddd;">${spaceItem.FloorType || '-'}</td>
+        <td style="padding: 8px; border-bottom: 1px solid #ddd;">${spaceItem.ParquetType || '-'}</td>
+        <td style="padding: 8px; border-bottom: 1px solid #ddd;">${spaceItem.Size || '-'} מ"ר</td>
+        <td style="padding: 8px; border-bottom: 1px solid #ddd;">${spaceItem.SpaceNotes || '-'}</td>
+      </tr>
+    `);
+  }
+});
+
+if (spaceIndex === 1) {
+  spacesContainer.append('<tr><td colspan="4">לא נמצאו חללים עבור לקוח זה</td></tr>');
+}
+$("#totalSpace").text(`${totalSize.toFixed(2)} מ"ר`);
+$("#totalMeters").text(totalSize.toFixed(2));
+calculateQuote();
+
+}
+
+,
+    function (err) {
+      console.error("AJAX error:", err);
+      alert("שגיאה בטעינת הנתונים מהשרת");
+    }
+  );
+  loadCalculatorItems();
+});
+
+
+function enableEdit(){
+  $('#editBtn').hide();
+  $('#saveBtn, #cancelBtn').show();
+
+  // הפיכת פרטי לקוח ל-inputs
+  ['phone','email','city','street','status'].forEach(field => {
+    const text = $(`#${field}Text`).text();
+    $(`#${field}Text`).html(`<input id="${field}" value="${text}" style="padding:4px; width:90%;">`);
+  });
+
+  // הפיכת פרטי חללים ל-inputs
+  $('#spacesDetails tr').each(function(){
+    $(this).find('td').each(function(index){
+      if(index > 0){ // סוג פרקט, שטח, הערות
+        const text = $(this).text().replace(' מ"ר','').trim();
+        $(this).html(`<input value="${text}" style="padding:4px; width:90%;">`);
+      }
+    });
+  });
+}
+
+function cancelEdit() {
+  $('#saveBtn, #cancelBtn').hide();
+  $('#editBtn').show();
+
+  const customerId = new URLSearchParams(window.location.search).get("id");
+
+  ajaxCall(
+    'POST',
+    'http://localhost:5283/api/Dashboard/GetDashboardData',
+    JSON.stringify({ CustomerID: customerId }),
+    function(data){
+      if(Array.isArray(data) && data.length > 0){
+        const customer = data.find(d => d.CustomerID == customerId);
+
+        $("#phoneText").text(customer.Phone || '-');
+        $("#emailText").text(customer.Email || '-');
+        $("#cityText").text(customer.City || '-');
+        $("#streetText").text(customer.Street || '-');
+        $("#statusText").text(customer.Status || '-');
+
+        // שיחזור פרטי החללים
+        const spacesContainer = $("#spacesDetails");
+        spacesContainer.empty();
+        let totalSize = 0;
+
+        data.forEach((item, index) => {
+          if(item.SpaceID){ 
+            totalSize += parseFloat(item.Size || 0);
+            spacesContainer.append(`
+              <tr style="text-align:right;">
+                <td style="padding: 8px; border-bottom: 1px solid #ddd;">${index + 1}</td>
+                <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.FloorType || '-'}</td>
+                <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.Size || '-'} מ"ר</td>
+                <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.SpaceNotes || '-'}</td>
+              </tr>
+            `);
+          }
+        });
+
+        if(totalSize == 0){
+          spacesContainer.append('<tr><td colspan="4">לא נמצאו חללים עבור לקוח זה</td></tr>');
+        }
+
+        $("#totalSpace").text(`${totalSize.toFixed(2)} מ"ר`);
+      }
+    },
+    function(err){
+      console.error("AJAX error:", err);
+      alert("שגיאה בטעינת הנתונים המקוריים");
+    }
+  );
+}
+
+function saveChanges(){
+  const saveBtn = $('#saveBtn');
+  saveBtn.text('⏳ שומר...').prop('disabled', true);
+
+  const customerId = new URLSearchParams(window.location.search).get("id");
+
+  const updatedCustomer = {
+    CustomerID: customerId,
+    Phone: $('#phone').val(),
+    Email: $('#email').val(),
+    City: $('#city').val(),
+    Street: $('#street').val(),
+    Status: $('#status').val()
+  };
+
+  const updatedSpaces = [];
+  $('#spacesDetails tr').each(function(){
+    const inputs = $(this).find('input');
+const spaceID = $(this).data('spaceid') || 0;
+
+if(inputs.length === 3){
+  updatedSpaces.push({
+    SpaceID: spaceID,
+    FloorType: inputs[0].value,
+    Size: parseFloat(inputs[1].value),
+    SpaceNotes: inputs[2].value
+  });
+}
+
+  });
+
+  ajaxCall(
+    'POST',
+    'http://localhost:5283/api/newRequest/updateRequest',
+    JSON.stringify({
+      customerDetails: updatedCustomer,
+      spaceDetails: updatedSpaces
+    }),
+    function(res){
+      if (res === 1 || res === 2 || res === 3) {
+        saveBtn.text('✔️ נשמר!'); // אפשרות להצגת הצלחה לפני רענון
+        setTimeout(() => location.reload(), 500);
+      } else {
+        alert("השמירה נכשלה. נסה שוב.");
+        saveBtn.text('💾 שמור שינויים').prop('disabled', false);
+      }
+    },
+    function(err){
+      console.error(err);
+      alert("אירעה שגיאה בשמירה");
+      saveBtn.text('💾 שמור שינויים').prop('disabled', false);
+    }
+  );
+}
+
+function openAddItemPopup() {
+  document.getElementById('addItemPopup').style.display = 'block';
+}
+
+function closeAddItemPopup() {
+  document.getElementById('addItemPopup').style.display = 'none';
+}
+function submitNewItem() {
+  const name = $('#popupItemName').val();
+  const price = parseFloat($('#popupItemPrice').val());
+  const desc = $('#popupItemDesc').val();
+
+  if (!name || isNaN(price)) {
+    alert("נא למלא שם ומחיר תקין");
+    return;
+  }
+
+  const newItem = {
+    ItemName: name,
+    Price: price,
+    Description: desc,
+    IsActive: true
+  };
+
+  ajaxCall(
+    'POST',
+    'http://localhost:5283/api/PriceCalculatorItem/AddNewCalculatorItem',
+    JSON.stringify(newItem),
+    function (id) {
+      if (id > 0) {
+        alert("✔️ הפריט נוסף בהצלחה");
+        closeAddItemPopup();
+        loadCalculatorItems();
+      } else {
+        alert("⚠️ שגיאה בהוספת הפריט");
+      }
+    },
+    function (err) {
+      console.error("שגיאה בשליחת הפריט:", err);
+      alert("❌ שגיאה בשרת");
+    }
+  );
+}
+function loadCalculatorItems() {
+  const container = document.getElementById("priceCalculator");
+  container.innerHTML = ''; 
+
+  ajaxCall(
+    'GET',
+    'http://localhost:5283/api/PriceCalculatorItem/GetCalculatorItems',
+    null,
+    function (items) {
+      if (Array.isArray(items)) {
+        items.forEach(item => {
+          const div = document.createElement("div");
+          div.className = "calculator-item";
+
+          div.dataset.label = item.itemName;
+          div.dataset.price = item.price;
+
+          div.innerHTML = `
+            <div class="calculator-header">
+              <div class="calculator-title">${item.itemName}</div>
+             <div class="calculator-actions">
+  <button onclick="showInfoPopup(this, \`${item.description || 'ללא תיאור'}\`)"><span>ℹ️</span></button>
+  <button onclick="openEditPopup(${item.calculatorItemID}, '${item.itemName}', ${item.price}, \`${item.description || ''}\`)"><span>✏️</span></button>
+<button title="מחק" onclick="deleteCalculatorItem(${item.calculatorItemID})"><span>🗑️</span></button>
+</div>
+
+            </div>
+            <div class="calculator-body">
+              <div><label>מחיר:</label> ${item.price} ₪</div>
+              <div>
+                <label>כמות:</label>
+                <div class="quantity-control">
+                  <button onclick="adjustQuantity(this, -1)">-</button>
+                  <span class="quantity-display">0</span>
+                  <button onclick="adjustQuantity(this, 1)">+</button>
+                </div>
+              </div>
+            </div>
+          `;
+
+          container.appendChild(div);
+        });
+
+        // ⬅️ זה יגרום לחישוב הצעת המחיר להתבצע אחרי טעינה
+        calculateQuote();
+      }
+    },
+    function (err) {
+      console.error("⚠️ שגיאה בטעינת פריטים קבועים:", err);
+    }
+  );
+}
+function updateInstallationPrice() {
+  const select = document.getElementById("floorType");
+  const display = document.getElementById("selectedFloorType");
+  const priceInput = document.getElementById("pricePerMeter");
+
+  const type = select.value;
+  const priceMap = {
+    spc: 60,
+    wood: 85,
+    fishbone: 150
+  };
+
+  const typeNameMap = {
+    spc: "SPC/למינציה",
+    wood: "עץ",
+    fishbone: "פישבון"
+  };
+
+  display.innerText = typeNameMap[type] || "לא נבחר";
+  priceInput.value = priceMap[type] || 0;
+
+  calculateQuote(); // ⬅️ הוספת שורת חישוב מיידי
+}
+
+function showItemDescription(desc) {
+  const popup = document.createElement("div");
+  popup.innerHTML = `
+    <div style="position: fixed; top: 30%; left: 50%; transform: translate(-50%, -50%);
+                background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px #aaa; z-index: 5000;">
+      <p>${desc}</p>
+      <button class="btn btn-secondary" onclick="this.parentElement.remove()">סגור</button>
+    </div>
+  `;
+  document.body.appendChild(popup);
+}
+function editCalculatorItem(button, id) {
+  const itemDiv = button.closest(".calculator-item");
+  const currentLabel = itemDiv.dataset.label;
+  const currentPrice = itemDiv.dataset.price;
+
+  const newLabel = prompt("עדכן שם פרמטר:", currentLabel);
+  if (!newLabel) return;
+
+  const newPrice = prompt("עדכן מחיר:", currentPrice);
+  if (newPrice === null || isNaN(parseFloat(newPrice))) return;
+
+  ajaxCall(
+    'POST',
+    'http://localhost:5283/api/PriceCalculatorItem/UpdateCalculatorItem',
+    JSON.stringify({
+      CalculatorItemID: id,
+      ItemName: newLabel,
+      Price: parseFloat(newPrice)
+    }),
+    function (res) {
+      if (res === 1) {
+        alert("✔️ עודכן בהצלחה");
+        loadCalculatorItems(); // טען מחדש כדי לעדכן תצוגה
+      } else {
+        alert("⚠️ עדכון נכשל");
+      }
+    },
+    function (err) {
+      console.error("❌ שגיאה בעדכון:", err);
+      alert("שגיאה בשרת");
+    }
+  );
+}
+function deleteCalculatorItem(itemId) {
+  if (!confirm("האם אתה בטוח שברצונך למחוק את הפריט?")) return;
+
+  ajaxCall(
+    'DELETE',
+    'http://localhost:5283/api/PriceCalculatorItem/DeleteCalculatorItem',
+    JSON.stringify({ calculatorItemID: itemId }), // 👈 שליחה בגוף הבקשה
+    function () {
+      alert("🗑️ הפריט נמחק בהצלחה");
+      loadCalculatorItems();
+    },
+    function (err) {
+      console.error("שגיאה במחיקה:", err);
+      alert("❌ לא ניתן למחוק את הפריט כרגע");
+    }
+  );
+}
+
+
+
+function showInfoPopup(button, description) {
+  const popup = document.getElementById("infoPopup");
+  const text = document.getElementById("infoText");
+  text.innerText = description || "אין תיאור";
+  popup.style.display = "block";
+
+  const rect = button.getBoundingClientRect();
+  popup.style.top = (rect.bottom + window.scrollY + 5) + "px";
+  popup.style.left = (rect.left + window.scrollX - 50) + "px";
+
+  // סגירה אוטומטית אחרי 5 שניות
+  setTimeout(() => popup.style.display = "none", 5000);
+}
+
+function openEditPopup(itemId, name, price, desc) {
+  $("#editItemId").val(itemId);
+  $("#editItemName").val(name);
+  $("#editItemPrice").val(price);
+  $("#editItemDesc").val(desc);
+  $("#editPopup").show();
+}
+
+function closeEditPopup() {
+  $("#editPopup").hide();
+}
+
+function submitEditItem(buttonElement) {
+  const itemId = $('#editItemId').val(); // 👈 זה השדה הנכון שקיים ב-HTML
+
+  const name = $('#editItemName').val();
+  const price = parseFloat($('#editItemPrice').val());
+  const description = $('#editItemDesc').val();
+
+  if (!itemId || !name || isNaN(price)) {
+    alert("יש להזין שם ומחיר תקין");
+    return;
+  }
+
+  const updatedItem = {
+    CalculatorItemID: parseInt(itemId),
+    ItemName: name,
+    Price: price,
+    Description: description,
+    IsActive: true
+  };
+
+  ajaxCall(
+    'POST',
+    'http://localhost:5283/api/PriceCalculatorItem/UpdateCalculatorItem',
+    JSON.stringify(updatedItem),
+    function () {
+      closeEditPopup();
+      loadCalculatorItems();
+    },
+    function (err) {
+      console.error("⚠️ שגיאה בעדכון פריט:", err);
+      alert("שגיאה בשמירת הפריט");
+    }
+  );
+}
+
+
+
+</script>
+</body>
+</html>
