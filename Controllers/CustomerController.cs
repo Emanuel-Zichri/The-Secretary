@@ -10,7 +10,7 @@ namespace FinalProject.Controllers
     [ApiController]
     public class CustomerController : ControllerBase
     {
-
+        //test commit vscode
 
         [HttpPost("Register")]
         public int Register([FromBody] Customer newCustomer)
