@@ -6,6 +6,7 @@
         public string? TypeName { get; set; }
         public decimal? PricePerUnit { get; set; }
         public string? ImageURL { get; set; }
+        public string? Type { get; set; }
         public bool? IsActive { get; set; }
 
         public static int AddParquetType(ParquetType parquetType)

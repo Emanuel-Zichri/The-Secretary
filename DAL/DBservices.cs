@@ -761,6 +761,7 @@ public class DBservices
         paramDic.Add("@TypeName", newParquet.TypeName);
         paramDic.Add("@PricePerUnit", newParquet.PricePerUnit);
         paramDic.Add("@ImageURL", newParquet.ImageURL);
+        paramDic.Add("@Type", newParquet.Type);
         cmd = CreateCommandWithStoredProcedureGeneral("AddParquetType", con, paramDic); // create the command
         try
         {
@@ -797,6 +798,7 @@ public class DBservices
         paramDic.Add("@TypeName", parquetType.TypeName);
         paramDic.Add("@PricePerUnit", parquetType.PricePerUnit);
         paramDic.Add("@ImageURL", parquetType.ImageURL);
+        paramDic.Add("@Type", parquetType.Type);
         cmd = CreateCommandWithStoredProcedureGeneral("UpdateParquetType", con, paramDic); // create the command
         try
         {
@@ -842,6 +844,7 @@ public class DBservices
                     TypeName = reader["TypeName"].ToString(),
                     PricePerUnit = Convert.ToDecimal(reader["PricePerUnit"]),
                     ImageURL = reader["ImageURL"].ToString(),
+                    Type = reader["Type"] != DBNull.Value ? reader["Type"].ToString() : null,
                     IsActive = Convert.ToBoolean(reader["IsActive"])
                 };
                 parquetTypes.Add(p);
