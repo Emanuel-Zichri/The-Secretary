@@ -143,11 +143,17 @@
             <label>
               העלאת סרטון
               <i>↢</i>
-              <input type="file" accept="video/*">
+              <input id="videoUploader" onChange="test()" type="file" accept="video/*">
             </label>
           </div>
         </div>`;
       container.appendChild(div);
+    }
+
+    function test(){
+      alert(
+        "video uploaded successfuly!" 
+      )
     }
 
     function toggleRoom(btn) {
