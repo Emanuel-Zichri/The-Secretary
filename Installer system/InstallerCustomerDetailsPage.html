@@ -6,7 +6,8 @@
   <title>פרטי לקוח</title>
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700&display=swap" rel="stylesheet">
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="/ajaxCall.js"></script>
+<script src="/ajaxCall.js"></script>  
+<script src="/api.js"></script>
   <style>
     :root {
       --main-color: #b46a2c;
@@ -615,7 +616,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   ajaxCall(
     'POST',
-    'http://localhost:5283/api/Dashboard/GetDashboardData',
+    `${API_BASE_URL}/Dashboard/GetDashboardData`,
     JSON.stringify({ CustomerID: customerId }),
     function (data) {
   console.log("🎯 נתונים מהשרת:", data);
@@ -717,7 +718,7 @@ function cancelEdit() {
 
   ajaxCall(
     'POST',
-    'http://localhost:5283/api/Dashboard/GetDashboardData',
+    `${API_BASE_URL}/Dashboard/GetDashboardData`,
     JSON.stringify({ CustomerID: customerId }),
     function(data){
       if(Array.isArray(data) && data.length > 0){
@@ -795,7 +796,7 @@ if(inputs.length === 3){
 
   ajaxCall(
     'POST',
-    'http://localhost:5283/api/newRequest/updateRequest',
+    `${API_BASE_URL}/newRequest/updateRequest`,
     JSON.stringify({
       customerDetails: updatedCustomer,
       spaceDetails: updatedSpaces
@@ -843,7 +844,7 @@ function submitNewItem() {
 
   ajaxCall(
     'POST',
-    'http://localhost:5283/api/PriceCalculatorItem/AddNewCalculatorItem',
+    `${API_BASE_URL}/PriceCalculatorItem/AddNewCalculatorItem`,
     JSON.stringify(newItem),
     function (id) {
       if (id > 0) {
@@ -866,7 +867,7 @@ function loadCalculatorItems() {
 
   ajaxCall(
     'GET',
-    'http://localhost:5283/api/PriceCalculatorItem/GetCalculatorItems',
+    `${API_BASE_URL}/PriceCalculatorItem/GetCalculatorItems`,
     null,
     function (items) {
       if (Array.isArray(items)) {
@@ -960,7 +961,7 @@ function editCalculatorItem(button, id) {
 
   ajaxCall(
     'POST',
-    'http://localhost:5283/api/PriceCalculatorItem/UpdateCalculatorItem',
+   `${API_BASE_URL}/PriceCalculatorItem/UpdateCalculatorItem`,
     JSON.stringify({
       CalculatorItemID: id,
       ItemName: newLabel,
@@ -983,10 +984,25 @@ function editCalculatorItem(button, id) {
 function deleteCalculatorItem(itemId) {
   if (!confirm("האם אתה בטוח שברצונך למחוק את הפריט?")) return;
 
+  const itemDiv = [...document.querySelectorAll(".calculator-item")].find(el =>
+    el.querySelector("button[onclick*='deleteCalculatorItem']").outerHTML.includes(`deleteCalculatorItem(${itemId})`)
+  );
+
+  const name = itemDiv?.dataset.label || "";
+  const price = parseFloat(itemDiv?.dataset.price || 0);
+
+  const payload = {
+    calculatorItemID: itemId,
+    itemName: name,
+    description: "", // או תיאור אם שמור בדום
+    price: price,
+    isActive: false
+  };
+
   ajaxCall(
     'DELETE',
-    'http://localhost:5283/api/PriceCalculatorItem/DeleteCalculatorItem',
-    JSON.stringify({ calculatorItemID: itemId }), // 👈 שליחה בגוף הבקשה
+    `${API_BASE_URL}/PriceCalculatorItem/DeleteCalculatorItem`,
+    JSON.stringify(payload),
     function () {
       alert("🗑️ הפריט נמחק בהצלחה");
       loadCalculatorItems();
@@ -997,6 +1013,8 @@ function deleteCalculatorItem(itemId) {
     }
   );
 }
+
+
 
 
 
@@ -1048,7 +1066,7 @@ function submitEditItem(buttonElement) {
 
   ajaxCall(
     'POST',
-    'http://localhost:5283/api/PriceCalculatorItem/UpdateCalculatorItem',
+    `${API_BASE_URL}/PriceCalculatorItem/UpdateCalculatorItem`,
     JSON.stringify(updatedItem),
     function () {
       closeEditPopup();

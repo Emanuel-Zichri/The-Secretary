@@ -5,6 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>הכנסת פרטי הלקוח</title>
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700&display=swap" rel="stylesheet">
+  <script src="selectParquetPage.html"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="/ajaxCall.js"></script>  
+<script src="/api.js"></script>
+  <script src="customerDetails.js"></script>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -147,28 +152,5 @@
   </div>
 
   <button class="btn-next" onclick="saveCustomerData()">בואו נמשיך</button>
-
-  <script>
-    function saveCustomerData() {
-      const customer = {
-        customerID: 0,
-        firstName: document.getElementById('firstName').value,
-        lastName: document.getElementById('lastName').value,
-        phone: document.getElementById('phone').value,
-        email: document.getElementById('email').value,
-        createdAt: new Date().toISOString(),
-        city: document.getElementById('city').value,
-        street: document.getElementById('street').value,
-        number: document.getElementById('number').value,
-        notes: document.getElementById('notes').value
-      };
-
-      const existingData = localStorage.getItem('installationData');
-      const parsed = existingData ? JSON.parse(existingData) : {};
-      parsed.customerDetails = customer;
-      localStorage.setItem('installationData', JSON.stringify(parsed));
-      window.location.href = 'quoteSummaryPage.html';
-    }
-  </script>
 </body>
 </html>
