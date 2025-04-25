@@ -133,6 +133,41 @@
       display: block;
       cursor: pointer; 
     }
+    .modal {
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.3);
+    font-family: 'Heebo', sans-serif;
+  }
+
+  .close {
+    color: #aaa;
+    float: left;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+
+  .close:hover {
+    color: #000;
+  }
   </style>
 </head>
 <body>
@@ -155,80 +190,18 @@
   </div>
   <div class="section-title" id="parquet-title">פרקטי עץ מלא</div>
   <div class="parquet-grid" id="parquet-options"></div>
+  
   <button class="btn-next" onclick="validateSelection()">בואו נמשיך</button>
-
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script>
-    let parquetData = {
-      solid: [],
-      laminate: [],
-      fishbone: []
-    };
+  <div id="info-modal" class="modal" style="display:none;">
+    <div class="modal-content">
+      <span class="close" onclick="closeInfoModal()">&times;</span>
+      <h2 id="info-title"></h2>
+      <img id="info-image" src="" alt="" style="max-width: 100%; border-radius: 12px; margin: 16px 0;" />
+      <p id="info-description"></p>
+    </div>
+  </div>
   
-    function fetchParquetTypes() {
-      $.ajax({
-        url: "${API_BASE_URL}/ParquetType/GetAll", // שים לב: שנה את ה-URL אם השרת שלך נמצא בכתובת אחרת
-        method: "GET",
-        success: function (types) {
-          types.forEach(type => {
-            if (type.TypeName.includes("עץ")) parquetData.solid.push(type);
-            else if (type.TypeName.includes("למינציה")) parquetData.laminate.push(type);
-            else if (type.TypeName.includes("פישבון")) parquetData.fishbone.push(type);
-          });
   
-          selectTab($('.tab.active')[0], 'solid');
-        },
-        error: function (xhr, status, error) {
-          console.error("שגיאה בטעינת סוגי פרקטים:", error);
-        }
-      });
-    }
-  
-    function selectTab(tabEl, type) {
-      $('.tab').removeClass('active');
-      $(tabEl).addClass('active');
-  
-      $('#parquet-title').text('פרקטי ' + $(tabEl).text());
-  
-      const items = parquetData[type];
-      const container = $('#parquet-options');
-      container.empty();
-  
-      items.forEach(item => {
-        container.append(`
-          <div class="parquet-item">
-            <div style="position:relative">
-              <img src="/picturs/parquetsTypes/${item.ImageURL}" alt="${item.TypeName}" />
-              <div class="info-btn" onclick="alert('${item.Description || item.TypeName}')">i</div>
-            </div>
-            <div style="margin-top: 8px; font-weight: 500; font-size: 14px;">${item.TypeName}</div>
-            <div class="price">החל מ־${item.PricePerUnit} ש"ח למ"ר</div>
-            <div class="parquet-select">
-              <input type="radio" name="parquet" value="${item.TypeName}" />
-            </div>
-          </div>
-        `);
-      });
-    }
-  
-    function validateSelection() {
-      const selected = $('input[name="parquet"]:checked').val();
-      if (!selected) {
-        alert('אנא בחרו פרקט לפני מעבר לשלב הבא');
-        return;
-      }
-      localStorage.setItem('ParquetType', selected);
-      window.location.href = 'InstallDetailsPage.html';
-    }
-  
-    function goBack() {
-      window.history.back();
-    }
-  
-    $(document).ready(function () {
-      fetchParquetTypes();
-    });
-  </script>
-  
+ 
 </body>
 </html>

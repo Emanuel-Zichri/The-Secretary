@@ -263,7 +263,7 @@
       <a href="#">מסך הבית</a>
       <a href="#">לעומק</a>
       <a href="#">סטטוסים לביצוע</a>
-      <a href="#">ניהול התקנות</a>
+      <a href="#">ניהול פורטל לקוחות</a>
       <a href="InstallerCustomersPage.html" class="active">לקוחות</a>
       <a href="#">יומן</a>
       <a href="#">הגדרות</a>
@@ -430,6 +430,9 @@
   <p><strong>סה"כ לתשלום:</strong> <span id="previewTotal">-</span> ₪</p>
   <p><strong>כולל פרקט, התקנה והנחה (אם קיימת).</strong></p>
 </div>
+  <button class="btn" onclick="submitQuote()">📤 שלח הצעת מחיר</button>
+</div>
+
     </div>
     <div class="section">
       <h2>צ'קליסט משימות לביצוע</h2>
@@ -495,15 +498,17 @@ function addCustomItem() {
     <div class="calculator-body">
       <div>
         <label>מחיר:</label>
-        <input type="number" value="0" oninput="this.closest('.calculator-item').dataset.price = this.value" style="width: 80px; padding: 6px;">
+<input type="number" class="price-input" value="0" oninput="this.closest('.calculator-item').dataset.price = this.value" style="width: 80px; padding: 6px;">
       </div>
       <div>
         <label>כמות:</label>
-        <div class="quantity-control">
-          <button onclick="adjustQuantity(this, -1)">-</button>
-          <span class="quantity-display">0</span>
-          <button onclick="adjustQuantity(this, 1)">+</button>
-        </div>
+    <div class="quantity-control">
+  <button onclick="adjustQuantity(this, -1)">-</button>
+  <span class="quantity-display">0</span>
+  <input type="number" class="quantity-input" value="0" style="display: none;">
+  <button onclick="adjustQuantity(this, 1)">+</button>
+</div>
+
       </div>
     </div>
   `;
@@ -519,10 +524,11 @@ function adjustQuantity(button, delta) {
   display.textContent = quantity;
 
   // עדכון גם ל־input אם יש
-  const quantityInput = item.querySelector('input[type="number"]');
-  if (quantityInput) {
-    quantityInput.value = quantity;
-  }
+  const quantityInput = item.querySelector('.quantity-input');
+if (quantityInput) {
+  quantityInput.value = quantity;
+}
+
 }
 
 function adjustQuantityInput(button, delta) {
@@ -877,6 +883,7 @@ function loadCalculatorItems() {
 
           div.dataset.label = item.itemName;
           div.dataset.price = item.price;
+          div.dataset.fixedId = item.calculatorItemID; // ✅ נדרש לזיהוי קבוע
 
           div.innerHTML = `
             <div class="calculator-header">
@@ -1078,7 +1085,180 @@ function submitEditItem(buttonElement) {
     }
   );
 }
+function submitQuote() {
+  const customerId = new URLSearchParams(window.location.search).get("id");
+  const subtotal = parseFloat(document.getElementById("previewSubtotal").innerText) || 0;
+  const discountPercent = parseFloat(document.getElementById("discountPercent").value) || 0;
+  const totalWithVAT = parseFloat(document.getElementById("previewTotal").innerText) || 0;
 
+  const discountAmount = subtotal * (discountPercent / 100);  // ← מחושב מ־subtotal
+
+  const quote = {
+    RequestID: parseInt(customerId),
+    TotalPrice: totalWithVAT,       // ← שים לב לשם השדה
+    DiscountAmount: discountAmount, // ← חובה לפי ה־Swagger
+    DiscountPercent: discountPercent
+  };
+
+  ajaxCall(
+    "POST",
+    `${API_BASE_URL}/Quote/InsertQuote`,
+    JSON.stringify(quote),
+    function (quoteId) {
+      if (quoteId > 0) {
+        submitQuoteItems(quoteId);
+      } else {
+        alert("⚠️ שגיאה ביצירת הצעת המחיר");
+      }
+    },
+    function (err) {
+      console.error("❌ שגיאה בשליחת הצעת המחיר:", err);
+      alert("שגיאה בשרת");
+    }
+  );
+}
+function submitQuoteItems(quoteId) {
+  const submitBtn = document.querySelector('button[onclick="submitQuote()"]');
+  submitBtn.textContent = "📤 שולח...";
+  submitBtn.disabled = true;
+
+  const items = document.querySelectorAll(".calculator-item");
+
+  const quoteItems = Array.from(items).map((item) => {
+    const label = item.dataset.label || "ללא שם";
+    const price = parseFloat(item.dataset.price || "0");
+    const quantity = parseInt(item.querySelector(".quantity-display")?.textContent || "0");
+    const finalPrice = price * quantity;
+    const calculatorItemID = item.dataset.fixedId ? parseInt(item.dataset.fixedId) : null;
+
+    return {
+      quoteItemID: 0,
+      quoteID: quoteId,
+      calculatorItemID: calculatorItemID,
+      customItemName: label,
+      priceForItem: price,
+      quantity: quantity,
+      finalPrice: finalPrice,
+      notes: ""
+    };
+  }).filter(item => item.quantity > 0 && item.priceForItem > 0);
+
+  if (quoteItems.length === 0) {
+    alert("אין פריטים להצעת מחיר.");
+    submitBtn.textContent = "📤 שלח הצעת מחיר";
+    submitBtn.disabled = false;
+    return;
+  }
+
+  let sentCount = 0;
+  let failedCount = 0;
+
+  quoteItems.forEach((item) => {
+    ajaxCall(
+      "POST",
+      `${API_BASE_URL}/Quote/AddQuoteItem`,
+      JSON.stringify([item]),
+      function () {
+        sentCount++;
+        if (sentCount + failedCount === quoteItems.length) {
+          if (failedCount === 0) {
+            submitBtn.textContent = "✔️ נשלח בהצלחה";
+            checkPopularCandidates();
+          } else {
+            submitBtn.textContent = "📤 שלח הצעת מחיר";
+            alert("⚠️ חלק מהפריטים לא נשלחו. נסה שוב.");
+          }
+          submitBtn.disabled = false;
+        }
+      },
+      function (err) {
+        console.error("⚠️ שגיאה בפריט:", item, err);
+        failedCount++;
+        if (sentCount + failedCount === quoteItems.length) {
+          submitBtn.textContent = "📤 שלח הצעת מחיר";
+          alert("⚠️ חלק מהפריטים לא נשלחו. נסה שוב.");
+          submitBtn.disabled = false;
+        }
+      }
+    );
+  });
+}
+
+
+
+function checkPopularCandidates() {
+  ajaxCall(
+    "GET",
+    `${API_BASE_URL}/PriceCalculatorItem/GetPopularCandidates`,
+    null,
+    function (candidates) {
+      if (Array.isArray(candidates) && candidates.length > 0) {
+        showCandidatePopup(candidates);
+      }
+    },
+    function (err) {
+      console.error("⚠️ שגיאה בבדיקת מועמדים פופולריים:", err);
+    }
+  );
+}
+function showCandidatePopup(candidates) {
+  const popup = document.createElement("div");
+  popup.style.cssText = `
+    position: fixed; top: 20%; left: 50%; transform: translateX(-50%);
+    background: white; padding: 20px; border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.2); z-index: 9999;
+    max-width: 400px;
+  `;
+
+  popup.innerHTML = `
+    <h3>🧠 זיהינו פרמטרים חוזרים</h3>
+    <p>האם להפוך אותם לפריטים קבועים במחשבון?</p>
+    <ul style="text-align: right; padding-right: 20px;">
+      ${candidates.map(c => `<li><strong>${c.customItemName}</strong> (≈ ${c.suggestedPrice} ₪)</li>`).join("")}
+    </ul>
+    <div style="text-align: left; margin-top: 15px;">
+      <button class="btn" onclick='approveCandidates(${JSON.stringify(candidates).replace(/"/g, '&quot;')})'>✔️ כן</button>
+<button class="btn btn-secondary" onclick='rejectCandidates(${JSON.stringify(candidates).replace(/"/g, '&quot;')})'>❌ לא</button>
+    </div>
+  `;
+
+  document.body.appendChild(popup);
+}
+function approveCandidates(candidates) {
+  candidates.forEach(c => {
+    ajaxCall(
+      "POST",
+      `${API_BASE_URL}/PriceCalculatorItem/CreateFromCandidate`,
+      JSON.stringify(c.customItemName), // ✅ רק מחרוזת לפי Swagger
+      function () {
+        console.log(`✅ נוסף פריט קבוע: ${c.customItemName}`);
+        loadCalculatorItems(); // ⬅️ טען את הרשימה מחדש
+      },
+      function (err) {
+        console.error(`❌ שגיאה ביצירת קבוע: ${c.customItemName}`, err);
+      }
+    );
+  });
+
+  document.querySelector("div[style*='z-index: 9999']")?.remove(); // סגירת הפופאפ
+}
+function rejectCandidates(candidates) {
+  candidates.forEach(c => {
+    ajaxCall(
+      "POST",
+      `${API_BASE_URL}/PriceCalculatorItem/RejectCandidate`,
+      JSON.stringify(c.customItemName), // לפי Swagger שלך — רק מחרוזת
+      function () {
+        console.log(`🚫 נדחה פריט זמני: ${c.customItemName}`);
+      },
+      function (err) {
+        console.error(`❌ שגיאה בדחיית פריט: ${c.customItemName}`, err);
+      }
+    );
+  });
+
+  document.querySelector("div[style*='z-index: 9999']")?.remove(); // סגירת הפופאפ
+}
 
 
 </script>

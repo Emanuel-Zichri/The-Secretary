@@ -1,59 +1,91 @@
-src="https://code.jquery.com/jquery-3.6.0.min.js"
-src="/ajaxCall.js"
-
-
-const parquetData = {
-    solid: [
-      { name: 'פרקט עץ אגוז טבעי', img: 'etzMaleEgozTivi.jpg', price: '30', info: 'פרקט איכותי בגוון חום כהה, עמיד במיוחד.' },
-      { name: 'פרקט עץ אלון טבעי', img: 'etzMaleAlonTivi.jpg', price: '30', info: 'פרקט אלון הוא אחד הסוגים הפופולריים ביותר של פרקטים בזכות מראהו האלגנטי ועמידותו לאורך זמן.' }
-    ],
-    laminate: [
-      { name: 'פרקט למינציה אפור', img: 'lam1.jpg', price: '20', info: 'פרקט בגוון אפור מודרני, מתאים לעיצוב תעשייתי.' }
-    ],
-    fishbone: [
-      { name: 'פרקט פישבון אלון', img: 'fish1.jpg', price: '35', info: 'עיצוב קלאסי יוקרתי שמתאים לחללים פתוחים.' }
-    ]
+let parquetData = {
+    solid: [],
+    laminate: [],
+    fishbone: []
   };
-
+  
+  function fetchParquetTypes() {
+    ajaxCall(
+      "GET",
+      `${API_BASE_URL}/ParquetType/GetAll`,
+      null,
+      function (types) {
+        console.log("תוצאה מהשרת:", types); // בדיקת מבנה המידע
+  
+        types.forEach(type => {
+          if (type.typeName.includes("עץ")) parquetData.solid.push(type);
+          else if (type.typeName.includes("למינציה")) parquetData.laminate.push(type);
+          else if (type.typeName.includes("פישבון")) parquetData.fishbone.push(type);
+        });
+  
+        selectTab($('.tab.active')[0], 'solid'); // טען את הטאב הראשון כברירת מחדל
+      },
+      function (xhr, status, error) {
+        console.error("שגיאה בטעינת סוגי פרקטים:", error);
+        alert("אירעה שגיאה בטעינת סוגי הפרקטים מהשרת.");
+      }
+    );
+  }
+  
   function selectTab(tabEl, type) {
-    document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-    tabEl.classList.add('active');
-    document.getElementById('parquet-title').innerText = 'פרקטי ' + tabEl.innerText;
-    const container = document.getElementById('parquet-options');
-    container.innerHTML = parquetData[type].map(item => `
+    $('.tab').removeClass('active');
+    $(tabEl).addClass('active');
+  
+    $('#parquet-title').text('פרקטי ' + $(tabEl).text());
+  
+    const items = parquetData[type];
+    const container = $('#parquet-options');
+    container.empty();
+  
+    items.forEach(item => {
+      container.append(`
         <div class="parquet-item">
           <div style="position:relative">
-            <img src="/picturs/parquetsTypes/${item.img}" alt="${item.name}" />
-            <div class="info-btn" onclick="alert('${item.info}')">i</div>
+            <img src="/picturs/parquetsTypes/${item.imageURL}" alt="${item.typeName}" />
+            <div class="info-btn" onclick='showInfo(${JSON.stringify(item)})'>i</div>
+
           </div>
-          <div style="margin-top: 8px; font-weight: 500; font-size: 14px;">${item.name}</div>
-          <div class="price">החל מ־${item.price} ש"ח למ"ר</div>
+          <div style="margin-top: 8px; font-weight: 500; font-size: 14px;">${item.typeName}</div>
+          <div class="price">החל מ־${item.pricePerUnit} ש"ח למ"ר</div>
           <div class="parquet-select">
-            <input type="radio" name="parquet" value="${item.name}" />
+            <input type="radio" name="parquet" value="${item.typeName}" />
           </div>
         </div>
-      `).join('');
-      
+      `);
+    });
   }
-
+  
+  function escapeQuotes(text) {
+    return text.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+  
+  function showInfo(item) {
+    document.getElementById("info-title").innerText = item.typeName;
+    document.getElementById("info-description").innerText = item.description || "אין תיאור זמין.";
+    document.getElementById("info-image").src = item.imageURL || "/picturs/default.jpg";
+    document.getElementById("info-modal").style.display = "flex";
+  }
+  
+  function closeInfoModal() {
+    document.getElementById("info-modal").style.display = "none";
+  }
+  
+  
   function validateSelection() {
-  const selected = document.querySelector('input[name="parquet"]:checked');
-  if (!selected) {
-    alert('אנא בחרו פרקט לפני מעבר לשלב הבא');
-    return;
+    const selected = $('input[name="parquet"]:checked').val();
+    if (!selected) {
+      alert('אנא בחרו פרקט לפני מעבר לשלב הבא');
+      return;
+    }
+    localStorage.setItem('ParquetType', selected);
+    window.location.href = 'InstallDetailsPage.html';
   }
-
-  localStorage.setItem('ParquetType', selected.value);
-  window.location.href = 'InstallDetailsPage.html';
-}
-
-
-
+  
   function goBack() {
     window.history.back();
   }
-
-
-  window.onload = () => {
-    selectTab(document.querySelector('.tab.active'), 'solid');
-  };
+  
+  $(document).ready(function () {
+    fetchParquetTypes();
+  });
+  

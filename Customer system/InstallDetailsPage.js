@@ -1,5 +1,24 @@
 let roomCount = 0;
 
+const roomTypeOptions = [
+  "סלון",
+  "חדר שינה",
+  "מטבח",
+  "חדר רחצה",
+  "מרפסת",
+  "חדר ילדים",
+  "מסדרון"
+];
+
+function generateRoomTypeSelect() {
+  return `
+    <select required class="room-type-select" onchange="updateHeader(this)">
+      <option value="">בחר סוג חלל</option>
+      ${roomTypeOptions.map(type => `<option value="${type}">${type}</option>`).join('')}
+    </select>
+  `;
+}
+
 function addRoom() {
   roomCount++;
   const container = document.getElementById('rooms-container');
@@ -14,21 +33,19 @@ function addRoom() {
       </div>
     </div>
     <div class="room-body">
-      <div class="form-group">
-        <input type="text" placeholder="סוג החלל (חדר/סלון/מטבח)" required oninput="updateHeader(this)">
-      </div>
+      <div class="form-group">${generateRoomTypeSelect()}</div>
       <div class="form-group" style="position: relative;">
         <span class="info-btn" onclick="showPopup(event)">i</span>
-        <input type="number" placeholder="שטח החלל במר" required>
+        <input type="number" placeholder="שטח החלל במ״ר" required />
       </div>
       <div class="form-group">
-        <input type="text" placeholder="הערות לחלל (לא חובה)">
+        <input type="text" placeholder="הערות לחלל (לא חובה)" />
       </div>
       <div class="form-group upload-wrapper">
         <label>
           העלאת סרטון
           <i>↢</i>
-          <input type="file" accept="video/*">
+          <input type="file" accept="video/*" />
         </label>
       </div>
     </div>`;
@@ -44,7 +61,8 @@ function toggleRoom(btn) {
 function updateHeader(input) {
   const header = input.closest('.room-entry').querySelector('.room-header span');
   const baseLabel = header.dataset.baseLabel || header.textContent;
-  header.textContent = input.value ? `${input.value}` : baseLabel;
+  const value = input.value?.trim?.() || input.value || "";
+  header.textContent = value !== "" ? value : baseLabel;
 }
 
 function removeRoom(roomDiv) {
@@ -64,11 +82,12 @@ function saveAllRooms() {
   const parquetType = localStorage.getItem('ParquetType');
 
   roomDivs.forEach((div, index) => {
+    const select = div.querySelector('select.room-type-select');
     const inputs = div.querySelectorAll('input');
-    const floorType = inputs[0]?.value.trim();
-    const size = parseFloat(inputs[1]?.value.trim());
-    const notes = inputs[2]?.value.trim();
-    const mediaFile = inputs[3]?.files[0];
+    const floorType = select?.value?.trim?.() || "";
+    const size = parseFloat(inputs[0]?.value.trim());
+    const notes = inputs[1]?.value.trim();
+    const mediaFile = inputs[2]?.files[0];
 
     if (!floorType || isNaN(size)) {
       isValid = false;
@@ -114,7 +133,6 @@ function closePopup() {
   document.getElementById('popup').style.display = 'none';
 }
 
-
 window.addEventListener('DOMContentLoaded', () => {
-  addRoom();
+  addRoom(); // הוסף חלל ראשון כברירת מחדל
 });

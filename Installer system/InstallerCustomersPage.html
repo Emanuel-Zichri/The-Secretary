@@ -6,8 +6,7 @@
   <title>לקוחות</title>
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700&display=swap" rel="stylesheet">
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="/ajaxCall.js"></script>  
-<script src="/api.js"></script>
+<script src="/ajaxCall.js"></script>
 
   <style>
     :root {
@@ -150,7 +149,7 @@
   document.addEventListener('DOMContentLoaded', () => {
     ajaxCall(
       'POST',
-      `${API_BASE_URL}/Dashboard/GetDashboardData`,
+      'http://localhost:5283/api/Dashboard/GetDashboardData',
       JSON.stringify({}),
       function (data) {
         const tbody = document.getElementById('customersBody');
