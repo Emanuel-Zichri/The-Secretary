@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>יומן התקנות</title>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <style>
+    body {
+      font-family: 'Heebo', sans-serif;
+      background-color: #f9f9f9;
+      margin: 0;
+      padding: 20px;
+      max-width: 800px;
+      margin: auto;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .date-range-picker {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .date-range-picker input, .date-range-picker button {
+      padding: 8px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    .schedule-table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: #fff;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .schedule-table th, .schedule-table td {
+      padding: 12px;
+      border-bottom: 1px solid #ddd;
+      text-align: center;
+    }
+    .slot-button {
+      padding: 8px 12px;
+      border: none;
+      border-radius: 999px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .available {
+      background-color: #90ee90;
+      color: #000;
+    }
+    .booked {
+      background-color: #ff6b6b;
+      color: #fff;
+    }
+    .completed {
+      background-color: #a9a9a9;
+      color: #fff;
+    }
+    .canceled {
+      background-color: #ffc107;
+      color: #000;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>יומן התקנות</h1>
+
+  <div class="date-range-picker">
+    <label>מתאריך:</label>
+    <input type="date" id="fromDate">
+    <label>עד תאריך:</label>
+    <input type="date" id="toDate">
+    <button onclick="loadSchedule()">טען יומן</button>
+  </div>
+
+  <table class="schedule-table">
+    <thead>
+      <tr>
+        <th>תאריך</th>
+        <th>בוקר</th>
+        <th>ערב</th>
+      </tr>
+    </thead>
+    <tbody id="scheduleBody">
+      <!-- כאן נטען את הסלוטים -->
+    </tbody>
+  </table>
+
+  <script>
+    const API_BASE_URL = 'https://localhost:7135/api'; // שנה לפי הצורך
+
+    const slotLabels = {
+      1: "סלוט בוקר",
+      2: "סלוט ערב"
+    };
+
+    const statusClasses = {
+      "Available": "available",
+      "Booked": "booked",
+      "Completed": "completed",
+      "Canceled": "canceled"
+    };
+
+    function loadSchedule() {
+      const fromDate = document.getElementById('fromDate').value;
+      const toDate = document.getElementById('toDate').value;
+
+      if (!fromDate || !toDate) {
+        alert('אנא בחר טווח תאריכים');
+        return;
+      }
+
+      $.ajax({
+        url: `${API_BASE_URL}/Schedule/GetScheduleSlots`,
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({ fromDate: fromDate, toDate: toDate }),
+        success: function(slots) {
+          renderSchedule(slots);
+        },
+        error: function(err) {
+          console.error('Error loading schedule:', err);
+          alert('שגיאה בטעי9');
+        }
+      });
+    }
+
+    function renderSchedule(slots) {
+      const tbody = document.getElementById('scheduleBody');
+      tbody.innerHTML = '';
+
+      const groupedSlots = {};
+      slots.forEach(slot => {
+        if (!groupedSlots[slot.Date]) groupedSlots[slot.Date] = {};
+        groupedSlots[slot.Date][slot.Slot] = slot;
+      });
+
+      for (const date in groupedSlots) {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${new Date(date).toLocaleDateString('he-IL')}</td>
+          <td>${createSlotButton(groupedSlots[date][1])}</td>
+          <td>${createSlotButton(groupedSlots[date][2])}</td>
+        `;
+        tbody.appendChild(row);
+      }
+    }
+
+    function createSlotButton(slot) {
+      if (!slot) return '<button class="slot-button available">פנוי</button>';
+      const statusClass = statusClasses[slot.Status] || 'available';
+      return `<button class="slot-button ${statusClass}">${slotLabels[slot.Slot]}</button>`;
+    }
+  </script>
+
+</body>
+</html>

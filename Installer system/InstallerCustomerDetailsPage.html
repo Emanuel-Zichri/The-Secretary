@@ -247,6 +247,21 @@
   justify-content: flex-start;
   align-items: flex-start;
 }
+.progress-step {
+    flex: 1;
+    text-align: center;
+    margin: 10px;
+    min-width: 100px;
+  }
+  .progress-circle {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #ccc;
+    margin: auto;
+    margin-bottom: 5px;
+    transition: background 0.3s ease;
+  }
 
 
 
@@ -254,6 +269,7 @@
 </style>
 </head>
 <body>
+  
 <div class="container">
   <aside class="sidebar">
     <div class="logo">
@@ -273,23 +289,43 @@
   <main class="main">
     <div class="section" style="text-align:center; margin-bottom: 30px;">
       <h2>התקדמות טיפול בלקוח</h2>
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px;">
-        <div style="flex:1; text-align:center;">
-          <div class="progress-circle" style="width:30px; height:30px; border-radius:50%; background:#ccc; margin:auto;"></div>
-          <span>צפייה בסרטון</span>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px; flex-wrap:wrap;">
+        
+        <div class="progress-step">
+          <div class="progress-circle"></div>
+          <span>צפייה בסרטון לקוח</span>
         </div>
-        <div style="flex:1; text-align:center;">
-          <div class="progress-circle" style="width:30px; height:30px; border-radius:50%; background:var(--main-color); margin:auto;"></div>
-          <span>הצעת מחיר</span>
+        
+        <div class="progress-step">
+          <div class="progress-circle"></div>
+          <span>טיוטה להצעת מחיר</span>
         </div>
-        <div style="flex:1; text-align:center;">
-          <div class="progress-circle" style="width:30px; height:30px; border-radius:50%; background:#ccc; margin:auto;"></div>
-          <span>אישור מקדמה</span>
+        
+        <div class="progress-step">
+          <div class="progress-circle"></div>
+          <span>שליחת טיוטה ללקוח</span>
         </div>
-        <div style="flex:1; text-align:center;">
-          <div class="progress-circle" style="width:30px; height:30px; border-radius:50%; background:#ccc; margin:auto;"></div>
-          <span>ביצוע התקנה</span>
+        
+        <div class="progress-step">
+          <div class="progress-circle"></div>
+          <span>העברת מקדמה</span>
         </div>
+        
+        <div class="progress-step">
+          <div class="progress-circle"></div>
+          <span>תיאום התקנה</span>
+        </div>
+        
+        <div class="progress-step">
+          <div class="progress-circle"></div>
+          <span>התקנה בוצעה</span>
+        </div>
+        
+        <div class="progress-step">
+          <div class="progress-circle"></div>
+          <span>קבלת משוב</span>
+        </div>
+    
       </div>
     </div>
     <div style="display: flex; gap: 20px; flex-wrap: wrap; align-items:flex-start;">
@@ -305,6 +341,10 @@
             <div class="info-item"><label>עיר:</label><span id="cityText">-</span></div>
             <div class="info-item"><label>רחוב:</label><span id="streetText">-</span></div>
             <div class="info-item"><label>סטטוס:</label><span id="statusText">-</span></div>
+            <div class="info-item"><label>תאריך מועדף להתקנה:</label><span id="preferredDateText">-</span></div>
+            <div class="info-item"><label>תאריך שנקבע להתקנה:</label><span id="plannedDateText">-</span></div>
+            <div class="info-item"><label>תאריך סיום עבודה:</label><span id="completedDateText">-</span></div> 
+
           </div>
         </div>
       
@@ -437,13 +477,13 @@
     <div class="section">
       <h2>צ'קליסט משימות לביצוע</h2>
       <div class="checklist">
-        <label><input type="checkbox" data-key="WatchedVideo"> צפייה בסרטון לקוח</label>
-        <label><input type="checkbox" data-key="GeneratedQuote"> טיוטה להצעת מחיר</label>
-        <label><input type="checkbox" data-key="SentQuote"> שליחת טיוטה ללקוח</label>
-        <label><input type="checkbox" data-key="DepositPaid"> העברת מקדמה</label>
-        <label><input type="checkbox" data-key="InstallationScheduled"> תיאום התקנה</label>
-        <label><input type="checkbox" data-key="InstallationDone"> התקנה בוצעה</label>
-        <label><input type="checkbox" data-key="FeedbackReceived"> קבלת משוב</label>
+        <label><input type="checkbox" data-key="צפייה בסרטון לקוח"> צפייה בסרטון לקוח</label>
+        <label><input type="checkbox" data-key="טיוטה להצעת מחיר"> טיוטה להצעת מחיר</label>
+        <label><input type="checkbox" data-key="שליחת טיוטה ללקוח"> שליחת טיוטה ללקוח</label>
+        <label><input type="checkbox" data-key="העברת מקדמה"> העברת מקדמה</label>
+        <label><input type="checkbox" data-key="תיאום התקנה"> תיאום התקנה</label>
+        <label><input type="checkbox" data-key="התקנה בוצעה"> התקנה בוצעה</label>
+        <label><input type="checkbox" data-key="קבלת משוב"> קבלת משוב</label>
       </div>
     </div>
   </main>
@@ -480,6 +520,17 @@
 </div>
 
 <script>
+  const WORKREQUEST_STATUSES = [
+  "צפייה בסרטון לקוח",
+  "טיוטה להצעת מחיר",
+  "שליחת טיוטה ללקוח",
+  "העברת מקדמה",
+  "תיאום התקנה",
+  "התקנה בוצעה",
+  "קבלת משוב"
+];
+ let currentRequestID = null;
+ let currentStatus = null;
 function addCustomItem() {
   const container = document.getElementById("priceCalculator");
   const div = document.createElement("div");
@@ -631,7 +682,10 @@ document.addEventListener('DOMContentLoaded', () => {
     alert("לא נמצאו נתונים עבור לקוח זה.");
     return;
   }
-
+currentRequestID = data[0].RequestID; // שמירת מזהה הבקשה הנוכחית
+currentStatus = data[0].Status; // שמירת הסטטוס הנוכחי
+markChecklistAccordingToStatus(currentStatus);
+updateProgressBar(currentStatus);
   // פרטי לקוח — מתוך הרשומה הראשונה
 const item = data[0];
 $("#customerName").text(`${item.FirstName || ''} ${item.LastName || ''}`);
@@ -640,6 +694,10 @@ $("#emailText").text(item.Email || '-');
 $("#cityText").text(item.City || '-');
 $("#streetText").text(item.Street || '-');
 $("#statusText").text(item.Status || '-');
+$("#requestId").text(item.RequestID || '-');
+$("#preferredDateText").text(item.PreferredDate ? new Date(item.PreferredDate).toLocaleDateString('he-IL') : '-');
+$("#plannedDateText").text(item.PlannedDate ? new Date(item.PlannedDate).toLocaleDateString('he-IL') : '-');
+$("#completedDateText").text(item.CompletedDate ? new Date(item.CompletedDate).toLocaleDateString('he-IL') : '-'); 
 
 if (item.MediaURL) {
   const video = $("#video source");
@@ -1094,7 +1152,7 @@ function submitQuote() {
   const discountAmount = subtotal * (discountPercent / 100);  // ← מחושב מ־subtotal
 
   const quote = {
-    RequestID: parseInt(customerId),
+    RequestID: parseInt(currentRequestID),
     TotalPrice: totalWithVAT,       // ← שים לב לשם השדה
     DiscountAmount: discountAmount, // ← חובה לפי ה־Swagger
     DiscountPercent: discountPercent
@@ -1163,6 +1221,7 @@ function submitQuoteItems(quoteId) {
         if (sentCount + failedCount === quoteItems.length) {
           if (failedCount === 0) {
             submitBtn.textContent = "✔️ נשלח בהצלחה";
+            alert("🎉 הצעת המחיר נשלחה בהצלחה!");
             checkPopularCandidates();
           } else {
             submitBtn.textContent = "📤 שלח הצעת מחיר";
@@ -1258,6 +1317,79 @@ function rejectCandidates(candidates) {
   });
 
   document.querySelector("div[style*='z-index: 9999']")?.remove(); // סגירת הפופאפ
+}
+function updateWorkRequestStatus(newStatus) {
+  if (!currentRequestID) {
+    alert("⚠️ לא נמצא בקשת עבודה לעדכון סטטוס");
+    return;
+  }
+
+  ajaxCall(
+    "POST",
+    `${API_BASE_URL}/WorkRequest/UpdateStatus?workRequestID=${currentRequestID}&workRequestNewStatus=${newStatus}`,
+    null,
+    function (response) {
+      if (response > 0) {
+        console.log(`סטטוס עודכן ל: ${newStatus}`);
+      } else {
+        alert("❌ שגיאה בעדכון הסטטוס");
+      }
+    },
+    function (err) {
+      console.error("שגיאה בעדכון סטטוס:", err);
+      alert("❌ שגיאה בשרת");
+    }
+  );
+}
+
+// מקשיב לכל הצ'קבוקסים
+document.querySelectorAll('.checklist input[type="checkbox"]').forEach(checkbox => {
+  checkbox.addEventListener('change', function () {
+    if (this.checked) {
+      const newStatus = this.dataset.key; // לוקחים את ה-data-key
+      updateWorkRequestStatus(newStatus);
+    }
+  });
+});
+function markChecklistAccordingToStatus(currentStatus) {
+  const statusIndex = WORKREQUEST_STATUSES.indexOf(currentStatus);
+  
+  if (statusIndex === -1) {
+    console.warn("סטאטוס לא נמצא ברשימה הידועה.");
+    return;
+  }
+
+  // עבור כל צ'קבוקס בדף
+  document.querySelectorAll('.checklist input[type="checkbox"]').forEach((checkbox) => {
+    const checkboxStatus = checkbox.dataset.key;
+    const checkboxIndex = WORKREQUEST_STATUSES.indexOf(checkboxStatus);
+
+    if (checkboxIndex !== -1 && checkboxIndex <= statusIndex) {
+      checkbox.checked = true;
+    } else {
+      checkbox.checked = false;
+    }
+  });
+}
+
+// עדכון בר של התקדמות
+function updateProgressBar(currentStatus) {
+  const stageIndex = WORKREQUEST_STATUSES.indexOf(currentStatus);
+
+  if (stageIndex === -1) {
+    console.warn("סטאטוס לא נמצא ברשימה.");
+    return;
+  }
+
+  const steps = document.querySelectorAll('.progress-step .progress-circle');
+
+  steps.forEach((circle, index) => {
+    if (index <= stageIndex) {
+      circle.style.background = "#4CAF50"; // צבע של סיום
+    } else {
+      circle.style.background = "#ccc"; // צבע אפור לשלב שלא הושלם
+    }
+  });
 }
 
 

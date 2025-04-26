@@ -130,12 +130,20 @@
     <label for="dateInput">בחר תאריך מועדף להתקנה:</label>
     <input type="date" id="dateInput">
   </div>
+  <div class="form-section">
+    <label>האם יש עדיפות לזמן התקנה?</label><br>
+    <input type="radio" name="preferredSlot" value="1"> בוקר<br>
+    <input type="radio" name="preferredSlot" value="2"> ערב<br>
+    <input type="radio" name="preferredSlot" value="3"> אין העדפה<br>
+  </div>
 
   <button class="btn-next" onclick="submitAllData()">סיום ושליחה</button>
 
   <script>
      function submitAllData() {
     const date = document.getElementById('dateInput').value;
+    const preferredSlot = document.querySelector('input[name="preferredSlot"]:checked')?.value || null;
+
     if (!date) {
       alert('אנא בחר תאריך התקנה מועדף');
       return;
@@ -154,7 +162,8 @@
       customerDetails: fullData.customerDetails || {},
       spaceDetails: fullData.spaceDetails || [],
       selectedParquet: parquet,
-      preferredDate: date
+      preferredDate: date,
+      preferredSlot: preferredSlot || 3 // ברירת מחדל אם לא נבחר
     };
 
     ajaxCall(
