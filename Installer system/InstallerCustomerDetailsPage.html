@@ -348,7 +348,7 @@
           </div>
         </div>
       
-        <!-- כרטיסיית פרטי חללים -->
+        
         <div class="section" style="flex:2; min-width:300px;">
           <h2>פרטי החללים להתקנה</h2>
           <table style="width:100%; border-collapse: collapse; direction: rtl; text-align: right;">
@@ -490,11 +490,11 @@
 </div>
 <!-- פופאפ להוספת פרמטר חדש -->
 <div id="addItemPopup" style="display:none; position:fixed; top:30%; left:50%; transform:translate(-50%, -50%); background:white; padding:20px; border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.2); z-index:2000;">
-  <h3>פרט פרמטר חדש</h3>
+  <h3>הוספת פרמטר חדש</h3>
   <label>שם:</label><br>
-  <input id="popupItemName" type="text" style="width:100%; margin-bottom:10px;"><br>
+  <input id="popupItemName" type="text" style="width:100%; margin-bottom:10px;" required><br>
   <label>מחיר:</label><br>
-  <input id="popupItemPrice" type="number" style="width:100%; margin-bottom:10px;"><br>
+  <input id="popupItemPrice" type="number" style="width:100%; margin-bottom:10px;" required><br>
   <label>תיאור:</label><br>
   <textarea id="popupItemDesc" style="width:100%; margin-bottom:10px;"></textarea><br>
   <button class="btn" onclick="submitNewItem()">✔️ שמור</button>
@@ -713,6 +713,19 @@ if (item.FloorType) {
 // טבלת כל החללים
 const spacesContainer = $("#spacesDetails");
 spacesContainer.empty();
+
+let firstParquetType = null;
+for (const spaceItem of data) {
+  if (spaceItem.SpaceID && spaceItem.ParquetType) {
+    firstParquetType = spaceItem.ParquetType;
+    break; 
+  }
+}
+
+if (firstParquetType) {
+  document.getElementById('selectedFloorType').innerText = firstParquetType;
+}
+
 
 let totalSize = 0;
 let spaceIndex = 1;
@@ -996,7 +1009,7 @@ function updateInstallationPrice() {
     fishbone: "פישבון"
   };
 
-  display.innerText = typeNameMap[type] || "לא נבחר";
+ 
   priceInput.value = priceMap[type] || 0;
 
   calculateQuote(); // ⬅️ הוספת שורת חישוב מיידי

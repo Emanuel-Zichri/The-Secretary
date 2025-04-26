@@ -235,11 +235,27 @@
   }
 
   function deleteCustomer(id) {
-    if (confirm('האם אתה בטוח שברצונך למחוק את הלקוח?')) {
-      const row = document.querySelector(`tr td a[href*='id=${id}']`).closest('tr');
-      row.remove();
-    }
+  if (confirm('האם אתה בטוח שברצונך למחוק את הלקוח?')) {
+    ajaxCall(
+      'POST',
+      `${API_BASE_URL}/Dashboard/DeactivateCustomer`,
+      JSON.stringify(id),
+      function (response) {
+        if (response === 1 || response === 2) {
+          alert('✔️ הלקוח נמחק בהצלחה');
+          location.reload(); // מרענן את הרשימה
+        } else {
+          alert('⚠️ לא ניתן היה לעדכן את סטטוס הלקוח.');
+        }
+      },
+      function (err) {
+        console.error('❌ שגיאה במחיקת לקוח:', err);
+        alert('אירעה שגיאה בעת ניסיון המחיקה.');
+      }
+    );
   }
+}
+
 </script>
 
 </body>
