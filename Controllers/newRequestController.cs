@@ -11,8 +11,13 @@ namespace FinalProject.Controllers
         [HttpPost("RegisterNewRequest")]
         public int RegisterNewRequest([FromBody] NewRequest newReq)
         {
+            // קודם כל רושמים את הלקוח
             int newCustomerID = Customer.Register(newReq.customerDetails);
-            int workRequestID = WorkRequest.Register(newCustomerID);
+
+            // רושמים את דרישת העבודה, ומעבירים גם את התאריך והפרקט
+            int workRequestID = WorkRequest.Register(newCustomerID, newReq.PreferredDate,newReq.PreferredSlot);
+
+            // עבור כל חלל מוסיפים SpaceDetails
             foreach (var space in newReq.spaceDetails)
             {
                 SpaceDetails.Register(workRequestID, space);

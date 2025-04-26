@@ -158,7 +158,7 @@ public class DBservices
     //--------------------------------------------------------------------------------------------------
     // This method insert work request
     //--------------------------------------------------------------------------------------------------
-    public int InsertWorkRequest(int costumerID)
+    public int InsertWorkRequest(int costumerID, DateTime PreferredDate,int PreferredSlot)
     {
         SqlConnection con;
         SqlCommand cmd;
@@ -176,6 +176,8 @@ public class DBservices
         cmd.CommandType = CommandType.StoredProcedure;
 
         cmd.Parameters.AddWithValue("@CustomerID", costumerID);
+        cmd.Parameters.AddWithValue("@PreferredDate", PreferredDate);
+        cmd.Parameters.AddWithValue("@PreferredSlot", PreferredSlot);
 
 
         SqlParameter outputIdParam = new SqlParameter("@RequestID", SqlDbType.Int)
@@ -255,13 +257,14 @@ public class DBservices
         { "RequestID", reader["RequestID"] },
         { "PlannedDate", reader["PlannedDate"] != DBNull.Value ? (DateTime?)reader["PlannedDate"] : null },
         { "CompletedDate", reader["CompletedDate"] != DBNull.Value ? (DateTime?)reader["CompletedDate"] : null },
+        { "PreferredDate", reader["PreferredDate"] != DBNull.Value ? (DateTime?)reader["PreferredDate"] : null },
         { "Status", reader["Status"].ToString() },
 
         // עבור לקוח ספציפי ישמש לבניית כרטיס הלקוח בהמשך-ייתכן ונצטרך לעדכן לינק לסרטון והערות
         { "SpaceID", ColumnExists(reader, "SpaceID") ? reader["SpaceID"] : null },
         { "Size", ColumnExists(reader, "Size") ? reader["Size"] : null },
         { "FloorType", ColumnExists(reader, "FloorType") ? reader["FloorType"].ToString() : null },
-        { "Parquet", ColumnExists(reader, "Parquet") ? reader["Parquet"].ToString() : null },
+        { "ParquetType", ColumnExists(reader, "ParquetType") ? reader["ParquetType"].ToString() : null },
         { "SpaceNotes", ColumnExists(reader, "SpaceNotes") ? reader["SpaceNotes"].ToString() : null },
 
         // עבור תצוגה מקובצת- כלומר לא נשלח מזהה לקוח
@@ -1026,6 +1029,47 @@ public class DBservices
                 con.Close();
         }
     }
+    //--------------------------------------------------------------------------------------------------
+    // This method update work request status 
+    //--------------------------------------------------------------------------------------------------
+    public int UpdateWorkRequestStatus(int workRequestID, string workRequestNewStatus)
+    {
+        SqlConnection con;
+        SqlCommand cmd;
+
+        try
+        {
+            con = connect("myProjDB");
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+
+        Dictionary<string, object> paramDic = new Dictionary<string, object>
+    {
+        { "@RequestID", workRequestID },
+        { "@NewStatus", workRequestNewStatus }
+    };
+
+        cmd = CreateCommandWithStoredProcedureGeneral("UpdateWorkRequestStatus", con, paramDic);
+
+        try
+        {
+            int numEffected = cmd.ExecuteNonQuery();
+            return numEffected;
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+        finally
+        {
+            if (con != null)
+                con.Close();
+        }
+    }
+
     //--------------------------------------------------------------------------------------------------
     // This method Read all games for a specific user 
     //--------------------------------------------------------------------------------------------------
