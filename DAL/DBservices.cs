@@ -258,6 +258,7 @@ public class DBservices
         { "PlannedDate", reader["PlannedDate"] != DBNull.Value ? (DateTime?)reader["PlannedDate"] : null },
         { "CompletedDate", reader["CompletedDate"] != DBNull.Value ? (DateTime?)reader["CompletedDate"] : null },
         { "PreferredDate", reader["PreferredDate"] != DBNull.Value ? (DateTime?)reader["PreferredDate"] : null },
+        { "PreferredSlot", reader["PreferredSlot"] != DBNull.Value ? (int?)Convert.ToInt32(reader["PreferredSlot"]) : null },
         { "Status", reader["Status"].ToString() },
 
         // עבור לקוח ספציפי ישמש לבניית כרטיס הלקוח בהמשך-ייתכן ונצטרך לעדכן לינק לסרטון והערות
@@ -1069,7 +1070,45 @@ public class DBservices
                 con.Close();
         }
     }
+    //--------------------------------------------------------------------------------------------------
+    // This method Assign request to schedule 
+    //--------------------------------------------------------------------------------------------------
+    public int AssignRequestToSlot(ScheduleSlotAssignment assignment)
+    {
+        SqlConnection con;
+        SqlCommand cmd;
+        try
+        {
+            con = connect("myProjDB");
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
 
+        try
+        {
+            // יצירת שורת סלוט חדש
+            Dictionary<string, object> paramDic = new Dictionary<string, object>();
+            paramDic.Add("@Date", assignment.Date);
+            paramDic.Add("@Slot", assignment.Slot);
+            paramDic.Add("@RequestID", assignment.RequestID);
+
+            cmd = CreateCommandWithStoredProcedureGeneral("AssignRequestToSlot", con, paramDic);
+            int numEffected = cmd.ExecuteNonQuery();
+
+            return numEffected;
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+        finally
+        {
+            if (con != null)
+                con.Close();
+        }
+    }
     //--------------------------------------------------------------------------------------------------
     // This method Read all games for a specific user 
     //--------------------------------------------------------------------------------------------------
