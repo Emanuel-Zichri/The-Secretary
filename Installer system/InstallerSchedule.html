@@ -3,160 +3,292 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>יומן התקנות</title>
+  <title>יומן התקנות - דוד פרקטים</title>
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700&display=swap" rel="stylesheet">
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="/ajaxCall.js"></script>
+  <script src="/api.js"></script>
   <style>
     body {
       font-family: 'Heebo', sans-serif;
-      background-color: #f9f9f9;
+      background: #fff;
       margin: 0;
       padding: 20px;
-      max-width: 800px;
+      max-width: 1200px;
       margin: auto;
+      direction: rtl;
     }
     h1 {
       text-align: center;
       margin-bottom: 20px;
     }
-    .date-range-picker {
-      display: flex;
-      gap: 10px;
-      justify-content: center;
+    .toggle-container {
+      text-align: center;
       margin-bottom: 20px;
-      flex-wrap: wrap;
     }
-    .date-range-picker input, .date-range-picker button {
-      padding: 8px;
+    .toggle-container button {
+      padding: 10px 20px;
       font-size: 16px;
+      cursor: pointer;
+      background-color: #007bff;
+      color: white;
+      border: none;
       border-radius: 8px;
-      border: 1px solid #ccc;
     }
-    .schedule-table {
-      width: 100%;
-      border-collapse: collapse;
-      background-color: #fff;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-    .schedule-table th, .schedule-table td {
-      padding: 12px;
-      border-bottom: 1px solid #ddd;
+    .calendar {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 10px;
       text-align: center;
     }
-    .slot-button {
-      padding: 8px 12px;
-      border: none;
-      border-radius: 999px;
+    .day {
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 10px;
+      min-height: 200px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      background-color: #f9f9f9;
+    }
+    .day h3 {
+      margin: 10px 0;
+      font-size: 18px;
+      color: #333;
+    }
+    .slot {
+      margin-top: 10px;
+      padding: 8px;
+      border-radius: 8px;
+      background-color: #eee;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .slot.booked {
+      background-color: #90ee90;
       font-weight: bold;
+    }
+    .slot.empty {
+      background-color: #f2f2f2;
+      color: #777;
+    }
+    #popup {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    #popup > div {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      width: 90%;
+      max-width: 400px;
+      text-align: center;
+      position: relative;
+    }
+    #popup select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 6px;
+    }
+    #popup button {
+      margin-top: 10px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
       cursor: pointer;
     }
-    .available {
-      background-color: #90ee90;
-      color: #000;
+    #popup button:first-of-type {
+      background: #28a745;
+      color: white;
     }
-    .booked {
-      background-color: #ff6b6b;
-      color: #fff;
-    }
-    .completed {
-      background-color: #a9a9a9;
-      color: #fff;
-    }
-    .canceled {
-      background-color: #ffc107;
-      color: #000;
+    #popup button:last-of-type {
+      background: #dc3545;
+      color: white;
     }
   </style>
 </head>
+
 <body>
 
   <h1>יומן התקנות</h1>
 
-  <div class="date-range-picker">
-    <label>מתאריך:</label>
-    <input type="date" id="fromDate">
-    <label>עד תאריך:</label>
-    <input type="date" id="toDate">
-    <button onclick="loadSchedule()">טען יומן</button>
+  <div class="toggle-container">
+    <button id="toggleView">מעבר לחודש הקרוב</button>
   </div>
 
-  <table class="schedule-table">
-    <thead>
-      <tr>
-        <th>תאריך</th>
-        <th>בוקר</th>
-        <th>ערב</th>
-      </tr>
-    </thead>
-    <tbody id="scheduleBody">
-      <!-- כאן נטען את הסלוטים -->
-    </tbody>
-  </table>
+  <div class="calendar" id="calendar"></div>
+
+  <!-- פופאפ -->
+  <div id="popup">
+    <div>
+      <h2>בחר בקשה לשיבוץ</h2>
+      <select id="requestSelector"></select>
+      <div style="margin-top:20px;">
+        <button onclick="assignRequestToSlot()">אישור שיבוץ</button>
+        <button onclick="closePopup()">ביטול</button>
+      </div>
+    </div>
+  </div>
 
   <script>
-    const API_BASE_URL = 'https://localhost:7135/api'; // שנה לפי הצורך
+    let viewMode = "week";
+    let selectedSlotDate = null;
+    let selectedSlotType = null;
 
-    const slotLabels = {
-      1: "סלוט בוקר",
-      2: "סלוט ערב"
-    };
+    $(document).ready(function() {
+      loadCalendar();
 
-    const statusClasses = {
-      "Available": "available",
-      "Booked": "booked",
-      "Completed": "completed",
-      "Canceled": "canceled"
-    };
+      $("#toggleView").click(function() {
+        viewMode = (viewMode === "week") ? "month" : "week";
+        $("#toggleView").text(viewMode === "week" ? "מעבר לחודש הקרוב" : "מעבר לשבוע הקרוב");
+        loadCalendar();
+      });
+    });
 
-    function loadSchedule() {
-      const fromDate = document.getElementById('fromDate').value;
-      const toDate = document.getElementById('toDate').value;
+    function loadCalendar() {
+      const calendar = $("#calendar");
+      calendar.empty();
 
-      if (!fromDate || !toDate) {
-        alert('אנא בחר טווח תאריכים');
+      const today = new Date();
+      const dates = [];
+      const daysToShow = (viewMode === "week") ? 7 : 30;
+
+      for (let i = 0; i < daysToShow; i++) {
+        const d = new Date(today);
+        d.setDate(today.getDate() + i);
+        dates.push(d);
+      }
+
+      ajaxCall(
+        'POST',
+        `${API_BASE_URL}/Dashboard/GetDashboardData`,
+        JSON.stringify({
+          fromDate: formatDate(dates[0]),
+          toDate: formatDate(dates[dates.length - 1]),
+          status: "תיאום התקנה"
+        }),
+        function(data) {
+          dates.forEach(date => {
+            const dayDiv = $("<div>").addClass("day");
+            dayDiv.append(`<h3>${formatDate(date)}</h3>`);
+            dayDiv.append(createSlotDiv(data, date, 1, "בוקר"));
+            dayDiv.append(createSlotDiv(data, date, 2, "ערב"));
+            calendar.append(dayDiv);
+          });
+        },
+        function(err) {
+          console.error("שגיאה בטעינת היומן:", err);
+        }
+      );
+    }
+
+    function createSlotDiv(data, date, slot, label) {
+      const slotDiv = $("<div>").addClass("slot").text(label);
+
+      const item = data.find(d => {
+        const planned = d.plannedDate ? new Date(d.plannedDate) : null;
+        const preferred = d.preferredDate ? new Date(d.preferredDate) : null;
+        const dateToCompare = planned || preferred;
+
+        return dateToCompare &&
+               dateToCompare.toDateString() === date.toDateString() &&
+               (d.preferredSlot == slot || d.preferredSlot == null);
+      });
+
+      if (item) {
+        slotDiv.addClass("booked");
+        slotDiv.html(`
+          ${label}<br>
+          ${item.firstName} ${item.lastName}<br>
+          ${item.city}, ${item.street}<br>
+          📞 ${item.phone}
+        `);
+      } else {
+        slotDiv.addClass("empty");
+        slotDiv.click(function() {
+          selectedSlotDate = date;
+          selectedSlotType = slot;
+          openPopup();
+        });
+      }
+
+      return slotDiv;
+    }
+
+    function formatDate(date) {
+      return date.toISOString().split('T')[0];
+    }
+
+    function openPopup() {
+      $("#popup").fadeIn();
+      loadRequestsToPopup();
+    }
+
+    function closePopup() {
+      $("#popup").fadeOut();
+    }
+
+    function loadRequestsToPopup() {
+      $("#requestSelector").empty();
+      ajaxCall(
+        'POST',
+        `${API_BASE_URL}/Dashboard/GetDashboardData`,
+        JSON.stringify({ status: "העברת מקדמה" }),
+        function(data) {
+          if (data.length === 0) {
+            $("#requestSelector").append(`<option>אין בקשות זמינות</option>`);
+            return;
+          }
+          data.forEach(req => {
+  $("#requestSelector").append(
+    `<option value="${req.RequestID}">
+      ${req.FirstName} ${req.LastName} - ${req.City} (${req.Phone})
+    </option>`
+  );
+});
+
+        },
+        function(err) {
+          console.error("שגיאה בטעינת הבקשות:", err);
+          alert("שגיאה בטעינת הבקשות!");
+        }
+      );
+    }
+
+    function assignRequestToSlot() {
+      const selectedRequestID = $("#requestSelector").val();
+      if (!selectedRequestID) {
+        alert("בחר בקשה קודם.");
         return;
       }
 
-      $.ajax({
-        url: `${API_BASE_URL}/Schedule/GetScheduleSlots`,
-        method: 'POST',
-        contentType: 'application/json',
-        data: JSON.stringify({ fromDate: fromDate, toDate: toDate }),
-        success: function(slots) {
-          renderSchedule(slots);
+      const dataToSend = {
+        requestID: parseInt(selectedRequestID),
+        date: formatDate(selectedSlotDate),
+        slot: selectedSlotType
+      };
+
+      ajaxCall(
+        "POST",
+        `${API_BASE_URL}/Schedule/AssignRequestToSlot`,
+        JSON.stringify(dataToSend),
+        function(res) {
+          alert("הבקשה שובצה בהצלחה!");
+          closePopup();
+          loadCalendar();
         },
-        error: function(err) {
-          console.error('Error loading schedule:', err);
-          alert('שגיאה בטעי9');
+        function(err) {
+          console.error("שגיאה בשיבוץ:", err);
+          alert("שגיאה בשיבוץ הבקשה!");
         }
-      });
-    }
-
-    function renderSchedule(slots) {
-      const tbody = document.getElementById('scheduleBody');
-      tbody.innerHTML = '';
-
-      const groupedSlots = {};
-      slots.forEach(slot => {
-        if (!groupedSlots[slot.Date]) groupedSlots[slot.Date] = {};
-        groupedSlots[slot.Date][slot.Slot] = slot;
-      });
-
-      for (const date in groupedSlots) {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td>${new Date(date).toLocaleDateString('he-IL')}</td>
-          <td>${createSlotButton(groupedSlots[date][1])}</td>
-          <td>${createSlotButton(groupedSlots[date][2])}</td>
-        `;
-        tbody.appendChild(row);
-      }
-    }
-
-    function createSlotButton(slot) {
-      if (!slot) return '<button class="slot-button available">פנוי</button>';
-      const statusClass = statusClasses[slot.Status] || 'available';
-      return `<button class="slot-button ${statusClass}">${slotLabels[slot.Slot]}</button>`;
+      );
     }
   </script>
 
