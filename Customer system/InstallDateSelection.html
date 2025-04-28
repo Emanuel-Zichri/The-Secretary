@@ -1,187 +1,197 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>בחירת תאריך התקנה</title>
-  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700&display=swap" rel="stylesheet">
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script src="/ajaxCall.js"></script>  
-<script src="/api.js"></script>
-  <script src="InstallDateSelection.js"></script>
-  <style>
-    * { box-sizing: border-box; }
-    body {
-      font-family: 'Heebo', sans-serif;
-      background: #fff;
-      color: #333;
-      margin: 0;
-      padding: 0;
-      max-width: 480px;
-      margin: auto;
-    }
-    .top-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 16px;
-    }
-    .logo img { width: 100px; }
-    .back-btn {
-      font-size: 22px;
-      cursor: pointer;
-    }
-    h1 {
-      text-align: center;
-      font-size: 22px;
-      font-weight: 700;
-      margin: 0;
-    }
-    .progress-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      position: relative;
-      margin: 16px 24px 24px;
-    }
-    .progress-bar::before {
-      content: "";
-      position: absolute;
-      top: 50%;
-      left: 0;
-      right: 0;
-      height: 2px;
-      background-color: #e0e0e0;
-      z-index: 0;
-    }
-    .progress-step {
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      background-color: #fff;
-      border: 2px solid #dcdcdc;
-      z-index: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .progress-step.active {
-      background-color: #666;
-      border-color: #666;
-    }
-    .progress-step.done {
-      background-color: #b46a2c;
-      border-color: #b46a2c;
-    }
-    .progress-step.done::after {
-      content: "\2713";
-      color: white;
-      font-size: 14px;
-    }
-    .form-section {
-      padding: 16px;
-    }
-    .form-section label {
-      display: block;
-      margin-bottom: 8px;
-      font-weight: bold;
-    }
-    .form-section input[type="date"] {
-      width: 100%;
-      padding: 12px;
-      font-size: 16px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-    }
-    .btn-next {
-      background: #b46a2c;
-      color: white;
-      border: none;
-      border-radius: 999px;
-      padding: 16px;
-      font-weight: bold;
-      font-size: 16px;
-      width: 90%;
-      margin: 32px auto;
-      display: block;
-      cursor: pointer;
-    }
-  </style>
-</head>
-<body>
-  <div class="top-bar">
-    <div class="back-btn" onclick="window.history.back()">&#8592;</div>
-    <div class="logo">
-      <img src="/picturs/logo.png" alt="לוגו">
-    </div>
-  </div>
-
-  <h1>בחירת תאריך התקנה</h1>
-
-  <div class="progress-bar">
-    <div class="progress-step done"></div>
-    <div class="progress-step done"></div>
-    <div class="progress-step done"></div>
-    <div class="progress-step done"></div>
-    <div class="progress-step active"></div>
-  </div>
-
-  <div class="form-section">
-    <label for="dateInput">בחר תאריך מועדף להתקנה:</label>
-    <input type="date" id="dateInput">
-  </div>
-  <div class="form-section">
-    <label>האם יש עדיפות לזמן התקנה?</label><br>
-    <input type="radio" name="preferredSlot" value="1"> בוקר<br>
-    <input type="radio" name="preferredSlot" value="2"> ערב<br>
-    <input type="radio" name="preferredSlot" value="3"> אין העדפה<br>
-  </div>
-
-  <button class="btn-next" onclick="submitAllData()">סיום ושליחה</button>
-
-  <script>
-     function submitAllData() {
-    const date = document.getElementById('dateInput').value;
-    const preferredSlot = document.querySelector('input[name="preferredSlot"]:checked')?.value || null;
-
-    if (!date) {
-      alert('אנא בחר תאריך התקנה מועדף');
-      return;
-    }
-
-    // קבלת כל הנתונים ששמורים בלוקלסטורג'
-    const fullData = JSON.parse(localStorage.getItem('installationData')) || {};
-    const parquet = localStorage.getItem('selectedParquet') || '';
-
-    // הוספת הפרטים החסרים לאובייקט
-    fullData.selectedParquet = parquet;
-    fullData.preferredDate = date;
-
-    // בניית אובייקט ה-JSON כפי ש-API מצפה
-    const requestData = {
-      customerDetails: fullData.customerDetails || {},
-      spaceDetails: fullData.spaceDetails || [],
-      selectedParquet: parquet,
-      preferredDate: date,
-      preferredSlot: preferredSlot || 3 // ברירת מחדל אם לא נבחר
-    };
-
-    ajaxCall(
-      'POST',
-      `${API_BASE_URL}/newRequest/RegisterNewRequest`,
-      JSON.stringify(requestData),
-      function (res) {
-        alert('ההזמנה נשלחה בהצלחה!');
-        window.location.href = 'thankyou.html';
-      },
-      function (err) {
-        console.error('שגיאה בשליחה:', err);
-        console.log('סטטוס:', err.status);
-        console.log('תגובה מהשרת:', err.responseText);
-        alert('אירעה שגיאה בשליחת הנתונים.');
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>בחירת תאריך התקנה</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="/ajaxCall.js"></script>
+    <script src="/api.js"></script>
+    <script src="InstallDateSelection.js"></script>
+    <style>
+      * {
+        box-sizing: border-box;
       }
-    );
-  }
-  </script>
-</body>
+      body {
+        font-family: "Heebo", sans-serif;
+        background: #fff;
+        color: #333;
+        margin: 0;
+        padding: 0;
+        max-width: 480px;
+        margin: auto;
+      }
+      .top-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px;
+      }
+      .logo img {
+        width: 100px;
+      }
+      .back-btn {
+        font-size: 22px;
+        cursor: pointer;
+      }
+      h1 {
+        text-align: center;
+        font-size: 22px;
+        font-weight: 700;
+        margin: 0;
+      }
+      .progress-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: relative;
+        margin: 16px 24px 24px;
+      }
+      .progress-bar::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background-color: #e0e0e0;
+        z-index: 0;
+      }
+      .progress-step {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background-color: #fff;
+        border: 2px solid #dcdcdc;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .progress-step.active {
+        background-color: #666;
+        border-color: #666;
+      }
+      .progress-step.done {
+        background-color: #b46a2c;
+        border-color: #b46a2c;
+      }
+      .progress-step.done::after {
+        content: "\2713";
+        color: white;
+        font-size: 14px;
+      }
+      .form-section {
+        padding: 16px;
+      }
+      .form-section label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: bold;
+      }
+      .form-section input[type="date"] {
+        width: 100%;
+        padding: 12px;
+        font-size: 16px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+      }
+      .btn-next {
+        background: #b46a2c;
+        color: white;
+        border: none;
+        border-radius: 999px;
+        padding: 16px;
+        font-weight: bold;
+        font-size: 16px;
+        width: 90%;
+        margin: 32px auto;
+        display: block;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="top-bar">
+      <div class="back-btn" onclick="window.history.back()">&#8592;</div>
+      <div class="logo">
+        <img src="../picturs/logo.png" alt="לוגו" />
+      </div>
+    </div>
+
+    <h1>בחירת תאריך התקנה</h1>
+
+    <div class="progress-bar">
+      <div class="progress-step done"></div>
+      <div class="progress-step done"></div>
+      <div class="progress-step done"></div>
+      <div class="progress-step done"></div>
+      <div class="progress-step active"></div>
+    </div>
+
+    <div class="form-section">
+      <label for="dateInput">בחר תאריך מועדף להתקנה:</label>
+      <input type="date" id="dateInput" />
+    </div>
+    <div class="form-section">
+      <label>האם יש עדיפות לזמן התקנה?</label><br />
+      <input type="radio" name="preferredSlot" value="1" /> בוקר<br />
+      <input type="radio" name="preferredSlot" value="2" /> ערב<br />
+      <input type="radio" name="preferredSlot" value="3" /> אין העדפה<br />
+    </div>
+
+    <button class="btn-next" onclick="submitAllData()">סיום ושליחה</button>
+
+    <script>
+      function submitAllData() {
+        const date = document.getElementById("dateInput").value;
+        const preferredSlot =
+          document.querySelector('input[name="preferredSlot"]:checked')
+            ?.value || null;
+
+        if (!date) {
+          alert("אנא בחר תאריך התקנה מועדף");
+          return;
+        }
+
+        // קבלת כל הנתונים ששמורים בלוקלסטורג'
+        const fullData =
+          JSON.parse(localStorage.getItem("installationData")) || {};
+        const parquet = localStorage.getItem("selectedParquet") || "";
+
+        // הוספת הפרטים החסרים לאובייקט
+        fullData.selectedParquet = parquet;
+        fullData.preferredDate = date;
+
+        // בניית אובייקט ה-JSON כפי ש-API מצפה
+        const requestData = {
+          customerDetails: fullData.customerDetails || {},
+          spaceDetails: fullData.spaceDetails || [],
+          selectedParquet: parquet,
+          preferredDate: date,
+          preferredSlot: preferredSlot || 3, // ברירת מחדל אם לא נבחר
+        };
+
+        ajaxCall(
+          "POST",
+          `${API_BASE_URL}/newRequest/RegisterNewRequest`,
+          JSON.stringify(requestData),
+          function (res) {
+            alert("ההזמנה נשלחה בהצלחה!");
+            window.location.href = "thankyou.html";
+          },
+          function (err) {
+            console.error("שגיאה בשליחה:", err);
+            console.log("סטטוס:", err.status);
+            console.log("תגובה מהשרת:", err.responseText);
+            alert("אירעה שגיאה בשליחת הנתונים.");
+          }
+        );
+      }
+    </script>
+  </body>
 </html>
