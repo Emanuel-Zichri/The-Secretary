@@ -45,5 +45,17 @@ namespace FinalProject.Controllers
                 return 0;
             }
         }
+        [HttpPost("UpdateTimeWhenJobCompleted")]
+        public int UpdateTimeWhenJobCompleted([FromBody] int customerID)
+        {
+            try
+            {
+                return WorkRequest.UpdateTimeWhenJobCompleted(customerID);
+            }
+            catch
+            {
+                return 0;
+            }
+        }
     }
 }
