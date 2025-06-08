@@ -37,6 +37,19 @@
                 return 0;
             }
         }
+        public static int UpdateTimeWhenJobCompleted(int customerID)
+        {
+            DBservices db = new DBservices();
+            try
+            {
+                return db.UpdateWorkRequestTimeWhenJobCompleted(customerID);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error updating WorkRequest completion time: {ex.Message}");
+                return 0;
+            }
+        }
 
     }
 
