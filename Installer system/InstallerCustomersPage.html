@@ -208,7 +208,7 @@
             <option value="">מיון משני</option>
             <option value="Name">שם לקוח</option>
             <option value="City">עיר</option>
-            <option value="Status">סטטוס</option>
+          <option value="Status">סטטוס</option>
             <option value="CustomerCreatedAt">תאריך יצירה</option>
             <option value="PlannedDate">תאריך התקנה</option>
           </select>
@@ -347,7 +347,6 @@
               <td>${createdAt}</td>
               <td>${plannedDate}</td>
               <td class="actions">
-                <span title="ערוך" onclick="editCustomer(${c.CustomerID})">✏️</span>
                 <span title="מחק" onclick="deleteCustomer(${c.CustomerID})">🗑️</span>
               </td>
             `;
@@ -382,6 +381,27 @@
           return obj[key] || "";
       }
     }
+
+    function deleteCustomer(customerID) {
+  if (!confirm("האם אתה בטוח שברצונך למחוק את הלקוח?")) return;
+
+  $.ajax({
+    url: `${API_BASE_URL}/Dashboard/DeactivateCustomer`, // 👈 עדכון כתובת
+    type: "POST",
+    data: JSON.stringify(customerID), // 👈 שולחים מספר ולא אובייקט
+    contentType: "application/json; charset=utf-8",
+    success: function () {
+      alert("הלקוח הוסר בהצלחה");
+      loadCustomers();
+    },
+    error: function (xhr, status, error) {
+      console.error("שגיאה במחיקת הלקוח:", error);
+      alert("שגיאה במחיקת הלקוח");
+    }
+  });
+}
+
+
   </script>
   
 </body>
