@@ -270,7 +270,9 @@ public class DBservices
 
         // עבור תצוגה מקובצת- כלומר לא נשלח מזהה לקוח
         { "SpaceCount", ColumnExists(reader, "SpaceCount") ? reader["SpaceCount"] : null },
-        { "TotalSpaceSize", ColumnExists(reader, "TotalSpaceSize") ? reader["TotalSpaceSize"] : null }
+        { "TotalSpaceSize", ColumnExists(reader, "TotalSpaceSize") ? reader["TotalSpaceSize"] : null },
+        { "FloorTypes", ColumnExists(reader, "FloorTypes") ? reader["FloorTypes"].ToString() : null }
+
     };
 
                 dashboardTable.Add(row);
