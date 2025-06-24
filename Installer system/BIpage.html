@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BI - לוח בקרה</title>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700&display=swap" rel="stylesheet" />
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="/ajaxCall.js"></script>
+  <script src="/api.js"></script>
+  <style>
+    :root {
+      --main-color: #b46a2c;
+      --text-dark: #333;
+      --light-gray: #f5f5f5;
+      --radius: 12px;
+    }
+    body {
+      margin: 0;
+      font-family: "Heebo", sans-serif;
+      background-color: #fafafa;
+    }
+    .container {
+      display: flex;
+      min-height: 100vh;
+    }
+    .sidebar {
+      width: 200px;
+      background-color: #fff;
+      padding: 20px;
+      border-left: 1px solid #ddd;
+    }
+    .sidebar .logo {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    .sidebar nav a {
+      display: block;
+      padding: 12px;
+      color: var(--text-dark);
+      text-decoration: none;
+      border-radius: 8px;
+      margin-bottom: 8px;
+    }
+    .sidebar nav a.active {
+      background-color: #e6f2f2;
+      font-weight: bold;
+    }
+    .main {
+      flex: 1;
+      padding: 30px;
+    }
+    .dashboard-cards {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-bottom: 30px;
+    }
+    .card {
+      background-color: #fff;
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      flex: 1 1 200px;
+    }
+    .card h4 {
+      margin: 0 0 10px;
+      color: var(--main-color);
+    }
+    .card p {
+      font-size: 22px;
+      font-weight: bold;
+      margin: 0;
+    }
+    .filters {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .filters select, .filters input, .filters button {
+      padding: 8px 12px;
+      border: 1px solid #ccc;
+      border-radius: var(--radius);
+      background-color: #fff;
+      cursor: pointer;
+    }
+    .filter-buttons {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .filter-buttons button {
+      background-color: #eee;
+      border: none;
+      padding: 8px 14px;
+      border-radius: var(--radius);
+      cursor: pointer;
+    }
+    .filter-buttons button.active {
+      background-color: var(--main-color);
+      color: #fff;
+    }
+    .date-range-filter {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .charts-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+    .chart-container {
+      background-color: #fff;
+      border-radius: var(--radius);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      padding: 20px;
+    }
+    .chart-container h4 {
+      text-align: center;
+      margin-top: 0;
+      margin-bottom: 10px;
+      color: var(--main-color);
+    }
+    .chart-container canvas {
+      width: 100% !important;
+      height: 260px !important;
+      max-height: 260px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <aside class="sidebar">
+      <div class="logo">
+        <img src="../picturs/logo.png" alt="לוגו" width="100" />
+      </div>
+      <nav>
+        <a href="#">מסך הבית</a>
+        <a href="#">לעומק</a>
+        <a href="#">סטטוסים לביצוע</a>
+        <a href="#">ניהול התקנות</a>
+        <a href="#">לקוחות</a>
+        <a href="#" class="active">BI</a>
+        <a href="#">יומן</a>
+        <a href="#">הגדרות</a>
+        <a href="#">התנתקות</a>
+      </nav>
+    </aside>
+    <main class="main">
+      <h2>לוח בקרה</h2>
+      <div class="filters">
+        <div class="filter-buttons">
+          <button onclick="setDateRange('all')" class="active">הצג הכל</button>
+          <button onclick="setDateRange('year')">מתחילת שנה</button>
+          <button onclick="setDateRange('quarter')">מתחילת רבעון</button>
+          <button onclick="setDateRange('month')">מתחילת חודש</button>
+        </div>
+        <div class="date-range-filter">
+          <label>סינון לפי טווח תאריכים:</label>
+          <input type="date" id="fromDate">
+          <input type="date" id="toDate">
+          <button onclick="loadBI()">הצג</button>
+        </div>
+      </div>
+      <div class="dashboard-cards">
+        <div class="card"><h4>סך הצעות מחיר</h4><p id="totalQuote">₪0</p></div>
+        <div class="card"><h4>מס' לקוחות</h4><p id="totalCustomers">0</p></div>
+        <div class="card"><h4>התקנות שבוצעו</h4><p id="completedInstalls">0</p></div>
+        <div class="card"><h4>סה"כ שטח</h4><p id="totalSize">0 מ"ר</p></div>
+        <div class="card"><h4>שינוי מהחודש הקודם</h4><p id="quoteChange">0%</p></div>
+      </div>
+      <div class="charts-grid">
+        <div class="chart-container">
+          <h4>סטטוסים</h4>
+          <canvas id="statusChart"></canvas>
+        </div>
+        <div class="chart-container">
+          <h4>מגמת הצעות מחיר</h4>
+          <canvas id="quoteTrendChart"></canvas>
+        </div>
+        <div class="chart-container">
+          <h4>פילוח לפי סוג פרקט</h4>
+          <canvas id="installSizeChart"></canvas>
+        </div>
+        <div class="chart-container">
+          <h4>פיזור לקוחות לפי עיר</h4>
+          <canvas id="cityDistributionChart"></canvas>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script>
+    let statusChart, quoteTrendChart, installSizeChart, cityDistributionChart;
+
+    function setDateRange(type) {
+      const now = new Date();
+      let from = "", to = "";
+      $(".filter-buttons button").removeClass("active");
+      event.target.classList.add("active");
+
+      switch(type) {
+        case "year":
+          from = new Date(now.getFullYear(), 0, 1).toISOString().split("T")[0];
+          break;
+        case "quarter":
+          const quarter = Math.floor(now.getMonth() / 3);
+          from = new Date(now.getFullYear(), quarter * 3, 1).toISOString().split("T")[0];
+          break;
+        case "month":
+          from = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split("T")[0];
+          break;
+        case "all":
+          from = "";
+          to = "";
+          break;
+      }
+      document.getElementById("fromDate").value = from;
+      document.getElementById("toDate").value = to;
+      loadBI();
+    }
+
+    function loadBI() {
+      const dateField = "CustomerCreatedAt";
+      const fromDate = $("#fromDate").val();
+      const toDate = $("#toDate").val();
+
+      ajaxCall("POST", `${API_BASE_URL}/Dashboard/GetDashboardData`, JSON.stringify({}), function (data) {
+        if (!Array.isArray(data)) return;
+
+        let filtered = data;
+        if (fromDate || toDate) {
+          filtered = data.filter(c => {
+            const d = new Date(c[dateField]);
+            if (fromDate && d < new Date(fromDate)) return false;
+            if (toDate) {
+              const end = new Date(toDate);
+              end.setHours(23,59,59,999);
+              if (d > end) return false;
+            }
+            return true;
+          });
+        }
+
+        const totalQuote = filtered.reduce((sum, c) => sum + (c.TotalPrice || 0), 0);
+        const totalCustomers = new Set(filtered.map(c => c.CustomerID)).size;
+        const completed = filtered.filter(c => c.Status === "התקנה בוצעה").length;
+        const totalSize = filtered.reduce((sum, c) => sum + (c.TotalSpaceSize || 0), 0);
+
+        $("#totalQuote").text("₪" + totalQuote.toLocaleString());
+        $("#totalCustomers").text(totalCustomers);
+        $("#completedInstalls").text(completed);
+        $("#totalSize").text(totalSize.toFixed(1) + " מ\"ר");
+
+        const now = new Date();
+        const thisMonthKey = now.toLocaleDateString("he-IL", { year: 'numeric', month: '2-digit' });
+        const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        const lastMonthKey = lastMonth.toLocaleDateString("he-IL", { year: 'numeric', month: '2-digit' });
+
+        const monthlyQuotes = {}, statusCounts = {}, sizeDistribution = {}, cityCounts = {};
+       const floorTypes = {};
+
+filtered.forEach(c => {
+  statusCounts[c.Status] = (statusCounts[c.Status] || 0) + 1;
+
+  const monthKey = new Date(c.CustomerCreatedAt).toLocaleDateString("he-IL", { year: 'numeric', month: '2-digit' });
+  monthlyQuotes[monthKey] = (monthlyQuotes[monthKey] || 0) + (c.TotalPrice || 0);
+
+  const types = (c.FloorTypes || "לא ידוע").split(",").map(t => t.trim()).filter(Boolean);
+types.forEach(type => {
+  floorTypes[type] = (floorTypes[type] || 0) + 1;
+});
+
+  const city = c.City || "לא ידוע";
+  cityCounts[city] = (cityCounts[city] || 0) + 1;
+});
+
+
+        const quoteThis = monthlyQuotes[thisMonthKey] || 0;
+        const quoteLast = monthlyQuotes[lastMonthKey] || 0;
+        const change = quoteLast === 0 ? 0 : (((quoteThis - quoteLast) / quoteLast) * 100).toFixed(1);
+        $("#quoteChange").text(`${change}%`);
+
+        if (statusChart) statusChart.destroy();
+        if (quoteTrendChart) quoteTrendChart.destroy();
+        if (installSizeChart) installSizeChart.destroy();
+        if (cityDistributionChart) cityDistributionChart.destroy();
+
+        statusChart = new Chart(document.getElementById("statusChart"), {
+          type: "bar",
+          data: {
+            labels: Object.keys(statusCounts),
+            datasets: [{ label: "לקוחות", data: Object.values(statusCounts), backgroundColor: "#b46a2c" }]
+          },
+          options: { plugins: { legend: { display: false } } }
+        });
+
+        quoteTrendChart = new Chart(document.getElementById("quoteTrendChart"), {
+          type: "line",
+          data: {
+            labels: Object.keys(monthlyQuotes),
+            datasets: [{ label: "₪ הצעות", data: Object.values(monthlyQuotes), borderColor: "#b46a2c", fill: false }]
+          },
+          options: { scales: { y: { beginAtZero: true } } }
+        });
+
+        installSizeChart = new Chart(document.getElementById("installSizeChart"), {
+  type: "pie",
+  data: {
+    labels: Object.keys(floorTypes),
+    datasets: [{
+      data: Object.values(floorTypes),
+      backgroundColor: ["#d8a57c", "#b46a2c", "#91562c", "#e6b89c", "#ffc107"]
+    }]
+  }
+});
+
+
+        cityDistributionChart = new Chart(document.getElementById("cityDistributionChart"), {
+          type: "bar",
+          data: {
+            labels: Object.keys(cityCounts),
+            datasets: [{ label: "לקוחות לעיר", data: Object.values(cityCounts), backgroundColor: "#b46a2c" }]
+          },
+          options: { plugins: { legend: { display: false } }, indexAxis: 'y' }
+        });
+      });
+    }
+
+    $(document).ready(loadBI);
+  </script>
+</body>
+</html>
