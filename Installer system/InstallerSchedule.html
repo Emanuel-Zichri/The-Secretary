@@ -2,192 +2,274 @@
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>יומן התקנות - דוד פרקטים</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="/ajaxCall.js"></script>
   <script src="/api.js"></script>
+
   <style>
-    body { font-family: 'Heebo', sans-serif; background: #fff; margin: 0; padding: 20px; max-width: 1200px; margin: auto; direction: rtl; }
-    h1 { text-align: center; margin-bottom: 20px; }
-    .toggle-container { text-align: center; margin-bottom: 20px; }
-    .toggle-container button { padding: 10px 20px; font-size: 16px; cursor: pointer; background-color: #007bff; color: white; border: none; border-radius: 8px; }
-    .calendar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; text-align: center; }
-    .day { border: 1px solid #ddd; border-radius: 10px; padding: 10px; min-height: 200px; display: flex; flex-direction: column; justify-content: flex-start; background-color: #f9f9f9; }
-    .day h3 { margin: 10px 0; font-size: 18px; color: #333; }
-    .slot { margin-top: 10px; padding: 8px; border-radius: 8px; background-color: #eee; cursor: pointer; font-size: 14px; }
-    .slot.booked { background-color: #90ee90; font-weight: bold; }
-    .slot.empty { background-color: #f2f2f2; color: #777; }
-    .slot.unavailable { background-color: #ff4d4d; color: white; font-weight: bold; cursor: not-allowed; }
-    #popup { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); justify-content: center; align-items: center; z-index: 1000; }
-    #popup > div { background: #fff; padding: 20px; border-radius: 8px; width: 90%; max-width: 400px; text-align: center; position: relative; }
-    #popup select { width: 100%; padding: 10px; margin-top: 10px; border-radius: 6px; }
-    #popup button { margin-top: 10px; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; }
-    #popup button:first-of-type { background: #28a745; color: white; }
-    #popup button:last-of-type { background: #dc3545; color: white; }
+    :root {
+      --main-color: #b46a2c;
+      --light-gray: #f5f5f5;
+      --text-dark: #333;
+      --radius: 12px;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Heebo', sans-serif;
+      background-color: #fafafa;
+    }
+
+    .container {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      width: 200px;
+      background-color: #fff;
+      padding: 20px;
+      border-left: 1px solid #ddd;
+    }
+
+    .sidebar .logo {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .sidebar nav a {
+      display: block;
+      padding: 12px;
+      color: var(--text-dark);
+      text-decoration: none;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      transition: background-color 0.3s;
+    }
+
+    .sidebar nav a:hover {
+      background-color: #f0f0f0;
+    }
+
+    .sidebar nav a.active {
+      background-color: #e6f2f2;
+      font-weight: bold;
+    }
+
+    .main {
+      flex: 1;
+      padding: 30px;
+    }
+
+    h1 {
+      text-align: center;
+      color: var(--main-color);
+    }
+
+    #calendar {
+      max-width: 1200px;
+      margin: 40px auto;
+      background-color: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+    }
+
+    .fc-daygrid-event {
+      background-color: #b46a2c !important;
+      border: none !important;
+      color: white !important;
+      border-radius: 6px;
+      padding: 2px 6px;
+    }
+
+    .fc-toolbar-title {
+      font-size: 22px;
+      color: #333;
+    }
+
+    .fc-button {
+      background-color: #b46a2c !important;
+      border: none !important;
+      border-radius: 6px !important;
+    }
+
+    .fc-button-primary:not(:disabled):active,
+    .fc-button-primary:not(:disabled).fc-button-active {
+      background-color: #8e4e20 !important;
+    }
+
+    .popup {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+
+    .popup-content {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      text-align: center;
+      max-width: 400px;
+      width: 90%;
+    }
+
+    select, button {
+      padding: 10px;
+      margin-top: 10px;
+      width: 100%;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    button.confirm {
+      background-color: #28a745;
+      color: white;
+    }
+
+    button.cancel {
+      background-color: #dc3545;
+      color: white;
+    }
   </style>
 </head>
 <body>
+  <div class="container">
+    <aside class="sidebar">
+      <div class="logo">
+        <img src="../picturs/logo.png" alt="לוגו" width="100">
+      </div>
+      <nav>
+        <a href="InstallerDashboard.html">מסך הבית</a>
+        <a href="InstallerStatusesPage.html">סטטוסים לביצוע</a>
+        <a href="InstallerCustomersPage.html">לקוחות</a>
+        <a href="#" class="active">יומן התקנות</a>
+        <a href="BIpage.html">לוח בקרה - BI</a>
+        <a href="#">ניהול אתר לקוחות</a>
+        <a href="#">הגדרות</a>
+        <a href="#">התנתקות</a>
+      </nav>
+    </aside>
 
-<h1>יומן התקנות</h1>
-<div class="toggle-container">
-  <button id="toggleView">מעבר לחודש הקרוב</button>
-</div>
-<div class="calendar" id="calendar"></div>
+    <main class="main">
+      <h1>יומן התקנות</h1>
+      <div id="calendar"></div>
+    </main>
+  </div>
 
-<div id="popup">
-  <div>
-    <h2>בחר בקשה לשיבוץ</h2>
-    <select id="requestSelector"></select>
-    <div style="margin-top:20px;">
-      <button onclick="assignRequestToSlot()">אישור שיבוץ</button>
-      <button onclick="closePopup()">ביטול</button>
+  <div class="popup" id="assignPopup">
+    <div class="popup-content">
+      <h2>בחר בקשה לשיבוץ</h2>
+      <select id="requestSelector"></select>
+      <button class="confirm" onclick="assign()">שבץ</button>
+      <button class="cancel" onclick="$('#assignPopup').fadeOut()">בטל</button>
     </div>
   </div>
-</div>
 
-<script>
-let viewMode = "week";
-let selectedSlotDate = null;
-let selectedSlotType = null;
+  <script>
+    let selectedDate = null;
+    let selectedSlot = null;
 
-$(document).ready(function() {
-  loadCalendar();
-
-  $("#toggleView").click(function() {
-    viewMode = (viewMode === "week") ? "month" : "week";
-    $("#toggleView").text(viewMode === "week" ? "מעבר לחודש הקרוב" : "מעבר לשבוע הקרוב");
-    loadCalendar();
-  });
-});
-
-function loadCalendar() {
-  const calendar = $("#calendar");
-  calendar.empty();
-
-  const today = new Date();
-  const dates = [];
-  const daysToShow = (viewMode === "week") ? 7 : 30;
-
-  for (let i = 0; i < daysToShow; i++) {
-    const d = new Date(today);
-    d.setDate(today.getDate() + i);
-    dates.push(d);
-  }
-
-  ajaxCall(
-    'POST',
-    `${API_BASE_URL}/Dashboard/GetDashboardData`,
-    JSON.stringify({ fromDate: formatDate(dates[0]), toDate: formatDate(dates[dates.length - 1]), status: null }),
-    function(data) {
-      dates.forEach(date => {
-        const dayDiv = $("<div>").addClass("day");
-        dayDiv.append(`<h3>${formatDate(date)}</h3>`);
-        dayDiv.append(createSlotDiv(data, date, 1, "בוקר"));
-        dayDiv.append(createSlotDiv(data, date, 2, "ערב"));
-        calendar.append(dayDiv);
+    document.addEventListener('DOMContentLoaded', function () {
+      const calendarEl = document.getElementById('calendar');
+      const calendar = new FullCalendar.Calendar(calendarEl, {
+        locale: 'he',
+        initialView: 'dayGridMonth',
+        headerToolbar: {
+          left: 'prev,next today',
+          center: 'title',
+          right: 'dayGridWeek,dayGridMonth'
+        },
+        dateClick: function (info) {
+          openPopup(info.dateStr);
+        },
+        events: function(fetchInfo, successCallback, failureCallback) {
+          loadEvents(fetchInfo.startStr, fetchInfo.endStr, successCallback);
+        }
       });
-    },
-    function(err) {
-      console.error("שגיאה בטעינת היומן:", err);
-    }
-  );
-}
 
-function createSlotDiv(data, date, slot, label) {
-  const slotDiv = $("<div>").addClass("slot").text(label);
-
-  const scheduled = data.find(d => {
-    const planned = d.plannedDate ? new Date(d.plannedDate) : null;
-    return planned && planned.toDateString() === date.toDateString() && d.preferredSlot == slot && d.status === "יתואם";
-  });
-
-  const preferred = data.find(d => {
-    const preferredDate = d.preferredDate ? new Date(d.preferredDate) : null;
-    return preferredDate && preferredDate.toDateString() === date.toDateString() && (d.preferredSlot == slot || d.preferredSlot == null);
-  });
-
-  if (scheduled) {
-    slotDiv.addClass("unavailable").html(`${label}<br>משובץ`);
-  } else if (preferred) {
-    slotDiv.addClass("booked").html(`${label}<br>${preferred.firstName} ${preferred.lastName}<br>${preferred.city}, ${preferred.street}<br>📞 ${preferred.phone}`);
-  } else {
-    slotDiv.addClass("empty");
-    slotDiv.click(function() {
-      selectedSlotDate = date;
-      selectedSlotType = slot;
-      openPopup();
+      calendar.render();
     });
-  }
 
-  return slotDiv;
-}
+    function openPopup(dateStr) {
+      selectedDate = dateStr;
+      selectedSlot = null;
+      $('#requestSelector').empty();
+      ajaxCall("POST", `${API_BASE_URL}/Dashboard/GetDashboardData`, JSON.stringify({ status: "תיאום התקנה" }),
+        function (data) {
+          if (!data.length) {
+            $('#requestSelector').append(`<option>אין בקשות זמינות</option>`);
+          } else {
+            data.forEach(req => {
+              $('#requestSelector').append(`<option value="${req.RequestID}">${req.FirstName} ${req.LastName} - ${req.City}</option>`);
+            });
+          }
+          $('#assignPopup').fadeIn();
+        },
+        function (err) {
+          alert("שגיאה בטעינת הבקשות");
+        }
+      );
+    }
 
-function formatDate(date) {
-  return date.toISOString().split('T')[0];
-}
-
-function openPopup() {
-  $("#popup").fadeIn();
-  loadRequestsToPopup();
-}
-
-function closePopup() {
-  $("#popup").fadeOut();
-}
-
-function loadRequestsToPopup() {
-  $("#requestSelector").empty();
-  ajaxCall(
-    'POST',
-    `${API_BASE_URL}/Dashboard/GetDashboardData`,
-    JSON.stringify({ status: "העברת מקדמה" }),
-    function(data) {
-      if (data.length === 0) {
-        $("#requestSelector").append(`<option>אין בקשות זמינות</option>`);
+    function assign() {
+      const requestID = $("#requestSelector").val();
+      if (!requestID) {
+        alert("יש לבחור בקשה");
         return;
       }
-      data.forEach(req => {
-        $("#requestSelector").append(`<option value="${req.RequestID}">${req.FirstName} ${req.LastName} - ${req.City} (${req.Phone})</option>`);
+
+      // כברירת מחדל - נשבץ בבוקר (1)
+      const slot = 1;
+
+      ajaxCall("POST", `${API_BASE_URL}/Schedule/AssignRequestToSlot`, JSON.stringify({
+        requestID: parseInt(requestID),
+        date: selectedDate,
+        slot: slot
+      }),
+      function () {
+        alert("השיבוץ בוצע!");
+        $('#assignPopup').fadeOut();
+        location.reload();
+      },
+      function (err) {
+        alert("שגיאה בשיבוץ");
+        console.error(err);
       });
-    },
-    function(err) {
-      console.error("שגיאה בטעינת הבקשות:", err);
-      alert("שגיאה בטעינת הבקשות!");
     }
-  );
-}
 
-function assignRequestToSlot() {
-  const selectedRequestID = $("#requestSelector").val();
-  if (!selectedRequestID) {
-    alert("בחר בקשה קודם.");
-    return;
-  }
-
-  const dataToSend = {
-    requestID: parseInt(selectedRequestID),
-    date: formatDate(selectedSlotDate),
-    slot: selectedSlotType
-  };
-
-  ajaxCall(
-    "POST",
-    `${API_BASE_URL}/Schedule/AssignRequestToSlot`,
-    JSON.stringify(dataToSend),
-    function(res) {
-      alert("הבקשה שובצה בהצלחה!");
-      closePopup();
-      loadCalendar();
-    },
-    function(err) {
-      console.error("שגיאה בשיבוץ:", err);
-      alert("שגיאה בשיבוץ הבקשה!");
+    function loadEvents(fromDate, toDate, callback) {
+      ajaxCall("POST", `${API_BASE_URL}/Dashboard/GetDashboardData`,
+        JSON.stringify({ fromDate, toDate, status: null }),
+        function (data) {
+          const events = [];
+          data.forEach(item => {
+            if (item.PlannedDate && item.Status === "יתואם") {
+              const title = `${item.FirstName} ${item.LastName} (${item.PreferredSlot === 2 ? 'ערב' : 'בוקר'})`;
+              events.push({
+                title: title,
+                start: item.PlannedDate,
+                allDay: true
+              });
+            }
+          });
+          callback(events);
+        },
+        function (err) {
+          alert("שגיאה בטעינת נתוני היומן");
+          console.error(err);
+        });
     }
-  );
-}
-</script>
-
+  </script>
 </body>
 </html>
