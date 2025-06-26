@@ -20,5 +20,43 @@ namespace FinalProject.Controllers
                 return 0;
             }
         }
+
+        [HttpGet("GetLatestByCustomerID/{customerID}")]
+        public ActionResult<WorkRequest> GetLatestByCustomerID(int customerID)
+        {
+            try
+            {
+                var workRequest = WorkRequest.GetLatestByCustomerID(customerID);
+                if (workRequest == null)
+                {
+                    return NotFound("בקשת עבודה לא נמצאה");
+                }
+                return Ok(workRequest);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error getting work request: {ex.Message}");
+                return StatusCode(500, "שגיאה בקבלת בקשת העבודה");
+            }
+        }
+
+        [HttpGet("GetByRequestID/{requestID}")]
+        public ActionResult<WorkRequest> GetByRequestID(int requestID)
+        {
+            try
+            {
+                var workRequest = WorkRequest.GetByRequestID(requestID);
+                if (workRequest == null)
+                {
+                    return NotFound("בקשת עבודה לא נמצאה");
+                }
+                return Ok(workRequest);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error getting work request: {ex.Message}");
+                return StatusCode(500, "שגיאה בקבלת בקשת העבודה");
+            }
+        }
     }  
 }

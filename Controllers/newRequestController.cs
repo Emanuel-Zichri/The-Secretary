@@ -11,18 +11,43 @@ namespace FinalProject.Controllers
         [HttpPost("RegisterNewRequest")]
         public int RegisterNewRequest([FromBody] NewRequest newReq)
         {
+            Console.WriteLine("🔄 RegisterNewRequest נקרא");
+            Console.WriteLine($"📅 תאריך מועדף: {newReq.PreferredDate}");
+            Console.WriteLine($"🕐 משבצת זמן: {newReq.PreferredSlot}");
+            Console.WriteLine($"🏠 מספר חללים: {newReq.spaceDetails.Length}");
             
+            // רישום לקוח חדש
+            Console.WriteLine("👤 רושם לקוח חדש...");
             int newCustomerID = Customer.Register(newReq.customerDetails);
+            Console.WriteLine($"✅ לקוח נרשם בהצלחה, CustomerID: {newCustomerID}");
 
-           
-            int workRequestID = WorkRequest.Register(newCustomerID, newReq.PreferredDate,newReq.PreferredSlot);
-
-            
-            foreach (var space in newReq.spaceDetails)
+            if (newCustomerID <= 0)
             {
-                SpaceDetails.Register(workRequestID, space);
+                Console.WriteLine("❌ רישום לקוח נכשל");
+                return 0;
             }
 
+            // רישום בקשת עבודה
+            Console.WriteLine("📋 רושם בקשת עבודה...");
+            int workRequestID = WorkRequest.Register(newCustomerID, newReq.PreferredDate, newReq.PreferredSlot);
+            Console.WriteLine($"✅ בקשת עבודה נרשמה בהצלחה, WorkRequestID: {workRequestID}");
+
+            if (workRequestID <= 0)
+            {
+                Console.WriteLine("❌ רישום בקשת עבודה נכשל");
+                return 0;
+            }
+
+            // רישום פרטי חללים
+            Console.WriteLine("🏠 רושם פרטי חללים...");
+            foreach (var space in newReq.spaceDetails)
+            {
+                Console.WriteLine($"   - חלל בגודל {space.Size} מ\"ר, סוג רצפה: {space.FloorType}");
+                SpaceDetails.Register(workRequestID, space);
+            }
+            Console.WriteLine("✅ כל פרטי החללים נרשמו");
+
+            Console.WriteLine($"🎉 RegisterNewRequest הושלם בהצלחה, מחזיר WorkRequestID: {workRequestID}");
             return workRequestID;
         }
 

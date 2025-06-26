@@ -51,6 +51,33 @@
             }
         }
 
+        public static WorkRequest GetLatestByCustomerID(int customerID)
+        {
+            DBservices db = new DBservices();
+            try
+            {
+                return db.GetLatestWorkRequestByCustomerID(customerID);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error getting WorkRequest: {ex.Message}");
+                return null;
+            }
+        }
+
+        public static WorkRequest GetByRequestID(int requestID)
+        {
+            DBservices db = new DBservices();
+            try
+            {
+                return db.GetWorkRequestByID(requestID);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error getting WorkRequest: {ex.Message}");
+                return null;
+            }
+        }
     }
 
 }

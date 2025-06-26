@@ -160,15 +160,39 @@ public class DBservices
     //--------------------------------------------------------------------------------------------------
     public int InsertWorkRequest(int costumerID, DateTime PreferredDate, int PreferredSlot)
     {
+        Console.WriteLine($"🔄 DBservices.InsertWorkRequest נקרא עם CustomerID: {costumerID}");
+        
         SqlConnection con;
         SqlCommand cmd;
 
         try
         {
             con = connect("myProjDB");
+            Console.WriteLine("✅ חיבור למסד נתונים הצליח");
         }
         catch (Exception ex)
         {
+            Console.WriteLine($"❌ שגיאה בחיבור למסד נתונים: {ex.Message}");
+            throw ex;
+        }
+
+        // וידוא שהCustomerID קיים
+        try
+        {
+            var checkCmd = new SqlCommand("SELECT COUNT(*) FROM Customer WHERE CustomerID = @CustomerID", con);
+            checkCmd.Parameters.AddWithValue("@CustomerID", costumerID);
+            int customerExists = (int)checkCmd.ExecuteScalar();
+            
+            if (customerExists == 0)
+            {
+                Console.WriteLine($"❌ CustomerID {costumerID} לא קיים בטבלת Customer");
+                throw new Exception($"CustomerID {costumerID} לא קיים בטבלת Customer");
+            }
+            Console.WriteLine($"✅ CustomerID {costumerID} נמצא בטבלה");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ שגיאה בבדיקת CustomerID: {ex.Message}");
             throw ex;
         }
 
@@ -179,21 +203,75 @@ public class DBservices
         cmd.Parameters.AddWithValue("@PreferredDate", PreferredDate);
         cmd.Parameters.AddWithValue("@PreferredSlot", PreferredSlot);
 
-
         SqlParameter outputIdParam = new SqlParameter("@RequestID", SqlDbType.Int)
         {
             Direction = ParameterDirection.Output
         };
         cmd.Parameters.Add(outputIdParam);
 
+        Console.WriteLine($"📊 פרמטרים לפרוצדורה InsertWorkRequest:");
+        Console.WriteLine($"   @CustomerID: {costumerID}");
+        Console.WriteLine($"   @PreferredDate: {PreferredDate}");
+        Console.WriteLine($"   @PreferredSlot: {PreferredSlot}");
+
         try
         {
-            cmd.ExecuteNonQuery();
-            int newRequestId = (int)outputIdParam.Value;
+            Console.WriteLine("🚀 מפעיל פרוצדורה InsertWorkRequest...");
+            
+            // שימוש ב-ExecuteScalar כדי לקבל גם את הSELECT וגם לטפל ב-OUTPUT
+            object scalarResult = cmd.ExecuteScalar();
+            Console.WriteLine($"📊 ExecuteScalar תוצאה: {scalarResult}");
+            
+            // בדיקת פרמטר OUTPUT
+            Console.WriteLine($"📊 OUTPUT Parameter Value: {outputIdParam.Value}");
+            Console.WriteLine($"📊 OUTPUT Parameter Type: {outputIdParam.Value?.GetType()}");
+            
+            int newRequestId = 0;
+            
+            // ניסיון לקבל RequestID מהפרמטר OUTPUT
+            if (outputIdParam.Value != null && outputIdParam.Value != DBNull.Value)
+            {
+                newRequestId = (int)outputIdParam.Value;
+                Console.WriteLine($"✅ RequestID מפרמטר OUTPUT: {newRequestId}");
+            }
+            // אם OUTPUT לא עובד, ננסה מהSELECT
+            else if (scalarResult != null && scalarResult != DBNull.Value)
+            {
+                newRequestId = Convert.ToInt32(scalarResult);
+                Console.WriteLine($"✅ RequestID מ-ExecuteScalar: {newRequestId}");
+            }
+            else
+            {
+                Console.WriteLine("❌ גם OUTPUT וגם ExecuteScalar החזירו NULL");
+                throw new Exception("פרוצדורת InsertWorkRequest לא החזירה RequestID תקף");
+            }
+            
+            if (newRequestId <= 0)
+            {
+                Console.WriteLine($"❌ RequestID לא תקף: {newRequestId}");
+                throw new Exception($"RequestID לא תקף: {newRequestId}");
+            }
+            
+            Console.WriteLine($"✅ פרוצדורה הושלמה, RequestID שנוצר: {newRequestId}");
+            
+            // בדיקה נוספת שהRequestID אכן נוצר במסד הנתונים
+            var verifyCmd = new SqlCommand("SELECT COUNT(*) FROM WorkRequest WHERE RequestID = @RequestID", con);
+            verifyCmd.Parameters.AddWithValue("@RequestID", newRequestId);
+            int requestExists = (int)verifyCmd.ExecuteScalar();
+            
+            if (requestExists == 0)
+            {
+                Console.WriteLine($"❌ RequestID {newRequestId} לא נמצא במסד הנתונים!");
+                throw new Exception($"RequestID {newRequestId} לא נמצא במסד הנתונים");
+            }
+            
+            Console.WriteLine($"✅ RequestID {newRequestId} אומת במסד הנתונים");
             return newRequestId;
         }
         catch (Exception ex)
         {
+            Console.WriteLine($"❌ שגיאה בביצוע פרוצדורה InsertWorkRequest: {ex.Message}");
+            Console.WriteLine($"❌ Stack Trace: {ex.StackTrace}");
             throw ex;
         }
         finally
@@ -1145,814 +1223,247 @@ public class DBservices
             if (con != null)
                 con.Close();
         }
-        //--------------------------------------------------------------------------------------------------
-        // This method Read all games for a specific user 
-        //--------------------------------------------------------------------------------------------------
-        //public List<Game> ReadUserGames(int userId)
-        //{
-        //    SqlConnection con;
-        //    SqlCommand cmd;
-
-        //    try
-        //    {
-        //        con = connect("myProjDB"); // create the connection
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        // write to log
-        //        throw (ex);
-        //    }
-
-        //    List<Game> userGames = new List<Game>();
-
-        //    try
-        //    {
-        //        Dictionary<string, object> paramDic = new Dictionary<string, object>
-        //    {
-        //        { "@UserId", userId }
-        //    };
-        //        cmd = CreateCommandWithStoredProcedureGeneral("SP_ReadGamesForUserOsh", con, paramDic); // create the command
-        //        SqlDataReader reader = cmd.ExecuteReader(CommandBehavior.CloseConnection);
-
-        //        while (reader.Read())
-        //        {
-        //            Game g = new Game
-        //            {
-        //                AppID = Convert.ToInt32(reader["AppId"]),
-        //                Name = reader["Name"].ToString(),
-        //                ReleaseDate = Convert.ToDateTime(reader["ReleaseDate"]),
-        //                Price = reader["Price"] != DBNull.Value ? Convert.ToDouble(reader["Price"]) : 0.0,
-        //                Description = reader["Description"].ToString(),
-        //                HeaderImage = reader["HeaderImage"].ToString(),
-        //                Website = reader["Website"].ToString(),
-        //                Windows = reader["Windows"] != DBNull.Value && Convert.ToBoolean(reader["Windows"]),
-        //                Mac = reader["Mac"] != DBNull.Value && Convert.ToBoolean(reader["Mac"]),
-        //                Linux = reader["Linux"] != DBNull.Value && Convert.ToBoolean(reader["Linux"]),
-        //                ScoreRank = reader["ScoreRank"] != DBNull.Value ? Convert.ToInt32(reader["ScoreRank"]) : 0,
-        //                Recommendations = reader["Recommendations"].ToString(),
-        //                Publisher = reader["Publisher"].ToString(),
-        //                NumberOfPurchases = Convert.ToInt32(reader["NumberOfPurchases"])
-        //            };
-
-        //            userGames.Add(g);
-        //        }
-
-        //        reader.Close();
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        throw (ex);
-        //    }
-        //    finally
-        //    {
-        //        if (con != null)
-        //        {
-        //            con.Close(); // close the db connection
-        //        }
-        //    }
-
-        //    return userGames;
-        //}
-        //--------------------------------------------------------------------------------------------------
-        // This method Change user detail and return the updated user 
-        //--------------------------------------------------------------------------------------------------
-        //public Userr UpdateUser(Userr changesForUser)
-        //{
-        //    Userr updatedUser = new Userr();
-        //    SqlConnection con;
-        //    SqlCommand cmd;
-
-        //    try
-        //    {
-        //        con = connect("myProjDB"); // create the connection
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        // write to log
-        //        throw (ex);
-        //    }
-
-
-        //    try
-        //    {
-        //        Dictionary<string, object> paramDic = new Dictionary<string, object>
-        //    {
-        //        { "@Id", changesForUser.Id },
-        //        { "@NewName", changesForUser.Name },
-        //        { "@NewEmail", changesForUser.Email },
-        //        { "@NewPassword", changesForUser.Password }
-        //    };
-        //        cmd = CreateCommandWithStoredProcedureGeneral("SP_EditUserOsh", con, paramDic); // create the command
-        //        SqlDataReader reader = cmd.ExecuteReader(CommandBehavior.CloseConnection);
-
-        //        if(reader.Read())
-        //        {
-        //            updatedUser.Id = Convert.ToInt32(reader["Id"]);
-        //            updatedUser.Name = reader["Name"].ToString();
-        //            updatedUser.Email = reader["Email"].ToString();
-        //            updatedUser.Password = reader["Password"].ToString();
-
-        //        }
-
-        //        reader.Close();
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        throw (ex);
-        //    }
-        //    finally
-        //    {
-        //        if (con != null)
-        //        {
-        //            con.Close(); // close the db connection
-        //        }
-        //    }
-
-        //    return updatedUser;
-        //}
-        //--------------------------------------------------------------------------------------------------
-        // This method Changes user activation status and return Numaffected. 
-        //--------------------------------------------------------------------------------------------------
-        //public int changeActivation(int id, bool userActivation)
-        //{
-        //    Userr updatedUser = new Userr();
-        //    SqlConnection con;
-        //    SqlCommand cmd;
-
-        //    try
-        //    {
-        //        con = connect("myProjDB"); // create the connection
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        // write to log
-        //        throw (ex);
-        //    }
-
-
-        //    try
-        //    {
-        //        Dictionary<string, object> paramDic = new Dictionary<string, object>
-        //    {
-        //        { "@Id", id },
-        //        { "@IsActive", userActivation },
-
-        //    };
-        //        cmd = CreateCommandWithStoredProcedureGeneral("SP_ActivateUserOsh", con, paramDic); // create the command
-
-        //            int numEffected = cmd.ExecuteNonQuery(); // execute the command
-        //            return numEffected;
-
-        //    }
-
-        //    catch (Exception ex)
-        //    {
-        //        throw (ex);
-        //    }
-        //    finally
-        //    {
-        //        if (con != null)
-        //        {
-        //            con.Close(); // close the db connection
-        //        }
-        //    }
-        //}
-        //--------------------------------------------------------------------------------------------------
-        // This method Read all games for a specific user filtered by price
-        //--------------------------------------------------------------------------------------------------
-        //public List<Game> GetGamesByPrice(int Userid, float Price)
-        //{
-        //    SqlConnection con;
-        //    SqlCommand cmd;
-
-        //    try
-        //    {
-        //        con = connect("myProjDB"); // create the connection
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        // write to log
-        //        throw (ex);
-        //    }
-
-        //    List<Game> userGamesFilteredByPrice = new List<Game>();
-
-        //    try
-        //    {
-        //        Dictionary<string, object> paramDic = new Dictionary<string, object>
-        //    {
-        //        { "@UserId", Userid },
-        //        { "@Price",Price }
-        //    };
-        //        cmd = CreateCommandWithStoredProcedureGeneral("SP_FilterGameByPriceOsh", con, paramDic); // create the command
-        //        SqlDataReader reader = cmd.ExecuteReader(CommandBehavior.CloseConnection);
-
-        //        while (reader.Read())
-        //        {
-        //            Game g = new Game
-        //            {
-        //                AppID = Convert.ToInt32(reader["AppId"]),
-        //                Name = reader["Name"].ToString(),
-        //                ReleaseDate = Convert.ToDateTime(reader["ReleaseDate"]),
-        //                Price = reader["Price"] != DBNull.Value ? Convert.ToDouble(reader["Price"]) : 0.0,
-        //                Description = reader["Description"].ToString(),
-        //                HeaderImage = reader["HeaderImage"].ToString(),
-        //                Website = reader["Website"].ToString(),
-        //                Windows = reader["Windows"] != DBNull.Value && Convert.ToBoolean(reader["Windows"]),
-        //                Mac = reader["Mac"] != DBNull.Value && Convert.ToBoolean(reader["Mac"]),
-        //                Linux = reader["Linux"] != DBNull.Value && Convert.ToBoolean(reader["Linux"]),
-        //                ScoreRank = reader["ScoreRank"] != DBNull.Value ? Convert.ToInt32(reader["ScoreRank"]) : 0,
-        //                Recommendations = reader["Recommendations"].ToString(),
-        //                Publisher = reader["Publisher"].ToString(),
-        //                NumberOfPurchases = Convert.ToInt32(reader["NumberOfPurchases"])
-        //            };
-
-        //            userGamesFilteredByPrice.Add(g);
-        //        }
-
-        //        reader.Close();
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        throw (ex);
-        //    }
-        //    finally
-        //    {
-        //        if (con != null)
-        //        {
-        //            con.Close(); // close the db connection
-        //        }
-        //    }
-
-        //    return userGamesFilteredByPrice;
-        //}
-        //--------------------------------------------------------------------------------------------------
-        // This method Read all games for a specific user filtered by Rank
-        //--------------------------------------------------------------------------------------------------
-        //public List<Game> GetGamesByRank(int Userid, int rank)
-        //{
-        //    SqlConnection con;
-        //    SqlCommand cmd;
-
-        //    try
-        //    {
-        //        con = connect("myProjDB"); // create the connection
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        // write to log
-        //        throw (ex);
-        //    }
-
-        //    List<Game> userGamesFilteredByRank = new List<Game>();
-
-        //    try
-        //    {
-        //        Dictionary<string, object> paramDic = new Dictionary<string, object>
-        //    {
-        //        { "@UserId", Userid },
-        //        { "@Rank",rank }
-        //    };
-        //        cmd = CreateCommandWithStoredProcedureGeneral("SP_FilterGameByRankOsh", con, paramDic); // create the command
-        //        SqlDataReader reader = cmd.ExecuteReader(CommandBehavior.CloseConnection);
-
-        //        while (reader.Read())
-        //        {
-        //            Game g = new Game
-        //            {
-        //                AppID = Convert.ToInt32(reader["AppId"]),
-        //                Name = reader["Name"].ToString(),
-        //                ReleaseDate = Convert.ToDateTime(reader["ReleaseDate"]),
-        //                Price = reader["Price"] != DBNull.Value ? Convert.ToDouble(reader["Price"]) : 0.0,
-        //                Description = reader["Description"].ToString(),
-        //                HeaderImage = reader["HeaderImage"].ToString(),
-        //                Website = reader["Website"].ToString(),
-        //                Windows = reader["Windows"] != DBNull.Value && Convert.ToBoolean(reader["Windows"]),
-        //                Mac = reader["Mac"] != DBNull.Value && Convert.ToBoolean(reader["Mac"]),
-        //                Linux = reader["Linux"] != DBNull.Value && Convert.ToBoolean(reader["Linux"]),
-        //                ScoreRank = reader["ScoreRank"] != DBNull.Value ? Convert.ToInt32(reader["ScoreRank"]) : 0,
-        //                Recommendations = reader["Recommendations"].ToString(),
-        //                Publisher = reader["Publisher"].ToString(),
-        //                NumberOfPurchases = Convert.ToInt32(reader["NumberOfPurchases"])
-        //            };
-
-        //            userGamesFilteredByRank.Add(g);
-        //        }
-
-        //        reader.Close();
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        throw (ex);
-        //    }
-        //    finally
-        //    {
-        //        if (con != null)
-        //        {
-        //            con.Close(); // close the db connection
-        //        }
-        //    }
-
-        //    return userGamesFilteredByRank;
-        //}
-        //--------------------------------------------------------------------------------------------------
-        // This method Read all games in database 
-        //--------------------------------------------------------------------------------------------------
-        //public List<Game> Read()
-        //{
-        //    SqlConnection con;
-        //    SqlCommand cmd;
-
-        //    try
-        //    {
-        //        con = connect("myProjDB"); // create the connection
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        // write to log
-        //        throw (ex);
-        //    }
-
-        //    List<Game> gamesToRender = new List<Game>();
-
-        //    try
-        //    {
-        //        Dictionary<string, object> paramDic = new Dictionary<string, object>();
-        //        cmd = CreateCommandWithStoredProcedureGeneral("SP_ReadGamesOsh", con, paramDic); // create the command
-        //        SqlDataReader reader = cmd.ExecuteReader(CommandBehavior.CloseConnection);
-
-        //        while (reader.Read())
-        //        {
-        //            Game g = new Game
-        //            {
-        //                AppID = Convert.ToInt32(reader["AppId"]),
-        //                Name = reader["Name"].ToString(),
-        //                ReleaseDate = Convert.ToDateTime(reader["ReleaseDate"]),
-        //                Price = reader["Price"] != DBNull.Value ? Convert.ToDouble(reader["Price"]) : 0.0,
-        //                Description = reader["Description"].ToString(),
-        //                HeaderImage = reader["HeaderImage"].ToString(),
-        //                Website = reader["Website"].ToString(),
-        //                Windows = reader["Windows"] != DBNull.Value && Convert.ToBoolean(reader["Windows"]),
-        //                Mac = reader["Mac"] != DBNull.Value && Convert.ToBoolean(reader["Mac"]),
-        //                Linux = reader["Linux"] != DBNull.Value && Convert.ToBoolean(reader["Linux"]),
-        //                ScoreRank = reader["ScoreRank"] != DBNull.Value ? Convert.ToInt32(reader["ScoreRank"]) : 0,
-        //                Recommendations = reader["Recommendations"].ToString(),
-        //                Publisher = reader["Publisher"].ToString(),
-        //                NumberOfPurchases = Convert.ToInt32(reader["NumberOfPurchases"])
-        //            };
-
-        //            gamesToRender.Add(g);
-        //        }
-
-        //        reader.Close();
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        throw (ex);
-        //    }
-        //    finally
-        //    {
-        //        if (con != null)
-        //        {
-        //            con.Close(); // close the db connection
-        //        }
-        //    }
-
-        //    return gamesToRender;
-        //}
-
-
-
-        //---------------------------------------------------------------------------------
-        // Create the SqlCommand using a stored procedure
-        //---------------------------------------------------------------------------------
-        //private SqlCommand CreateCommandWithStoredProcedure(String spName, SqlConnection con, Userr user)
-        //{
-
-        //    SqlCommand cmd = new SqlCommand(); // create the command object
-
-        //    cmd.Connection = con;              // assign the connection to the command object
-
-        //    cmd.CommandText = spName;      // can be Select, Insert, Update, Delete 
-
-        //    cmd.CommandTimeout = 10;           // Time to wait for the execution' The default is 30 seconds
-
-        //    cmd.CommandType = System.Data.CommandType.StoredProcedure; // the type of the command, can also be text
-
-        //    cmd.Parameters.AddWithValue("@id", user.Id);
-
-        //    cmd.Parameters.AddWithValue("@name", user.Name);
-
-
-
-
-        //    return cmd;
-        //}
-
-        //--------------------------------------------------------------------------------------------------
-        // This method register a user to the user table 
-        //--------------------------------------------------------------------------------------------------
-        //public int Register(string newName, string newEmail, string newPassword)
-        //{
-
-        //    SqlConnection con;
-        //    SqlCommand cmd;
-
-        //    try
-        //    {
-        //        con = connect("myProjDB"); // create the connection
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        // write to log
-        //        throw (ex);
-        //    }
-
-        //    Dictionary<string, object> paramDic = new Dictionary<string, object>();
-        //    paramDic.Add("@Name", newName);
-        //    paramDic.Add("@Email", newEmail);
-        //    paramDic.Add("@Password", newPassword);
-
-
-        //    cmd = CreateCommandWithStoredProcedureGeneral("SP_RegisterUserOsh", con, paramDic);          // create the command
-
-        //    try
-        //    {
-        //        int numEffected = cmd.ExecuteNonQuery(); // execute the command
-        //        return numEffected;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        // write to log
-        //        throw (ex);
-        //    }
-
-        //    finally
-        //    {
-        //        if (con != null)
-        //        {
-        //            // close the db connection
-        //            con.Close();
-        //        }
-        //    }
-
-        //}
-
-        //--------------------------------------------------------------------------------------------------
-        // This method add a game and user to the GameUser table 
-        //--------------------------------------------------------------------------------------------------
-        //public int userBuyGame(int userID,int appID)
-        //{
-
-        //    SqlConnection con;
-        //    SqlCommand cmd;
-
-        //    try
-        //    {
-        //        con = connect("myProjDB"); // create the connection
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        // write to log
-        //        throw (ex);
-        //    }
-
-        //    Dictionary<string, object> paramDic = new Dictionary<string, object>();
-        //    paramDic.Add("@UserID", userID);
-        //    paramDic.Add("@AppId", appID);
-
-
-
-        //    cmd = CreateCommandWithStoredProcedureGeneral("SP_UserBuyOsh", con, paramDic);          // create the command
-
-        //    try
-        //    {
-        //        int numEffected = cmd.ExecuteNonQuery(); // execute the command
-        //        return numEffected;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        // write to log
-        //        throw (ex);
-        //    }
-
-        //    finally
-        //    {
-        //        if (con != null)
-        //        {
-        //            // close the db connection
-        //            con.Close();
-        //        }
-        //    }
-
-        //}
-        //--------------------------------------------------------------------------------------------------
-        // This method Delete a game from user games table 
-        //--------------------------------------------------------------------------------------------------
-        //public int userDeleteGame(int userID, int appID)
-        //{
-
-        //    SqlConnection con;
-        //    SqlCommand cmd;
-
-        //    try
-        //    {
-        //        con = connect("myProjDB"); // create the connection
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        // write to log
-        //        throw (ex);
-        //    }
-
-        //    Dictionary<string, object> paramDic = new Dictionary<string, object>();
-        //    paramDic.Add("@UserID", userID);
-        //    paramDic.Add("@AppId", appID);
-
-
-
-        //    cmd = CreateCommandWithStoredProcedureGeneral("SP_UserDeleteOsh", con, paramDic);          // create the command
-
-        //    try
-        //    {
-        //        int numEffected = cmd.ExecuteNonQuery(); // execute the command
-        //        return numEffected;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        // write to log
-        //        throw (ex);
-        //    }
-
-        //    finally
-        //    {
-        //        if (con != null)
-        //        {
-        //            // close the db connection
-        //            con.Close();
-        //        }
-        //    }
-
-        //}
-        //--------------------------------------------------------------------------------------------------
-        // This method update user name 
-        //--------------------------------------------------------------------------------------------------
-        //public int UpdateName(int currentID, string newName)
-        //{
-
-        //    SqlConnection con;
-        //    SqlCommand cmd;
-
-        //    try
-        //    {
-        //        con = connect("myProjDB"); // create the connection
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        // write to log
-        //        throw (ex);
-        //    }
-
-        //    Dictionary<string, object> paramDic = new Dictionary<string, object>();
-        //    paramDic.Add("@UserID", currentID);
-        //    paramDic.Add("@NewName", newName);
-
-
-
-        //    cmd = CreateCommandWithStoredProcedureGeneral("SP_UpdateUserNameOsh", con, paramDic);          // create the command
-
-        //    try
-        //    {
-        //        int numEffected = cmd.ExecuteNonQuery(); // execute the command
-        //        return numEffected;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        // write to log
-        //        throw (ex);
-        //    }
-
-        //    finally
-        //    {
-        //        if (con != null)
-        //        {
-        //            // close the db connection
-        //            con.Close();
-        //        }
-        //    }
-
-        //}
-        //--------------------------------------------------------------------------------------------------
-        // This method update user name 
-        //--------------------------------------------------------------------------------------------------
-        //public int UpdatePass(int currentID, string newPass)
-        //{
-
-        //    SqlConnection con;
-        //    SqlCommand cmd;
-
-        //    try
-        //    {
-        //        con = connect("myProjDB"); // create the connection
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        // write to log
-        //        throw (ex);
-        //    }
-
-        //    Dictionary<string, object> paramDic = new Dictionary<string, object>();
-        //    paramDic.Add("@UserID", currentID);
-        //    paramDic.Add("@NewPass", newPass);
-
-
-
-        //    cmd = CreateCommandWithStoredProcedureGeneral("SP_UpdateUserPassOsh", con, paramDic);          // create the command
-
-        //    try
-        //    {
-        //        int numEffected = cmd.ExecuteNonQuery(); // execute the command
-        //        return numEffected;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        // write to log
-        //        throw (ex);
-        //    }
-
-        //    finally
-        //    {
-        //        if (con != null)
-        //        {
-        //            // close the db connection
-        //            con.Close();
-        //        }
-        //    }
-
-        //}
-        //--------------------------------------------------------------------------------------------------
-        // This method Login a user  
-        //--------------------------------------------------------------------------------------------------
-        //public Userr userLogin(string email, string password)
-        //{
-        //    SqlConnection con;
-        //    SqlCommand cmd;
-
-        //    try
-        //    {
-        //        con = connect("myProjDB"); // create the connection
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        throw ex; // Log the exception if needed
-        //    }
-
-        //    Dictionary<string, object> paramDic = new Dictionary<string, object>();
-        //    paramDic.Add("@Email", email);
-        //    paramDic.Add("@Password", password);
-
-        //    cmd = CreateCommandWithStoredProcedureGeneral("SP_LoginUserOsh", con, paramDic);
-
-        //    try
-        //    {
-        //        SqlDataReader reader = cmd.ExecuteReader(CommandBehavior.CloseConnection);
-
-        //        Userr u = new Userr();
-        //        if (reader.Read())
-        //        {
-        //            u.Id = Convert.ToInt32(reader["Id"]);
-        //            u.Name = reader["Name"].ToString();
-        //            u.Email = reader["Email"].ToString();
-        //            u.Password = reader["Password"].ToString();
-        //            u.IsActive = reader["isActive"] != DBNull.Value && Convert.ToBoolean(reader["isActive"]);
-        //        }
-        //        return u;
-        //    }
-        //    //AppID = Convert.ToInt32(reader["AppId"])
-        //    catch (Exception ex)
-        //    {
-        //        throw ex; // Log the exception if needed
-        //    }
-        //    finally
-        //    {
-        //        if (con != null)
-        //        {
-        //            con.Close(); // Close the DB connection
-        //        }
-        //    }
-        //}
-
-
-        //--------------------------------------------------------------------------------------------------
-        // This method Read all users BI 
-        //--------------------------------------------------------------------------------------------------
-        //public object UsersBI()
-        //{
-        //    SqlConnection con;
-        //    SqlCommand cmd;
-
-        //    try
-        //    {
-        //        con = connect("myProjDB"); // create the connection
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        // write to log
-        //        throw (ex);
-        //    }
-
-        //    List<object> userBITable = new List<object>();
-
-        //    try
-        //    {
-        //        Dictionary<string, object> paramDic = new Dictionary<string, object>
-        //        {
-        //        };
-        //        cmd = CreateCommandWithStoredProcedureGeneral("SP_GetUsersBIOsh", con, paramDic); // create the command
-        //        SqlDataReader reader = cmd.ExecuteReader(CommandBehavior.CloseConnection);
-
-        //        while (reader.Read())
-        //        {
-        //            var o = new Dictionary<string, object>
-        //            {
-        //                { "Id", Convert.ToInt32(reader["Id"]) },
-        //                { "Name", reader["Name"].ToString() },
-        //                { "GamesPurchased", Convert.ToInt32(reader["GamesPurchased"]) },
-        //                { "MoneySpent", Convert.ToDouble(reader["MoneySpent"]) },
-        //                { "IsActive", reader["isActive"] != DBNull.Value && Convert.ToBoolean(reader["isActive"]) }
-
-        //            };
-
-        //            userBITable.Add(o);
-        //        }
-
-        //        reader.Close();
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        throw (ex);
-        //    }
-        //    finally
-        //    {
-        //        if (con != null)
-        //        {
-        //            con.Close(); // close the db connection
-        //        }
-        //    }
-
-        //    return userBITable;
-        //}
-        //--------------------------------------------------------------------------------------------------
-        // This method Read all Games BI 
-        //--------------------------------------------------------------------------------------------------
-        //public object GamesBI()
-        //{
-        //    SqlConnection con;
-        //    SqlCommand cmd;
-        //    try
-        //    {
-        //        con = connect("myProjDB"); // create the connection
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        // write to log
-        //        throw (ex);
-        //    }
-        //    List<object> gameBITable = new List<object>();
-        //    try
-        //    {
-        //        Dictionary<string, object> paramDic = new Dictionary<string, object>
-        //        {
-        //        };
-        //        cmd = CreateCommandWithStoredProcedureGeneral("SP_GetGamesBIOsh", con, paramDic); // create the command
-        //        SqlDataReader reader = cmd.ExecuteReader(CommandBehavior.CloseConnection);
-        //        while (reader.Read())
-        //        {
-        //            var o = new Dictionary<string, object>
-        //            {
-        //                { "AppId", Convert.ToInt32(reader["AppId"]) },
-        //                { "Name", reader["Name"].ToString() },
-        //                { "NumberOfPurchases", Convert.ToInt32(reader["NumberOfPurchases"]) },
-        //                { "Income", Convert.ToDouble(reader["Income"]) }
-        //            };
-        //            gameBITable.Add(o);
-        //        }
-        //        reader.Close();
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        throw (ex);
-        //    }
-        //    finally
-        //    {
-        //        if (con != null)
-        //        {
-        //            con.Close(); // close the db connection
-        //        }
-        //    }
-        //    return gameBITable;
-        //}
-
+    }
+    //--------------------------------------------------------------------------------------------------
+    // This method saves price estimate to database
+    //--------------------------------------------------------------------------------------------------
+    public int SavePriceEstimate(PriceEstimator estimate)
+    {
+        Console.WriteLine($"🔄 DBservices.SavePriceEstimate נקרא עם RequestID: {estimate.RequestID}");
+        
+        SqlConnection con;
+        SqlCommand cmd;
+        try
+        {
+            con = connect("myProjDB");
+            Console.WriteLine("✅ חיבור למסד נתונים הצליח");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ שגיאה בחיבור למסד נתונים: {ex.Message}");
+            throw ex;
+        }
+
+        Dictionary<string, object> paramDic = new Dictionary<string, object>
+        {
+            { "@RequestID", estimate.RequestID },
+            { "@TotalArea", estimate.TotalArea },
+            { "@ParquetType", estimate.ParquetType },
+            { "@RoomCount", estimate.RoomCount },
+            { "@BasePrice", estimate.BasePrice },
+            { "@EstimatedMinPrice", estimate.EstimatedMinPrice },
+            { "@EstimatedMaxPrice", estimate.EstimatedMaxPrice },
+            { "@EstimatedMinDays", estimate.EstimatedMinDays },
+            { "@EstimatedMaxDays", estimate.EstimatedMaxDays },
+            { "@ComplexityMultiplier", estimate.ComplexityMultiplier },
+            { "@Notes", estimate.Notes }
+        };
+
+        Console.WriteLine($"📊 פרמטרים לפרוצדורה:");
+        foreach (var param in paramDic)
+        {
+            Console.WriteLine($"   {param.Key}: {param.Value}");
+        }
+
+        cmd = CreateCommandWithStoredProcedureGeneral("SavePriceEstimate", con, paramDic);
+
+        try
+        {
+            Console.WriteLine("🚀 מפעיל פרוצדורה SavePriceEstimate...");
+            object result = cmd.ExecuteScalar();
+            Console.WriteLine($"✅ פרוצדורה הושלמה, תוצאה: {result}");
+            
+            int estimateID = Convert.ToInt32(result);
+            Console.WriteLine($"✅ EstimateID שנוצר: {estimateID}");
+            return estimateID;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ שגיאה בביצוע פרוצדורה SavePriceEstimate: {ex.Message}");
+            Console.WriteLine($"❌ Stack Trace: {ex.StackTrace}");
+            throw ex;
+        }
+        finally
+        {
+            if (con != null)
+                con.Close();
+        }
+    }
+
+    //--------------------------------------------------------------------------------------------------
+    // This method gets price estimate by request ID
+    //--------------------------------------------------------------------------------------------------
+    public PriceEstimator GetPriceEstimateByRequestID(int requestID)
+    {
+        SqlConnection con;
+        SqlCommand cmd;
+        try
+        {
+            con = connect("myProjDB");
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+
+        PriceEstimator estimate = null;
+
+        try
+        {
+            Dictionary<string, object> paramDic = new Dictionary<string, object>
+            {
+                { "@RequestID", requestID }
+            };
+
+            cmd = CreateCommandWithStoredProcedureGeneral("GetPriceEstimateByRequestID", con, paramDic);
+            SqlDataReader reader = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+
+            if (reader.Read())
+            {
+                estimate = new PriceEstimator
+                {
+                    EstimateID = Convert.ToInt32(reader["EstimateID"]),
+                    RequestID = Convert.ToInt32(reader["RequestID"]),
+                    TotalArea = Convert.ToDecimal(reader["TotalArea"]),
+                    ParquetType = reader["ParquetType"].ToString(),
+                    RoomCount = Convert.ToInt32(reader["RoomCount"]),
+                    BasePrice = Convert.ToDecimal(reader["BasePrice"]),
+                    EstimatedMinPrice = Convert.ToDecimal(reader["EstimatedMinPrice"]),
+                    EstimatedMaxPrice = Convert.ToDecimal(reader["EstimatedMaxPrice"]),
+                    EstimatedMinDays = Convert.ToInt32(reader["EstimatedMinDays"]),
+                    EstimatedMaxDays = Convert.ToInt32(reader["EstimatedMaxDays"]),
+                    ComplexityMultiplier = Convert.ToDecimal(reader["ComplexityMultiplier"]),
+                    CreatedAt = Convert.ToDateTime(reader["CreatedAt"]),
+                    Notes = reader["Notes"] != DBNull.Value ? reader["Notes"].ToString() : null
+                };
+            }
+            reader.Close();
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+        finally
+        {
+            if (con != null)
+                con.Close();
+        }
+
+        return estimate;
+    }
+
+    //--------------------------------------------------------------------------------------------------
+    // This method gets latest work request by customer ID
+    //--------------------------------------------------------------------------------------------------
+    public WorkRequest GetLatestWorkRequestByCustomerID(int customerID)
+    {
+        SqlConnection con;
+        SqlCommand cmd;
+        try
+        {
+            con = connect("myProjDB");
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+
+        WorkRequest workRequest = null;
+
+        try
+        {
+            Dictionary<string, object> paramDic = new Dictionary<string, object>
+            {
+                { "@CustomerID", customerID }
+            };
+
+            cmd = CreateCommandWithStoredProcedureGeneral("GetLatestWorkRequestByCustomerID", con, paramDic);
+            SqlDataReader reader = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+
+            if (reader.Read())
+            {
+                workRequest = new WorkRequest
+                {
+                    RequestID = Convert.ToInt32(reader["RequestID"]),
+                    CustomerID = Convert.ToInt32(reader["CustomerID"]),
+                    CreatedAt = reader["CreatedAt"] != DBNull.Value ? Convert.ToDateTime(reader["CreatedAt"]) : null,
+                    Status = reader["Status"] != DBNull.Value ? reader["Status"].ToString() : null,
+                    Notes = reader["Notes"] != DBNull.Value ? reader["Notes"].ToString() : null,
+                    PlannedDate = reader["PlannedDate"] != DBNull.Value ? Convert.ToDateTime(reader["PlannedDate"]) : null,
+                    CompletedDate = reader["CompletedDate"] != DBNull.Value ? Convert.ToDateTime(reader["CompletedDate"]) : null,
+                    PreferredSlot = reader["PreferredSlot"] != DBNull.Value ? Convert.ToInt32(reader["PreferredSlot"]) : null
+                };
+            }
+            reader.Close();
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+        finally
+        {
+            if (con != null)
+                con.Close();
+        }
+
+        return workRequest;
+    }
+
+    //--------------------------------------------------------------------------------------------------
+    // This method gets work request by request ID
+    //--------------------------------------------------------------------------------------------------
+    public WorkRequest GetWorkRequestByID(int requestID)
+    {
+        SqlConnection con;
+        SqlCommand cmd;
+        try
+        {
+            con = connect("myProjDB");
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+
+        WorkRequest workRequest = null;
+
+        try
+        {
+            Dictionary<string, object> paramDic = new Dictionary<string, object>
+            {
+                { "@RequestID", requestID }
+            };
+
+            cmd = CreateCommandWithStoredProcedureGeneral("GetWorkRequestByID", con, paramDic);
+            SqlDataReader reader = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+
+            if (reader.Read())
+            {
+                workRequest = new WorkRequest
+                {
+                    RequestID = Convert.ToInt32(reader["RequestID"]),
+                    CustomerID = Convert.ToInt32(reader["CustomerID"]),
+                    CreatedAt = reader["CreatedAt"] != DBNull.Value ? Convert.ToDateTime(reader["CreatedAt"]) : null,
+                    Status = reader["Status"] != DBNull.Value ? reader["Status"].ToString() : null,
+                    Notes = reader["Notes"] != DBNull.Value ? reader["Notes"].ToString() : null,
+                    PlannedDate = reader["PlannedDate"] != DBNull.Value ? Convert.ToDateTime(reader["PlannedDate"]) : null,
+                    CompletedDate = reader["CompletedDate"] != DBNull.Value ? Convert.ToDateTime(reader["CompletedDate"]) : null,
+                    PreferredSlot = reader["PreferredSlot"] != DBNull.Value ? Convert.ToInt32(reader["PreferredSlot"]) : null
+                };
+            }
+            reader.Close();
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+        finally
+        {
+            if (con != null)
+                con.Close();
+        }
+
+        return workRequest;
     }
 }
 

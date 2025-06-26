@@ -3,163 +3,247 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>הצעת מחיר</title>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700&display=swap"
-      rel="stylesheet"
-    />
+    <title>הצעת מחיר מותאמת</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="/ajaxCall.js"></script>
     <script src="/api.js"></script>
     <script src="quoteSummaryPage.js"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: '#b46a2c',
+              'primary-dark': '#8b5732',
+              'primary-light': '#d4985a'
+            },
+            fontFamily: {
+              'heebo': ['Heebo', 'sans-serif']
+            }
+          }
+        }
+      }
+    </script>
     <style>
-      * {
-        box-sizing: border-box;
-      }
       body {
-        font-family: "Heebo", sans-serif;
-        background: #fff;
-        color: #333;
-        margin: 0;
-        padding: 0;
-        max-width: 480px;
-        margin: auto;
+        font-family: 'Heebo', sans-serif;
       }
-      .top-bar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 16px;
+      .glass-effect {
+        backdrop-filter: blur(10px);
+        background: rgba(255, 255, 255, 0.95);
       }
-      .logo img {
-        width: 100px;
+      .price-card {
+        background: linear-gradient(135deg, #b46a2c 0%, #d4985a 100%);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       }
-      .back-btn {
-        font-size: 22px;
-        cursor: pointer;
+      .price-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 20px 40px rgba(180, 106, 44, 0.3);
       }
-      h1 {
-        text-align: center;
-        font-size: 22px;
-        font-weight: 700;
-        margin: 0;
+      .summary-item {
+        transition: all 0.3s ease;
       }
-      .progress-bar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        position: relative;
-        margin: 16px 24px 24px;
+      .summary-item:hover {
+        transform: translateX(-4px);
+        box-shadow: 0 4px 12px rgba(180, 106, 44, 0.1);
       }
-      .progress-bar::before {
-        content: "";
-        position: absolute;
-        top: 50%;
-        left: 0;
-        right: 0;
-        height: 2px;
-        background-color: #e0e0e0;
-        z-index: 0;
+      .slide-in {
+        animation: slideIn 0.6s ease-out;
       }
-      .progress-step {
-        width: 24px;
-        height: 24px;
-        border-radius: 50%;
-        background-color: #fff;
-        border: 2px solid #dcdcdc;
-        z-index: 1;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+      @keyframes slideIn {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
       }
-      .progress-step.active {
-        background-color: #666;
-        border-color: #666;
+      .pulse-animation {
+        animation: pulse 2s infinite;
       }
-      .progress-step.done {
-        background-color: #b46a2c;
-        border-color: #b46a2c;
+      @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.7; }
       }
-      .progress-step.done::after {
-        content: "\2713";
-        color: white;
-        font-size: 14px;
+      .shimmer {
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 200% 100%;
+        animation: shimmer 1.5s infinite;
       }
-      .summary-section {
-        padding: 16px;
-      }
-      .summary-section ul {
-        list-style: none;
-        padding: 0;
-      }
-      .summary-section ul li {
-        margin-bottom: 8px;
-      }
-      .price-box {
-        background: #f9f9f9;
-        border: 1px solid #ddd;
-        border-radius: 12px;
-        padding: 16px;
-        margin: 16px;
-        text-align: center;
-      }
-      .price-range {
-        color: #b46a2c;
-        font-size: 20px;
-        font-weight: bold;
-      }
-      .duration-range {
-        color: #f44336;
-        font-weight: bold;
-        font-size: 16px;
-      }
-      .btn-next {
-        background: #b46a2c;
-        color: white;
-        border: none;
-        border-radius: 999px;
-        padding: 16px;
-        font-weight: bold;
-        font-size: 16px;
-        width: 90%;
-        margin: 32px auto;
-        display: block;
-        cursor: pointer;
+      @keyframes shimmer {
+        0% { background-position: -200% 0; }
+        100% { background-position: 200% 0; }
       }
     </style>
   </head>
-  <body>
-    <div class="top-bar">
-      <div class="back-btn" onclick="window.history.back()">&#8592;</div>
-      <div class="logo"><img src="../picturs/logo.png" alt="לוגו" /></div>
-    </div>
-
-    <h1>הצעת מחיר</h1>
-    <div class="progress-bar">
-      <div class="progress-step done"></div>
-      <div class="progress-step done"></div>
-      <div class="progress-step done"></div>
-      <div class="progress-step active"></div>
-      <div class="progress-step"></div>
-    </div>
-
-    <div class="summary-section">
-      <h3>נכון לפרטים שהזנתם:</h3>
-      <ul id="summary-list"></ul>
-
-      <div class="price-box">
-        <div>הצעת המחיר היא:</div>
-        <div class="price-range" id="priceRange"></div>
-        <small>(לא כולל מע"מ)</small>
-        <div style="margin-top: 10px">הזמן המשוער לביצוע ההתקנה הינו:</div>
-        <div class="duration-range" id="durationRange"></div>
-      </div>
-      <div>
-        המחיר או זמן ההתקנה עשוי להשתנות בהתאם לשינויים בעת ההתקנה או במידה
-        והנתונים שהוזנו שונים מהנתונים בפועל*
+  <body class="bg-gradient-to-br from-orange-50 to-amber-50 min-h-screen font-heebo">
+    <!-- Header -->
+    <div class="glass-effect sticky top-0 z-40 border-b border-orange-100">
+      <div class="max-w-md mx-auto px-4 py-3">
+        <div class="flex items-center justify-between">
+          <button onclick="window.history.back()" class="p-2 hover:bg-orange-100 rounded-full transition-colors">
+            <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+            </svg>
+          </button>
+          <div class="flex-1 text-center">
+            <img src="../picturs/logo.png" alt="לוגו" class="h-10 mx-auto" />
+          </div>
+          <div class="w-10"></div>
+        </div>
       </div>
     </div>
 
-    <button class="btn-next" onclick="goNext()">עדיפות לתאריך התקנה</button>
+    <!-- Main Content -->
+    <div class="max-w-md mx-auto px-4 pb-24">
+      <!-- Title Section -->
+      <div class="text-center py-6">
+        <h1 class="text-2xl font-bold text-gray-800 mb-2">הצעת מחיר מותאמת</h1>
+        <p class="text-gray-600 text-sm">הערכה מדויקת המבוססת על הפרטים שלכם</p>
+      </div>
+
+      <!-- Progress Bar -->
+      <div class="mb-8">
+        <div class="flex items-center justify-between relative">
+          <div class="absolute top-1/2 left-0 right-0 h-0.5 bg-orange-200 -translate-y-1/2"></div>
+          <div class="w-6 h-6 rounded-full bg-primary border-2 border-white shadow-lg z-10 flex items-center justify-center">
+            <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+            </svg>
+          </div>
+          <div class="w-6 h-6 rounded-full bg-primary border-2 border-white shadow-lg z-10 flex items-center justify-center">
+            <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+            </svg>
+          </div>
+          <div class="w-6 h-6 rounded-full bg-primary border-2 border-white shadow-lg z-10 flex items-center justify-center">
+            <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+            </svg>
+          </div>
+          <div class="w-6 h-6 rounded-full bg-primary border-2 border-white shadow-lg z-10 flex items-center justify-center">
+            <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+            </svg>
+          </div>
+          <div class="w-6 h-6 rounded-full bg-gray-300 border-2 border-white shadow-lg z-10"></div>
+        </div>
+      </div>
+
+      <!-- Project Summary -->
+      <div class="bg-white rounded-2xl shadow-lg border border-orange-100 p-6 mb-6 slide-in">
+        <div class="flex items-center mb-6">
+          <svg class="w-6 h-6 text-primary ml-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+          </svg>
+          <h2 class="text-xl font-semibold text-gray-800">סיכום הפרויקט שלכם</h2>
+        </div>
+        
+        <div id="summary-list" class="space-y-3">
+          <!-- Loading skeleton -->
+          <div class="summary-item bg-gray-100 rounded-xl p-4 shimmer">
+            <div class="h-4 bg-gray-200 rounded w-3/4"></div>
+          </div>
+          <div class="summary-item bg-gray-100 rounded-xl p-4 shimmer">
+            <div class="h-4 bg-gray-200 rounded w-1/2"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Price Card -->
+      <div class="price-card rounded-2xl shadow-xl p-6 mb-6 text-white slide-in">
+        <div class="text-center">
+          <div class="flex items-center justify-center mb-4">
+            <svg class="w-8 h-8 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+            </svg>
+            <h3 class="text-2xl font-bold">הצעת המחיר שלכם</h3>
+          </div>
+          
+          <div id="priceRange" class="text-4xl font-bold mb-2 pulse-animation">
+            <div class="shimmer bg-white/20 rounded-lg h-12 w-48 mx-auto"></div>
+          </div>
+          
+          <p class="text-white/90 mb-6">לא כולל מע"מ</p>
+          
+          <div class="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
+            <div class="flex items-center justify-center mb-2">
+              <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              <span class="font-semibold">זמן ההתקנה המשוער</span>
+            </div>
+            <div id="durationRange" class="text-xl font-bold">
+              <div class="shimmer bg-white/20 rounded-lg h-6 w-32 mx-auto"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Important Note -->
+      <div class="bg-amber-50 border border-amber-200 rounded-2xl p-6 mb-6 slide-in">
+        <div class="flex items-start">
+          <svg class="w-6 h-6 text-amber-600 ml-3 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <div>
+            <h4 class="font-semibold text-amber-800 mb-2">חשוב לדעת</h4>
+            <p class="text-amber-700 text-sm leading-relaxed">
+              המחיר וזמן ההתקנה עשויים להשתנות בהתאם לתנאי השטח בפועל, דרישות מיוחדות או שינויים בפרטי ההזמנה. ההערכה מבוססת על הנתונים שהזנתם.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Features List -->
+      <div class="bg-white rounded-2xl shadow-lg border border-orange-100 p-6 mb-6 slide-in">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+          <svg class="w-5 h-5 text-green-600 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          מה כלול בשירות?
+        </h3>
+        
+        <div class="space-y-3">
+          <div class="flex items-center text-gray-700">
+            <svg class="w-4 h-4 text-green-500 ml-2" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+            </svg>
+            <span class="text-sm">התקנה מקצועית של הפרקט</span>
+          </div>
+          <div class="flex items-center text-gray-700">
+            <svg class="w-4 h-4 text-green-500 ml-2" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+            </svg>
+            <span class="text-sm">הכנת הרצפה והשטח</span>
+          </div>
+          <div class="flex items-center text-gray-700">
+            <svg class="w-4 h-4 text-green-500 ml-2" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+            </svg>
+            <span class="text-sm">ניקוי יסודי לאחר ההתקנה</span>
+          </div>
+          <div class="flex items-center text-gray-700">
+            <svg class="w-4 h-4 text-green-500 ml-2" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+            </svg>
+            <span class="text-sm">אחריות על העבודה</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fixed Bottom Section -->
+    <div class="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-white via-white to-transparent p-4">
+      <div class="max-w-md mx-auto">
+        <button onclick="goNext()" id="continue-btn" 
+                class="w-full bg-primary hover:bg-primary-dark text-white font-semibold py-4 px-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 active:scale-95">
+          <span class="flex items-center justify-center">
+            <span>המשך לקביעת תאריך התקנה</span>
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+            </svg>
+          </span>
+        </button>
+      </div>
+    </div>
   </body>
 </html>
