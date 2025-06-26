@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>סטטוסים לביצוע</title>
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="/ajaxCall.js"></script>
+<script src="/api.js"></script>
+
   <style>
     :root {
       --main-color: #b46a2c;
@@ -159,15 +163,15 @@
   <div class="container">
     <aside class="sidebar">
       <div class="logo">
-        <img src="picturs/logo.png" alt="לוגו" width="100">
+        <img src="../picturs/logo.png" alt="לוגו" width="100">
       </div>
       <nav>
-        <a href="#">מסך הבית</a>
-        <a href="#">לעומק</a>
-        <a href="#" class="active">סטטוסים לביצוע</a>
-        <a href="#">ניהול התקנות</a>
-        <a href="#">לקוחות</a>
-        <a href="#">יומן</a>
+        <a href="InstallerDashboard.html">מסך הבית</a>
+        <a href="InstallerStatusesPage.html" class="active">סטטוסים לביצוע</a>
+        <a href="InstallerCustomersPage.html">לקוחות</a>
+        <a href="#">יומן התקנות</a>
+        <a href="BIpage.html">לוח בקרה - BI</a>
+        <a href="#">ניהול אתר לקוחות</a>
         <a href="#">הגדרות</a>
         <a href="#">התנתקות</a>
       </nav>
@@ -176,80 +180,74 @@
     <main class="main">
       <div class="top-bar">
         <h2>סטטוסים לביצוע</h2>
-        <input type="text" placeholder="...חפש כאן" style="padding: 10px; border-radius: 20px; border: 1px solid #ccc;">
       </div>
 
-      <div class="accordion" id="accordion">
-        <div class="accordion-item">
-  <div class="accordion-header">1. צפייה בסרטון לקוח <span class="count">1 ממתינים לטיפול</span></div>
-  <div class="accordion-content">
-    <div class="customer-card">
-      <a href="customer-details.html?id=123">שמעון שמעוני</a>
-      <div class="customer-info">
-        <p>טלפון: 052-1234567</p>
-        <p>אימייל: shimon@example.com</p>
-        <p>כתובת: הרצל 12, תל אביב</p>
-        <p>תאריך בקשה: 10/04/2025</p>
-      </div>
-    </div>
-  </div>
+      <div class="accordion" id="statusAccordion">
+  <!-- סטטוסים ייטענו כאן דינמית -->
 </div>
-
-<div class="accordion-item">
-  <div class="accordion-header">2. טיוטה להצעת מחיר <span class="count">0 ממתינים לטיפול</span></div>
-  <div class="accordion-content">
-    אין לקוחות להצגה תחת סטטוס זה.
-  </div>
-</div>
-
-<div class="accordion-item">
-  <div class="accordion-header">3. התקשרות ללקוח להצגת הצעת מחיר <span class="count">0 ממתינים לטיפול</span></div>
-  <div class="accordion-content">
-    אין לקוחות להצגה תחת סטטוס זה.
-  </div>
-</div>
-
-<div class="accordion-item">
-  <div class="accordion-header">4. העברת מקדמה <span class="count">0 ממתינים לטיפול</span></div>
-  <div class="accordion-content">
-    אין לקוחות להצגה תחת סטטוס זה.
-  </div>
-</div>
-
-<div class="accordion-item">
-  <div class="accordion-header">5. תיאום התקנה <span class="count">0 ממתינים לטיפול</span></div>
-  <div class="accordion-content">
-    אין לקוחות להצגה תחת סטטוס זה.
-  </div>
-</div>
-
-<div class="accordion-item">
-  <div class="accordion-header">6. עבודות לביצוע <span class="count">0 ממתינים לטיפול</span></div>
-  <div class="accordion-content">
-    אין לקוחות להצגה תחת סטטוס זה.
-  </div>
-</div>
-
-<div class="accordion-item">
-  <div class="accordion-header">7. משובים לסיום ביצוע <span class="count">0 ממתינים לטיפול</span></div>
-  <div class="accordion-content">
-    אין לקוחות להצגה תחת סטטוס זה.
-  </div>
-</div>
-      </div>
-    </main>
-  </div>
 
   <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      const headers = document.querySelectorAll(".accordion-header");
-      headers.forEach(header => {
-        header.addEventListener("click", () => {
-          const content = header.nextElementSibling;
-          content.classList.toggle("open");
-        });
-      });
+document.addEventListener("DOMContentLoaded", loadCustomersByStatus);
+
+function loadCustomersByStatus() {
+  ajaxCall("POST", `${API_BASE_URL}/Dashboard/GetDashboardData`, JSON.stringify({}), function (data) {
+    if (!Array.isArray(data)) return;
+
+    // קבוצת לקוחות לפי סטטוס
+    const grouped = {};
+    data.forEach(c => {
+      const status = c.Status || "ללא סטטוס";
+      if (!grouped[status]) grouped[status] = [];
+      grouped[status].push(c);
     });
+
+    const container = document.getElementById("statusAccordion");
+    container.innerHTML = ""; // נקה הכל
+
+    Object.keys(grouped).forEach((status, index) => {
+      const customers = grouped[status];
+      const count = customers.length;
+
+      const content = customers.map(c => {
+        const fullName = `${c.FirstName || ""} ${c.LastName || ""}`.trim();
+        return `
+          <div class="customer-card">
+            <a href="InstallerCustomerDetailsPage.html?id=${c.CustomerID}">${fullName}</a>
+            <div class="customer-info">
+              <p>טלפון: ${c.Phone || ""}</p>
+              <p>אימייל: ${c.Email || ""}</p>
+              <p>כתובת: ${c.Street || ""} ${c.Number || ""}, ${c.City || ""}</p>
+              <p>תאריך בקשה: ${new Date(c.CustomerCreatedAt).toLocaleDateString("he-IL")}</p>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      const item = `
+        <div class="accordion-item">
+          <div class="accordion-header">${index + 1}. ${status} <span class="count">${count} ממתינים לטיפול</span></div>
+          <div class="accordion-content">${content || "אין לקוחות להצגה תחת סטטוס זה."}</div>
+        </div>
+      `;
+
+      container.innerHTML += item;
+    });
+
+    // הפעלת האקורדיון מחדש
+    activateAccordion();
+  });
+}
+
+function activateAccordion() {
+  const headers = document.querySelectorAll(".accordion-header");
+  headers.forEach(header => {
+    header.addEventListener("click", () => {
+      const content = header.nextElementSibling;
+      content.classList.toggle("open");
+    });
+  });
+}
+
   </script>
 </body>
 </html>
