@@ -516,7 +516,7 @@
 </div>
 
 <script>
-  const WORKREQUEST_STATUSES = [
+  let WORKREQUEST_STATUSES = [
   "צפייה בסרטון לקוח",
   "טיוטה להצעת מחיר",
   "שליחת טיוטה ללקוח",
@@ -525,6 +525,21 @@
   "התקנה בוצעה",
   "קבלת משוב"
 ];
+
+// טעינת סטטוסים מהשרת
+function loadWorkRequestStatuses() {
+  ajaxCall('GET', `${API_BASE_URL}/BI/GetWorkRequestStatuses`, null,
+    function(statuses) {
+      if (Array.isArray(statuses)) {
+        WORKREQUEST_STATUSES = statuses.map(s => s.StatusName);
+        console.log('✅ סטטוסים נטענו מהשרת:', WORKREQUEST_STATUSES);
+      }
+    },
+    function(error) {
+      console.warn('⚠️ שגיאה בטעינת סטטוסים, משתמש בברירת מחדל:', error);
+    }
+  );
+}
  let currentRequestID = null;
  let currentStatus = null;
 function addCustomItem() {
@@ -659,6 +674,9 @@ if (floorPrice > 0 && meters > 0) {
 
 
 document.addEventListener('DOMContentLoaded', () => {
+  // טעינת סטטוסים מהשרת
+  loadWorkRequestStatuses();
+  
   const urlParams = new URLSearchParams(window.location.search);
   const customerId = urlParams.get("id");
 
@@ -993,22 +1011,37 @@ function updateInstallationPrice() {
   const priceInput = document.getElementById("pricePerMeter");
 
   const type = select.value;
-  const priceMap = {
-    spc: 60,
-    wood: 85,
-    fishbone: 150
-  };
+  
+  // קבלת מחירים מהשרת במקום מחירים קשיחים
+  ajaxCall('GET', `${API_BASE_URL}/SystemSettings/GetParquetPrices`, null, 
+    function(prices) {
+      const priceMap = {
+        spc: parseInt(prices.SPC) || 60,
+        wood: parseInt(prices.Wood) || 85,
+        fishbone: parseInt(prices.Fishbone) || 150
+      };
 
-  const typeNameMap = {
-    spc: "SPC/למינציה",
-    wood: "עץ",
-    fishbone: "פישבון"
-  };
+      const typeNameMap = {
+        spc: "SPC/למינציה",
+        wood: "עץ",
+        fishbone: "פישבון"
+      };
 
- 
-  priceInput.value = priceMap[type] || 0;
-
-  calculateQuote(); 
+      priceInput.value = priceMap[type] || 0;
+      calculateQuote(); 
+    },
+    function(error) {
+      console.error('שגיאה בקבלת מחירי פרקט:', error);
+      // ברירת מחדל במקרה של שגיאה
+      const priceMap = {
+        spc: 60,
+        wood: 85,
+        fishbone: 150
+      };
+      priceInput.value = priceMap[type] || 0;
+      calculateQuote(); 
+    }
+  );
 }
 
 function showItemDescription(desc) {

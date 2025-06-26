@@ -56,31 +56,59 @@ namespace FinalProject.BL
         }
 
         /// <summary>
-        /// קביעת מחיר בסיס לפי סוג פרקט
+        /// קביעת מחיר בסיס לפי סוג פרקט - עם קבלת מחירים מהמסד נתונים
         /// </summary>
         private static decimal GetBasePriceByType(string parquetType)
         {
-            if (string.IsNullOrEmpty(parquetType)) return 55;
+            try
+            {
+                // קבלת מחירים מהמסד נתונים
+                DBservices db = new DBservices();
+                var settings = db.GetSystemSettings(null);
+                
+                var spcPrice = decimal.Parse(settings.FirstOrDefault(s => s.SettingKey == "DEFAULT_PARQUET_PRICE_SPC")?.SettingValue ?? "60");
+                var woodPrice = decimal.Parse(settings.FirstOrDefault(s => s.SettingKey == "DEFAULT_PARQUET_PRICE_WOOD")?.SettingValue ?? "85");
+                var fishbonePrice = decimal.Parse(settings.FirstOrDefault(s => s.SettingKey == "DEFAULT_PARQUET_PRICE_FISHBONE")?.SettingValue ?? "150");
+                
+                if (string.IsNullOrEmpty(parquetType)) return spcPrice;
 
-            string type = parquetType.ToLower();
-            
-            // עץ מלא - המחיר הגבוה ביותר
-            if (type.Contains("עץ מלא") || type.Contains("אלון") || type.Contains("אגוז")) return 85;
-            
-            // פישבון - מורכב להתקנה
-            if (type.Contains("פישבון") || type.Contains("הרינגבון")) return 95;
-            
-            // עץ הנדסי - איכות בינונית-גבוהה
-            if (type.Contains("הנדסי") || type.Contains("עץ")) return 70;
-            
-            // למינציה - איכות בינונית
-            if (type.Contains("למינציה") || type.Contains("למינט")) return 50;
-            
-            // ויניל/PVC - הזול ביותר
-            if (type.Contains("ויניל") || type.Contains("pvc") || type.Contains("פי.וי.סי")) return 40;
-            
-            // ברירת מחדל
-            return 60;
+                string type = parquetType.ToLower();
+                
+                // עץ מלא - המחיר הגבוה ביותר
+                if (type.Contains("עץ מלא") || type.Contains("אלון") || type.Contains("אגוז")) return woodPrice;
+                
+                // פישבון - מורכב להתקנה
+                if (type.Contains("פישבון") || type.Contains("הרינגבון")) return fishbonePrice;
+                
+                // עץ הנדסי - איכות בינונית-גבוהה
+                if (type.Contains("הנדסי") || type.Contains("עץ")) return woodPrice * 0.85m;
+                
+                // למינציה - איכות בינונית
+                if (type.Contains("למינציה") || type.Contains("למינט")) return spcPrice;
+                
+                // ויניל/PVC - הזול ביותר
+                if (type.Contains("ויניל") || type.Contains("pvc") || type.Contains("פי.וי.סי")) return spcPrice * 0.8m;
+                
+                // ברירת מחדל
+                return spcPrice;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error getting prices from DB, using defaults: {ex.Message}");
+                
+                // ברירת מחדל במקרה של שגיאה
+                if (string.IsNullOrEmpty(parquetType)) return 55;
+
+                string type = parquetType.ToLower();
+                
+                if (type.Contains("עץ מלא") || type.Contains("אלון") || type.Contains("אגוז")) return 85;
+                if (type.Contains("פישבון") || type.Contains("הרינגבון")) return 95;
+                if (type.Contains("הנדסי") || type.Contains("עץ")) return 70;
+                if (type.Contains("למינציה") || type.Contains("למינט")) return 50;
+                if (type.Contains("ויניל") || type.Contains("pvc") || type.Contains("פי.וי.סי")) return 40;
+                
+                return 60;
+            }
         }
 
         /// <summary>

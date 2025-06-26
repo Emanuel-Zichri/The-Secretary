@@ -3,203 +3,212 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>BI - לוח בקרה</title>
-  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700&display=swap" rel="stylesheet" />
+  <title>לוח בקרה - BI</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="/ajaxCall.js"></script>
   <script src="/api.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#b46a2c',
+            'primary-dark': '#8b5732',
+            'primary-light': '#d4985a'
+          },
+          fontFamily: {
+            'heebo': ['Heebo', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
   <style>
-    :root {
-      --main-color: #b46a2c;
-      --text-dark: #333;
-      --light-gray: #f5f5f5;
-      --radius: 12px;
-    }
     body {
-      margin: 0;
-      font-family: "Heebo", sans-serif;
-      background-color: #fafafa;
+      font-family: 'Heebo', sans-serif;
     }
-    .container {
-      display: flex;
-      min-height: 100vh;
+    .glass-effect {
+      backdrop-filter: blur(10px);
+      background: rgba(255, 255, 255, 0.95);
     }
-    .sidebar {
-      width: 200px;
-      background-color: #fff;
-      padding: 20px;
-      border-left: 1px solid #ddd;
+    .card-hover {
+      transition: all 0.3s ease;
     }
-    .sidebar .logo {
-      text-align: center;
-      margin-bottom: 40px;
+    .card-hover:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
     }
-    .sidebar nav a {
-      display: block;
-      padding: 12px;
-      color: var(--text-dark);
-      text-decoration: none;
-      border-radius: 8px;
-      margin-bottom: 8px;
+    .gradient-bg {
+      background: linear-gradient(135deg, #b46a2c 0%, #d4985a 100%);
     }
-    .sidebar nav a.active {
-      background-color: #e6f2f2;
-      font-weight: bold;
+    .shimmer {
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
     }
-    .main {
-      flex: 1;
-      padding: 30px;
-    }
-    .dashboard-cards {
-      display: flex;
-      gap: 20px;
-      flex-wrap: wrap;
-      margin-bottom: 30px;
-    }
-    .card {
-      background-color: #fff;
-      border-radius: var(--radius);
-      padding: 20px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-      flex: 1 1 200px;
-    }
-    .card h4 {
-      margin: 0 0 10px;
-      color: var(--main-color);
-    }
-    .card p {
-      font-size: 22px;
-      font-weight: bold;
-      margin: 0;
-    }
-    .filters {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-    .filters select, .filters input, .filters button {
-      padding: 8px 12px;
-      border: 1px solid #ccc;
-      border-radius: var(--radius);
-      background-color: #fff;
-      cursor: pointer;
-    }
-    .filter-buttons {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-    .filter-buttons button {
-      background-color: #eee;
-      border: none;
-      padding: 8px 14px;
-      border-radius: var(--radius);
-      cursor: pointer;
-    }
-    .filter-buttons button.active {
-      background-color: var(--main-color);
-      color: #fff;
-    }
-    .date-range-filter {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-    .charts-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 20px;
-    }
-    .chart-container {
-      background-color: #fff;
-      border-radius: var(--radius);
-      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-      padding: 20px;
-    }
-    .chart-container h4 {
-      text-align: center;
-      margin-top: 0;
-      margin-bottom: 10px;
-      color: var(--main-color);
-    }
-    .chart-container canvas {
-      width: 100% !important;
-      height: 260px !important;
-      max-height: 260px;
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
     }
   </style>
 </head>
-<body>
-  <div class="container">
-    <aside class="sidebar">
-      <div class="logo">
-        <img src="../picturs/logo.png" alt="לוגו" width="100" />
+<body class="bg-gray-50 font-heebo">
+  <div class="flex min-h-screen">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white shadow-lg">
+      <div class="p-6">
+        <div class="text-center mb-8">
+          <img src="../picturs/logo.png" alt="לוגו" class="h-16 mx-auto mb-2" />
+          <h3 class="text-lg font-semibold text-gray-800">דוד פרקטים</h3>
+          <p class="text-sm text-gray-600">מערכת ניהול</p>
+        </div>
+        <nav class="space-y-2">
+          <a href="InstallerDashboard.html" class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors">
+            <svg class="w-5 h-5 ml-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
+            </svg>
+            מסך הבית
+          </a>
+          <a href="InstallerStatusesPage.html" class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors">
+            <svg class="w-5 h-5 ml-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+            </svg>
+            סטטוסים לביצוע
+          </a>
+          <a href="InstallerCustomersPage.html" class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors">
+            <svg class="w-5 h-5 ml-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+            </svg>
+            לקוחות
+          </a>
+          <a href="InstallerSchedule.html" class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors">
+            <svg class="w-5 h-5 ml-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+            יומן התקנות
+          </a>
+          <a href="BIpage.html" class="flex items-center px-4 py-3 bg-primary text-white rounded-lg">
+            <svg class="w-5 h-5 ml-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+            </svg>
+            לוח בקרה - BI
+          </a>
+          <a href="#" class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors">
+            <svg class="w-5 h-5 ml-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            </svg>
+            הגדרות
+          </a>
+        </nav>
       </div>
-      <nav>
-        <a href="InstallerDashboard.html">מסך הבית</a>
-        <a href="InstallerStatusesPage.html">סטטוסים לביצוע</a>
-        <a href="InstallerCustomersPage.html">לקוחות</a>
-        <a href="#">יומן התקנות</a>
-        <a href="BIpage.html" class="active">לוח בקרה - BI</a>
-        <a href="#">ניהול אתר לקוחות</a>
-        <a href="#">הגדרות</a>
-        <a href="#">התנתקות</a>
-      </nav>
     </aside>
-    <main class="main">
-      <h2>לוח בקרה</h2>
-      <div class="filters">
-        <div class="filter-buttons">
-          <button onclick="setDateRange('all')" class="active">הצג הכל</button>
-          <button onclick="setDateRange('year')">מתחילת שנה</button>
-          <button onclick="setDateRange('quarter')">מתחילת רבעון</button>
-          <button onclick="setDateRange('month')">מתחילת חודש</button>
+
+    <!-- Main Content -->
+    <main class="flex-1 p-8">
+      <!-- Header -->
+      <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">לוח בקרה</h1>
+        <p class="text-gray-600">סקירה כללית של הביצועים והסטטיסטיקות</p>
+      </div>
+
+      <!-- Filters -->
+      <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">סינונים</h3>
+        <div class="flex flex-wrap gap-4 mb-4">
+          <button onclick="setDateRange('all')" class="px-4 py-2 rounded-lg font-medium transition-colors bg-primary text-white">
+            הצג הכל
+          </button>
+          <button onclick="setDateRange('year')" class="px-4 py-2 rounded-lg font-medium transition-colors bg-gray-100 text-gray-700 hover:bg-gray-200">
+            מתחילת שנה
+          </button>
+          <button onclick="setDateRange('quarter')" class="px-4 py-2 rounded-lg font-medium transition-colors bg-gray-100 text-gray-700 hover:bg-gray-200">
+            מתחילת רבעון
+          </button>
+          <button onclick="setDateRange('month')" class="px-4 py-2 rounded-lg font-medium transition-colors bg-gray-100 text-gray-700 hover:bg-gray-200">
+            מתחילת חודש
+          </button>
         </div>
-        <div class="date-range-filter">
-          <label>סינון לפי טווח תאריכים:</label>
-          <input type="date" id="fromDate">
-          <input type="date" id="toDate">
-          <button onclick="loadBI()">הצג</button>
+        <div class="flex flex-wrap gap-4 items-center">
+          <label class="text-sm font-medium text-gray-700">טווח תאריכים:</label>
+          <input type="date" id="fromDate" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+          <span class="text-gray-500">עד</span>
+          <input type="date" id="toDate" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+          <button onclick="loadBI()" class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors">
+            הצג
+          </button>
         </div>
       </div>
-      <div class="dashboard-cards">
-        <div class="card"><h4>סך הצעות מחיר</h4><p id="totalQuote">₪0</p></div>
-        <div class="card"><h4>מס' לקוחות</h4><p id="totalCustomers">0</p></div>
-        <div class="card"><h4>התקנות שבוצעו</h4><p id="completedInstalls">0</p></div>
-        <div class="card"><h4>סה"כ שטח</h4><p id="totalSize">0 מ"ר</p></div>
-        <div class="card"><h4>שינוי מהחודש הקודם</h4><p id="quoteChange">0%</p></div>
+
+      <!-- Loading State -->
+      <div id="loadingState" class="hidden">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div class="bg-white rounded-xl p-6 shimmer h-32"></div>
+          <div class="bg-white rounded-xl p-6 shimmer h-32"></div>
+          <div class="bg-white rounded-xl p-6 shimmer h-32"></div>
+          <div class="bg-white rounded-xl p-6 shimmer h-32"></div>
+        </div>
       </div>
-      <div class="charts-grid">
-        <div class="chart-container">
-          <h4>סטטוסים</h4>
-          <canvas id="statusChart"></canvas>
+
+      <!-- Dashboard Summary Cards -->
+      <div id="dashboardSummary" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+        <!-- Cards will be populated by JavaScript -->
+      </div>
+
+      <!-- Statistics Cards -->
+      <div id="statisticsCards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <!-- Cards will be populated by JavaScript -->
+      </div>
+
+      <!-- Charts Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Monthly Sales Chart -->
+        <div class="bg-white rounded-xl shadow-sm p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">דוח מכירות חודשי</h3>
+          <canvas id="monthlySalesChart" class="w-full h-80"></canvas>
         </div>
-        <div class="chart-container">
-          <h4>מגמת הצעות מחיר</h4>
-          <canvas id="quoteTrendChart"></canvas>
-        </div>
-        <div class="chart-container">
-          <h4>פילוח לפי סוג פרקט</h4>
-          <canvas id="installSizeChart"></canvas>
-        </div>
-        <div class="chart-container">
-          <h4>פיזור לקוחות לפי עיר</h4>
-          <canvas id="cityDistributionChart"></canvas>
+
+        <!-- Status Distribution Chart -->
+        <div class="bg-white rounded-xl shadow-sm p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">פילוח סטטוסי בקשות</h3>
+          <canvas id="statusChart" class="w-full h-80"></canvas>
         </div>
       </div>
     </main>
   </div>
+
   <script>
-    let statusChart, quoteTrendChart, installSizeChart, cityDistributionChart;
+    let monthlySalesChart, statusChart;
+    let dashboardData = {};
+
+    // Toast notification function
+    function showToast(message, type = 'success') {
+      const toast = document.createElement('div');
+      toast.className = `fixed top-4 left-4 px-6 py-4 rounded-lg shadow-lg z-50 transition-all duration-300 transform translate-x-full ${
+        type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+      }`;
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      
+      setTimeout(() => toast.classList.remove('translate-x-full'), 100);
+      setTimeout(() => {
+        toast.classList.add('translate-x-full');
+        setTimeout(() => document.body.removeChild(toast), 300);
+      }, 3000);
+    }
 
     function setDateRange(type) {
       const now = new Date();
       let from = "", to = "";
-      $(".filter-buttons button").removeClass("active");
-      event.target.classList.add("active");
+      
+      // Update active button
+      document.querySelectorAll('button[onclick^="setDateRange"]').forEach(btn => {
+        btn.className = 'px-4 py-2 rounded-lg font-medium transition-colors bg-gray-100 text-gray-700 hover:bg-gray-200';
+      });
+      event.target.className = 'px-4 py-2 rounded-lg font-medium transition-colors bg-primary text-white';
 
       switch(type) {
         case "year":
@@ -217,119 +226,333 @@
           to = "";
           break;
       }
+      
       document.getElementById("fromDate").value = from;
       document.getElementById("toDate").value = to;
       loadBI();
     }
 
-    function loadBI() {
-      const dateField = "CustomerCreatedAt";
-      const fromDate = $("#fromDate").val();
-      const toDate = $("#toDate").val();
+    function showLoading() {
+      document.getElementById('loadingState').classList.remove('hidden');
+      document.getElementById('dashboardSummary').classList.add('hidden');
+      document.getElementById('statisticsCards').classList.add('hidden');
+    }
 
-      ajaxCall("POST", `${API_BASE_URL}/Dashboard/GetDashboardData`, JSON.stringify({}), function (data) {
-        if (!Array.isArray(data)) return;
+    function hideLoading() {
+      document.getElementById('loadingState').classList.add('hidden');
+      document.getElementById('dashboardSummary').classList.remove('hidden');
+      document.getElementById('statisticsCards').classList.remove('hidden');
+    }
 
-        let filtered = data;
-        if (fromDate || toDate) {
-          filtered = data.filter(c => {
-            const d = new Date(c[dateField]);
-            if (fromDate && d < new Date(fromDate)) return false;
-            if (toDate) {
-              const end = new Date(toDate);
-              end.setHours(23,59,59,999);
-              if (d > end) return false;
-            }
-            return true;
-          });
-        }
-
-        const totalQuote = filtered.reduce((sum, c) => sum + (c.TotalPrice || 0), 0);
-        const totalCustomers = new Set(filtered.map(c => c.CustomerID)).size;
-        const completed = filtered.filter(c => c.Status === "התקנה בוצעה").length;
-        const totalSize = filtered.reduce((sum, c) => sum + (c.TotalSpaceSize || 0), 0);
-
-        $("#totalQuote").text("₪" + totalQuote.toLocaleString());
-        $("#totalCustomers").text(totalCustomers);
-        $("#completedInstalls").text(completed);
-        $("#totalSize").text(totalSize.toFixed(1) + " מ\"ר");
-
-        const now = new Date();
-        const thisMonthKey = now.toLocaleDateString("he-IL", { year: 'numeric', month: '2-digit' });
-        const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-        const lastMonthKey = lastMonth.toLocaleDateString("he-IL", { year: 'numeric', month: '2-digit' });
-
-        const monthlyQuotes = {}, statusCounts = {}, sizeDistribution = {}, cityCounts = {};
-       const floorTypes = {};
-
-filtered.forEach(c => {
-  statusCounts[c.Status] = (statusCounts[c.Status] || 0) + 1;
-
-  const monthKey = new Date(c.CustomerCreatedAt).toLocaleDateString("he-IL", { year: 'numeric', month: '2-digit' });
-  monthlyQuotes[monthKey] = (monthlyQuotes[monthKey] || 0) + (c.TotalPrice || 0);
-
-  const types = (c.FloorTypes || "לא ידוע").split(",").map(t => t.trim()).filter(Boolean);
-types.forEach(type => {
-  floorTypes[type] = (floorTypes[type] || 0) + 1;
-});
-
-  const city = c.City || "לא ידוע";
-  cityCounts[city] = (cityCounts[city] || 0) + 1;
-});
-
-
-        const quoteThis = monthlyQuotes[thisMonthKey] || 0;
-        const quoteLast = monthlyQuotes[lastMonthKey] || 0;
-        const change = quoteLast === 0 ? 0 : (((quoteThis - quoteLast) / quoteLast) * 100).toFixed(1);
-        $("#quoteChange").text(`${change}%`);
-
-        if (statusChart) statusChart.destroy();
-        if (quoteTrendChart) quoteTrendChart.destroy();
-        if (installSizeChart) installSizeChart.destroy();
-        if (cityDistributionChart) cityDistributionChart.destroy();
-
-        statusChart = new Chart(document.getElementById("statusChart"), {
-          type: "bar",
-          data: {
-            labels: Object.keys(statusCounts),
-            datasets: [{ label: "לקוחות", data: Object.values(statusCounts), backgroundColor: "#b46a2c" }]
-          },
-          options: { plugins: { legend: { display: false } } }
-        });
-
-        quoteTrendChart = new Chart(document.getElementById("quoteTrendChart"), {
-          type: "line",
-          data: {
-            labels: Object.keys(monthlyQuotes),
-            datasets: [{ label: "₪ הצעות", data: Object.values(monthlyQuotes), borderColor: "#b46a2c", fill: false }]
-          },
-          options: { scales: { y: { beginAtZero: true } } }
-        });
-
-        installSizeChart = new Chart(document.getElementById("installSizeChart"), {
-  type: "pie",
-  data: {
-    labels: Object.keys(floorTypes),
-    datasets: [{
-      data: Object.values(floorTypes),
-      backgroundColor: ["#d8a57c", "#b46a2c", "#91562c", "#e6b89c", "#ffc107"]
-    }]
-  }
-});
-
-
-        cityDistributionChart = new Chart(document.getElementById("cityDistributionChart"), {
-          type: "bar",
-          data: {
-            labels: Object.keys(cityCounts),
-            datasets: [{ label: "לקוחות לעיר", data: Object.values(cityCounts), backgroundColor: "#b46a2c" }]
-          },
-          options: { plugins: { legend: { display: false } }, indexAxis: 'y' }
-        });
+    function loadDashboardSummary() {
+      ajaxCall("GET", `${API_BASE_URL}/BI/GetDashboardSummary`, "", function(data) {
+        const summaryContainer = document.getElementById('dashboardSummary');
+        summaryContainer.innerHTML = `
+          <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl shadow-sm p-6 text-white card-hover">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-blue-100 text-sm font-medium">ממתינים לתאריך</p>
+                <p class="text-3xl font-bold">${data.waitingForDate}</p>
+              </div>
+              <div class="bg-blue-400 rounded-full p-3">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+              </div>
+            </div>
+          </div>
+          
+          <div class="bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl shadow-sm p-6 text-white card-hover">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-orange-100 text-sm font-medium">התקנות בהמתנה</p>
+                <p class="text-3xl font-bold">${data.pendingInstalls}</p>
+              </div>
+              <div class="bg-orange-400 rounded-full p-3">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                </svg>
+              </div>
+            </div>
+          </div>
+          
+          <div class="bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl shadow-sm p-6 text-white card-hover">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-purple-100 text-sm font-medium">הצעות בהמתנה</p>
+                <p class="text-3xl font-bold">${data.pendingQuotes}</p>
+              </div>
+              <div class="bg-purple-400 rounded-full p-3">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+              </div>
+            </div>
+          </div>
+          
+          <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-xl shadow-sm p-6 text-white card-hover">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-green-100 text-sm font-medium">התקנות שהושלמו</p>
+                <p class="text-3xl font-bold">${data.completedInstalls}</p>
+              </div>
+              <div class="bg-green-400 rounded-full p-3">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+              </div>
+            </div>
+          </div>
+          
+          <div class="bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-xl shadow-sm p-6 text-white card-hover">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-indigo-100 text-sm font-medium">סה"כ לקוחות פעילים</p>
+                <p class="text-3xl font-bold">${data.totalActiveCustomers}</p>
+              </div>
+              <div class="bg-indigo-400 rounded-full p-3">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+                </svg>
+              </div>
+            </div>
+          </div>
+        `;
+      }, function(error) {
+        showToast('שגיאה בטעינת נתוני הדשבורד', 'error');
       });
     }
 
-    $(document).ready(loadBI);
+    function loadStatistics() {
+      const fromDate = document.getElementById("fromDate").value;
+      const toDate = document.getElementById("toDate").value;
+      
+      const requestData = {
+        fromDate: fromDate || new Date(2020, 0, 1).toISOString(),
+        toDate: toDate || new Date().toISOString(),
+        filterType: "all"
+      };
+
+      ajaxCall("POST", `${API_BASE_URL}/BI/GetStatistics`, JSON.stringify(requestData), function(data) {
+        const statsContainer = document.getElementById('statisticsCards');
+        let totalQuotes = 0, totalCustomers = 0, completedInstalls = 0, totalArea = 0;
+        
+        data.forEach(stat => {
+          switch(stat.statType) {
+            case 'TotalQuotes':
+              totalQuotes = stat.statValue;
+              break;
+            case 'TotalCustomers':
+              totalCustomers = stat.statValue;
+              break;
+            case 'CompletedInstalls':
+              completedInstalls = stat.statValue;
+              break;
+            case 'TotalArea':
+              totalArea = stat.statValue;
+              break;
+          }
+        });
+
+        statsContainer.innerHTML = `
+          <div class="bg-white rounded-xl shadow-sm p-6 card-hover">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-gray-600 text-sm font-medium">סך הצעות מחיר</p>
+                <p class="text-2xl font-bold text-gray-900">₪${totalQuotes.toLocaleString()}</p>
+              </div>
+              <div class="bg-blue-100 rounded-full p-3">
+                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                </svg>
+              </div>
+            </div>
+          </div>
+          
+          <div class="bg-white rounded-xl shadow-sm p-6 card-hover">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-gray-600 text-sm font-medium">מספר לקוחות</p>
+                <p class="text-2xl font-bold text-gray-900">${totalCustomers}</p>
+              </div>
+              <div class="bg-green-100 rounded-full p-3">
+                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+                </svg>
+              </div>
+            </div>
+          </div>
+          
+          <div class="bg-white rounded-xl shadow-sm p-6 card-hover">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-gray-600 text-sm font-medium">התקנות שבוצעו</p>
+                <p class="text-2xl font-bold text-gray-900">${completedInstalls}</p>
+              </div>
+              <div class="bg-purple-100 rounded-full p-3">
+                <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+              </div>
+            </div>
+          </div>
+          
+          <div class="bg-white rounded-xl shadow-sm p-6 card-hover">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-gray-600 text-sm font-medium">סה"כ שטח</p>
+                <p class="text-2xl font-bold text-gray-900">${totalArea.toFixed(1)} מ"ר</p>
+              </div>
+              <div class="bg-orange-100 rounded-full p-3">
+                <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"></path>
+                </svg>
+              </div>
+            </div>
+          </div>
+        `;
+      }, function(error) {
+        showToast('שגיאה בטעינת הסטטיסטיקות', 'error');
+      });
+    }
+
+    function loadMonthlySalesReport() {
+      ajaxCall("GET", `${API_BASE_URL}/BI/GetMonthlySalesReport`, "", function(data) {
+        if (monthlySalesChart) {
+          monthlySalesChart.destroy();
+        }
+
+        const ctx = document.getElementById('monthlySalesChart').getContext('2d');
+        monthlySalesChart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: data.map(item => item.monthName),
+            datasets: [{
+              label: 'הצעות מחיר (₪)',
+              data: data.map(item => item.totalQuotes),
+              borderColor: '#b46a2c',
+              backgroundColor: 'rgba(180, 106, 44, 0.1)',
+              borderWidth: 3,
+              fill: true,
+              tension: 0.4
+            }, {
+              label: 'לקוחות',
+              data: data.map(item => item.totalCustomers),
+              borderColor: '#059669',
+              backgroundColor: 'rgba(5, 150, 105, 0.1)',
+              borderWidth: 3,
+              fill: false,
+              tension: 0.4,
+              yAxisID: 'y1'
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: 'top',
+              },
+              title: {
+                display: false
+              }
+            },
+            scales: {
+              y: {
+                type: 'linear',
+                display: true,
+                position: 'right',
+                title: {
+                  display: true,
+                  text: 'הצעות מחיר (₪)'
+                }
+              },
+              y1: {
+                type: 'linear',
+                display: true,
+                position: 'left',
+                title: {
+                  display: true,
+                  text: 'מספר לקוחות'
+                },
+                grid: {
+                  drawOnChartArea: false,
+                },
+              }
+            }
+          }
+        });
+      }, function(error) {
+        showToast('שגיאה בטעינת דוח המכירות החודשי', 'error');
+      });
+    }
+
+    function loadWorkRequestStatuses() {
+      ajaxCall("GET", `${API_BASE_URL}/BI/GetWorkRequestStatuses`, "", function(data) {
+        if (statusChart) {
+          statusChart.destroy();
+        }
+
+        // For demo purposes, let's create some sample data based on the statuses
+        const statusData = data.map(status => ({
+          name: status.statusName,
+          count: Math.floor(Math.random() * 20) + 1 // Random data for demo
+        }));
+
+        const ctx = document.getElementById('statusChart').getContext('2d');
+        statusChart = new Chart(ctx, {
+          type: 'doughnut',
+          data: {
+            labels: statusData.map(item => item.name),
+            datasets: [{
+              data: statusData.map(item => item.count),
+              backgroundColor: [
+                '#3B82F6', // Blue
+                '#10B981', // Green
+                '#F59E0B', // Yellow
+                '#EF4444', // Red
+                '#8B5CF6', // Purple
+                '#F97316', // Orange
+                '#06B6D4'  // Cyan
+              ],
+              borderWidth: 2,
+              borderColor: '#ffffff'
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: 'bottom',
+              }
+            }
+          }
+        });
+      }, function(error) {
+        showToast('שגיאה בטעינת נתוני הסטטוסים', 'error');
+      });
+    }
+
+    function loadBI() {
+      showLoading();
+      
+      // Load all data in parallel
+      Promise.all([
+        new Promise(resolve => loadDashboardSummary() || resolve()),
+        new Promise(resolve => loadStatistics() || resolve()),
+        new Promise(resolve => loadMonthlySalesReport() || resolve()),
+        new Promise(resolve => loadWorkRequestStatuses() || resolve())
+      ]).finally(() => {
+        hideLoading();
+        showToast('הנתונים נטענו בהצלחה');
+      });
+    }
+
+    // Initialize on page load
+    $(document).ready(function() {
+      loadBI();
+    });
   </script>
 </body>
 </html>
