@@ -75,5 +75,20 @@ namespace FinalProject.BL
                 return 0;
             }
         }
+
+        public static int UpdateStatus(int customerID, string newStatus)
+        {
+            DBservices dbServices = new DBservices();
+            try
+            {
+                int result = dbServices.UpdateCustomerStatus(customerID, newStatus);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error updating customer status: {ex.Message}");
+                return 0;
+            }
+        }
     }
 }

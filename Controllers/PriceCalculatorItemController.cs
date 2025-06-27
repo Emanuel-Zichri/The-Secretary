@@ -94,6 +94,22 @@ namespace FinalProject.Controllers
             }
         }
 
+        [HttpGet("GetItemSuggestions")]
+        public List<ItemSuggestion> GetItemSuggestions(string query, int maxResults = 10)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(query) || query.Length < 2)
+                    return new List<ItemSuggestion>();
 
+                DBservices db = new DBservices();
+                return db.GetItemSuggestions(query, maxResults);
+            }
+            catch (Exception ex)
+            {
+                // Return empty list on error rather than throwing
+                return new List<ItemSuggestion>();
+            }
+        }
     }
 }

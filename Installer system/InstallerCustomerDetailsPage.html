@@ -548,9 +548,16 @@ function addCustomItem() {
   div.classList.add("calculator-item");
   div.setAttribute("data-label", "");
   div.setAttribute("data-price", "0");
+  
+  // יצירת ID יחודי לכל פרמטר זמני
+  const uniqueId = 'temp_' + Date.now();
+  
   div.innerHTML = `
     <div class="calculator-header">
-      <div class="calculator-title"><input type="text" placeholder="שם פרמטר זמני" oninput="this.closest('.calculator-item').dataset.label = this.value" style="width: 90%; padding: 6px;"></div>
+      <div class="calculator-title" style="position: relative;">
+        <input type="text" id="${uniqueId}_name" placeholder="התחל להקליד שם פרמטר..." oninput="this.closest('.calculator-item').dataset.label = this.value" style="width: 90%; padding: 6px;">
+        <div id="${uniqueId}_suggestions" style="position:absolute; top:100%; left:0; right:0; background:white; border:1px solid #ccc; border-top:none; max-height:200px; overflow-y:auto; z-index:1000; display:none;"></div>
+      </div>
       <div class="calculator-actions">
         <button title="הסבר"><span>ℹ️</span></button>
         <button title="ערוך"><span>✏️</span></button>
@@ -560,21 +567,24 @@ function addCustomItem() {
     <div class="calculator-body">
       <div>
         <label>מחיר:</label>
-<input type="number" class="price-input" value="0" oninput="this.closest('.calculator-item').dataset.price = this.value" style="width: 80px; padding: 6px;">
+        <input type="number" id="${uniqueId}_price" class="price-input" value="0" oninput="this.closest('.calculator-item').dataset.price = this.value" style="width: 80px; padding: 6px;">
       </div>
       <div>
         <label>כמות:</label>
-    <div class="quantity-control">
-  <button onclick="adjustQuantity(this, -1)">-</button>
-  <span class="quantity-display">0</span>
-  <input type="number" class="quantity-input" value="0" style="display: none;">
-  <button onclick="adjustQuantity(this, 1)">+</button>
-</div>
-
+        <div class="quantity-control">
+          <button onclick="adjustQuantity(this, -1)">-</button>
+          <span class="quantity-display">0</span>
+          <input type="number" class="quantity-input" value="0" style="display: none;">
+          <button onclick="adjustQuantity(this, 1)">+</button>
+        </div>
       </div>
     </div>
   `;
+  
   container.appendChild(div);
+  
+  // הפעלת האוטוקומפליט עבור הפרמטר החדש
+  setupTempItemAutocomplete(uniqueId);
 }
 
 
@@ -1360,6 +1370,121 @@ function rejectCandidates(candidates) {
 
   document.querySelector("div[style*='z-index: 9999']")?.remove(); 
 }
+
+// ==================== AUTOCOMPLETE FUNCTIONALITY ====================
+function getItemSuggestions(query, callback) {
+  if (!query || query.length < 2) {
+    callback([]);
+    return;
+  }
+
+  ajaxCall(
+    'GET',
+    `${API_BASE_URL}/PriceCalculatorItem/GetItemSuggestions?query=${encodeURIComponent(query)}&maxResults=10`,
+    null,
+    function(suggestions) {
+      callback(suggestions || []);
+    },
+    function(err) {
+      console.error('שגיאה בקבלת הצעות:', err);
+      callback([]);
+    }
+  );
+}
+
+function showSuggestions(suggestions, uniqueId) {
+  const list = document.getElementById(uniqueId + '_suggestions');
+  
+  if (!suggestions || suggestions.length === 0) {
+    list.style.display = 'none';
+    return;
+  }
+
+  list.innerHTML = '';
+  list.style.display = 'block';
+
+  suggestions.forEach(suggestion => {
+    const item = document.createElement('div');
+    item.style.cssText = 'padding:8px; cursor:pointer; border-bottom:1px solid #eee; text-align:right;';
+    item.innerHTML = `
+      <div style="font-weight:bold;">${suggestion.suggestionText}</div>
+      <div style="font-size:12px; color:#666;">
+        ${suggestion.source} • ${suggestion.suggestedPrice} ₪
+      </div>
+    `;
+    
+    item.addEventListener('click', () => {
+      const nameInput = document.getElementById(uniqueId + '_name');
+      const priceInput = document.getElementById(uniqueId + '_price');
+      
+      nameInput.value = suggestion.suggestionText;
+      priceInput.value = suggestion.suggestedPrice;
+      
+      // עדכון הdataset של הפריט
+      const calculatorItem = nameInput.closest('.calculator-item');
+      calculatorItem.dataset.label = suggestion.suggestionText;
+      calculatorItem.dataset.price = suggestion.suggestedPrice;
+      
+      list.style.display = 'none';
+      calculateQuote(); // עדכון החישוב
+    });
+
+    item.addEventListener('mouseenter', () => {
+      item.style.backgroundColor = '#f0f8ff';
+    });
+
+    item.addEventListener('mouseleave', () => {
+      item.style.backgroundColor = 'white';
+    });
+
+    list.appendChild(item);
+  });
+}
+
+function hideSuggestions(uniqueId) {
+  setTimeout(() => {
+    const list = document.getElementById(uniqueId + '_suggestions');
+    if (list) {
+      list.style.display = 'none';
+    }
+  }, 200); // דיליי קטן כדי לאפשר לחיצה על הצעה
+}
+
+function setupTempItemAutocomplete(uniqueId) {
+  const input = document.getElementById(uniqueId + '_name');
+  let debounceTimer;
+
+  input.addEventListener('input', function() {
+    clearTimeout(debounceTimer);
+    const query = this.value.trim();
+    
+    debounceTimer = setTimeout(() => {
+      getItemSuggestions(query, (suggestions) => {
+        showSuggestions(suggestions, uniqueId);
+      });
+    }, 300); // חכה 300ms אחרי שהמשתמש הפסיק להקליד
+  });
+
+  input.addEventListener('focus', function() {
+    if (this.value.length >= 2) {
+      getItemSuggestions(this.value, (suggestions) => {
+        showSuggestions(suggestions, uniqueId);
+      });
+    }
+  });
+
+  input.addEventListener('blur', () => hideSuggestions(uniqueId));
+
+  // מקשי מקלדת
+  input.addEventListener('keydown', function(e) {
+    const list = document.getElementById(uniqueId + '_suggestions');
+    
+    if (e.key === 'Escape') {
+      list.style.display = 'none';
+    }
+  });
+}
+
 function updateWorkRequestStatus(newStatus) {
   if (!currentRequestID) {
     alert("⚠️ לא נמצא בקשת עבודה לעדכון סטטוס");

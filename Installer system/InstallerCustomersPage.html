@@ -1,254 +1,354 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>לקוחות</title>
-  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700&display=swap" rel="stylesheet" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>לקוחות - דוד פרקטים</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script src="/ajaxCall.js"></script>
-  <script src="/api.js"></script>
+  <script src="../ajaxCall.js"></script>
+  <script src="../api.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#b46a2c',
+            'primary-dark': '#8b5732',
+            'primary-light': '#d4985a'
+          },
+          fontFamily: {
+            'heebo': ['Heebo', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
   <style>
-    :root {
-      --main-color: #b46a2c;
-      --text-dark: #333;
-      --light-gray: #f5f5f5;
-      --radius: 12px;
-    }
     body {
-      margin: 0;
-      font-family: "Heebo", sans-serif;
-      background-color: #fafafa;
+      font-family: 'Heebo', sans-serif;
     }
-    .container {
-      display: flex;
-      min-height: 100vh;
+    .card-hover {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    .sidebar {
-      width: 200px;
-      background-color: #fff;
-      padding: 20px;
-      border-left: 1px solid #ddd;
-    }
-    .sidebar .logo {
-      text-align: center;
-      margin-bottom: 40px;
-    }
-    .sidebar nav a {
-      display: block;
-      padding: 12px;
-      color: var(--text-dark);
-      text-decoration: none;
-      border-radius: 8px;
-      margin-bottom: 8px;
-    }
-    .sidebar nav a.active {
-      background-color: #e6f2f2;
-      font-weight: bold;
-    }
-    .main {
-      flex: 1;
-      padding: 30px;
-    }
-    .top-bar {
-      margin-bottom: 20px;
-    }
-    
-    .filters,
-    .sorters {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-bottom: 20px;
-      align-items: center;
-    }
-    .filters label,
-    .sorters label {
-      font-weight: bold;
-      margin-left: 10px;
-    }
-    .filters input,
-    .filters select,
-    .sorters select {
-      padding: 8px;
-      border: 1px solid #ccc;
-      border-radius: var(--radius);
-    }
-    .btn {
-      background-color: var(--main-color);
-      color: #fff;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 6px;
-      cursor: pointer;
-      margin-right: 10px;
-    }
-    .arrow-btn {
-      background: none;
-      border: none;
-      color: var(--main-color);
-      font-size: 18px;
-      cursor: pointer;
-    }
-    .customers-table {
-      background: #fff;
-      border-radius: var(--radius);
-      padding: 20px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    th,
-    td {
-      padding: 12px 10px;
-      border-bottom: 1px solid #eee;
-      text-align: right;
-      font-size: 14px;
-    }
-    th {
-      background-color: #f9f9f9;
-      font-weight: bold;
-    }
-    tr:hover {
-      background-color: #f1f1f1;
-    }
-    .status {
-      color: var(--main-color);
-      font-weight: bold;
-    }
-    .actions {
-      display: flex;
-      gap: 10px;
-    }
-    .actions span {
-      cursor: pointer;
-      font-size: 16px;
-    }
-    a.customer-link {
-      color: var(--main-color);
-      text-decoration: none;
-      font-weight: bold;
-    }
-    .no-results {
-      color: var(--main-color);
-      font-weight: bold;
-      text-align: center;
-      padding: 20px;
+    .card-hover:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
     }
   </style>
 </head>
-<body>
-  <div class="container">
-    <aside class="sidebar">
-      <div class="logo">
-        <img src="../picturs/logo.png" alt="לוגו" width="100" />
+<body class="bg-gray-50 font-heebo">
+  <div class="flex min-h-screen">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white shadow-lg">
+      <div class="p-6">
+        <div class="text-center mb-8">
+          <img src="../picturs/logo.png" alt="לוגו" class="h-20 mx-auto mb-2" />
+          <h3 class="text-lg font-semibold text-gray-800">דוד פרקטים</h3>
+          <p class="text-sm text-gray-600">מערכת ניהול</p>
+        </div>
+        <nav class="space-y-2">
+          <a href="InstallerDashboard.html" class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors">
+            <svg class="w-5 h-5 ml-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
+            </svg>
+            מסך הבית
+          </a>
+          <a href="InstallerStatusesPage.html" class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors">
+            <svg class="w-5 h-5 ml-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+            </svg>
+            סטטוסים לביצוע
+          </a>
+          <a href="InstallerCustomersPage.html" class="flex items-center px-4 py-3 bg-primary text-white rounded-lg">
+            <svg class="w-5 h-5 ml-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+            </svg>
+            לקוחות
+          </a>
+          <a href="InstallerSchedule.html" class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors">
+            <svg class="w-5 h-5 ml-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+            יומן התקנות
+          </a>
+          <a href="BIpage.html" class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors">
+            <svg class="w-5 h-5 ml-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+            </svg>
+            לוח בקרה - BI
+          </a>
+          <a href="#" class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors">
+            <svg class="w-5 h-5 ml-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            </svg>
+            הגדרות
+          </a>
+        </nav>
       </div>
-      <nav>
-        <a href="InstallerDashboard.html">מסך הבית</a>
-        <a href="InstallerStatusesPage.html">סטטוסים לביצוע</a>
-        <a href="InstallerCustomersPage.html" class="active">לקוחות</a>
-        <a href="#">יומן התקנות</a>
-        <a href="BIpage.html">לוח בקרה - BI</a>
-        <a href="#">ניהול אתר לקוחות</a>
-        <a href="#">הגדרות</a>
-        <a href="#">התנתקות</a>
-      </nav>
     </aside>
-    <main class="main">
-      <div class="top-bar">
-        <h2>לקוחות</h2>
-      </div>
 
-      <div class="filters">
-        <label><strong>סנן לפי:</strong></label>
-        <input type="text" id="filterName" placeholder="שם לקוח" />
-        <input type="text" id="filterCity" placeholder="עיר" />
-        <select id="filterStatus">
-          <option value="">סטטוס</option>
-          <option value="טיוטה">טיוטה</option>
-          <option value="צפייה בסרטון לקוח">צפייה בסרטון לקוח</option>
-          <option value="טיוטה להצעת מחיר">טיוטה להצעת מחיר</option>
-          <option value="שליחת טיוטה ללקוח">שליחת טיוטה ללקוח</option>
-          <option value="העברה מקדמה">העברה מקדמה</option>
-          <option value="תיאום התקנה">תיאום התקנה</option>
-          <option value="התקנה בוצעה">התקנה בוצעה</option>
-          <option value="קבלת משוב">קבלת משוב</option>
-        </select>
-
-        <label for="filterDateType"><strong></strong></label>
-        <select id="filterDateType">
-          <option value="PlannedDate">תאריך התקנה</option>
-          <option value="CustomerCreatedAt">תאריך יצירה</option>
-        </select>
-
-        <input type="date" id="filterFromDate" />
-        <input type="date" id="filterToDate" />
-        <button class="btn" onclick="loadCustomers()">סנן</button>
-        <button class="btn" onclick="resetFilters()">בטל סינון</button>
-      </div>
-
-      <div class="sorters">
-        <label><strong>מיין לפי:</strong></label>
-        <div>
-          <select id="primarySort">
-            <option value="">מיון ראשי</option>
-            <option value="Name">שם לקוח</option>
-            <option value="City">עיר</option>
-            <option value="Status">סטטוס</option>
-            <option value="CustomerCreatedAt">תאריך יצירה</option>
-            <option value="PlannedDate">תאריך התקנה</option>
-          </select>
-          <span class="arrow-btn" onclick="setSortDirection('primary', 'asc')">&#x25B2;</span>
-          <span class="arrow-btn" onclick="setSortDirection('primary', 'desc')">&#x25BC;</span>
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col">
+      <!-- Top Header -->
+      <header class="bg-white shadow-sm border-b border-gray-200 px-8 py-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-4 space-x-reverse">
+            <img src="../picturs/logo.png" alt="לוגו" class="h-12 w-12" />
+            <div>
+              <h1 class="text-xl font-semibold text-gray-900">דוד פרקטים</h1>
+              <p class="text-sm text-gray-600">ניהול לקוחות</p>
+            </div>
+          </div>
+          <div class="flex items-center space-x-4 space-x-reverse">
+            <div class="flex items-center space-x-3 space-x-reverse">
+              <div class="text-right">
+                <p class="text-sm font-medium text-gray-900">שלום, דוד</p>
+                <p class="text-xs text-gray-600">מנהל מערכת</p>
+              </div>
+              <div class="h-10 w-10 bg-primary rounded-full flex items-center justify-center text-white font-semibold">
+                ד
+              </div>
+            </div>
+          </div>
         </div>
-        <div>
-          <select id="secondarySort">
-            <option value="">מיון משני</option>
-            <option value="Name">שם לקוח</option>
-            <option value="City">עיר</option>
-          <option value="Status">סטטוס</option>
-            <option value="CustomerCreatedAt">תאריך יצירה</option>
-            <option value="PlannedDate">תאריך התקנה</option>
-          </select>
-          <span class="arrow-btn" onclick="setSortDirection('secondary', 'asc')">&#x25B2;</span>
-          <span class="arrow-btn" onclick="setSortDirection('secondary', 'desc')">&#x25BC;</span>
-        </div>
-        <button class="btn" onclick="loadCustomers()">מיין</button>
-        <button class="btn" onclick="resetSorting()">בטל מיון</button>
-      </div>
+      </header>
 
-      <div class="customers-table">
-        <h4 style="margin-bottom: 10px">רשימת לקוחות</h4>
-        <table>
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>שם לקוח</th>
-              <th>טלפון</th>
-              <th>עיר</th>
-              <th>סטטוס</th>
-              <th>תאריך יצירה</th>
-              <th>תאריך התקנה</th>
-              <th>פעולות</th>
-            </tr>
-          </thead>
-          <tbody id="customersBody">
-            <tr>
-              <td colspan="8">טוען נתונים...</td>
-            </tr>
-          </tbody>
-        </table>
+      <!-- Content -->
+      <div class="flex-1 p-8">
+        <div class="mb-8">
+          <h2 class="text-2xl font-bold text-gray-900 mb-2">ניהול לקוחות</h2>
+          <p class="text-gray-600">צפה, חפש וסנן את רשימת הלקוחות במערכת</p>
+        </div>
+
+        <!-- Filters & Search -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-100">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">סינון וחיפוש</h3>
+          
+          <!-- Main Filters Row -->
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+            <div>
+              <label class="block text-sm font-bold text-primary mb-2">🔍 שם לקוח</label>
+              <input type="text" id="filterName" placeholder="חפש לפי שם..." 
+                     class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors">
+            </div>
+            <div>
+              <label class="block text-sm font-bold text-primary mb-2">🏙️ עיר</label>
+              <input type="text" id="filterCity" placeholder="חפש לפי עיר..." 
+                     class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors">
+            </div>
+            <div>
+              <label class="block text-sm font-bold text-primary mb-2">📊 סטטוס</label>
+              <select id="filterStatus" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors">
+                <option value="">כל הסטטוסים</option>
+                <option value="טיוטה">טיוטה</option>
+                <option value="צפייה בסרטון לקוח">צפייה בסרטון לקוח</option>
+                <option value="טיוטה להצעת מחיר">טיוטה להצעת מחיר</option>
+                <option value="שליחת טיוטה ללקוח">שליחת טיוטה ללקוח</option>
+                <option value="העברה מקדמה">העברה מקדמה</option>
+                <option value="תיאום התקנה">תיאום התקנה</option>
+                <option value="התקנה בוצעה">התקנה בוצעה</option>
+                <option value="קבלת משוב">קבלת משוב</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Date Range & Actions -->
+          <div class="flex flex-wrap items-end gap-4">
+            <div>
+              <label class="block text-sm font-bold text-primary mb-2">📅 סוג תאריך</label>
+              <select id="filterDateType" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors">
+                <option value="PlannedDate">תאריך התקנה</option>
+                <option value="CustomerCreatedAt">תאריך יצירה</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-bold text-primary mb-2">📅 מתאריך</label>
+              <input type="date" id="filterFromDate" 
+                     class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors">
+            </div>
+            <div>
+              <label class="block text-sm font-bold text-primary mb-2">📅 עד תאריך</label>
+              <input type="date" id="filterToDate" 
+                     class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors">
+            </div>
+            <div>
+              <button onclick="loadCustomers()" 
+                      class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors font-medium shadow-md hover:shadow-lg">
+                🔍 סנן
+              </button>
+            </div>
+            <div>
+              <button onclick="resetFilters()" 
+                      class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors font-medium shadow-md hover:shadow-lg">
+                🔄 איפוס
+              </button>
+            </div>
+          </div>
+        </div>
+
+
+
+        <!-- Stats Bar -->
+        <div class="bg-gradient-to-r from-primary to-primary-dark rounded-xl shadow-lg p-6 mb-8 text-white">
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-center">
+            <div>
+              <p class="text-2xl font-bold" id="totalCustomers">0</p>
+              <p class="text-primary-light text-sm">סה"כ לקוחות</p>
+            </div>
+            <div>
+              <p class="text-2xl font-bold" id="activeRequests">0</p>
+              <p class="text-primary-light text-sm">בקשות פעילות</p>
+            </div>
+            <div>
+              <p class="text-2xl font-bold" id="completedInstalls">0</p>
+              <p class="text-primary-light text-sm">התקנות הושלמו</p>
+            </div>
+            <div>
+              <p class="text-2xl font-bold" id="pendingInstalls">0</p>
+              <p class="text-primary-light text-sm">ממתינים להתקנה</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Customers Table -->
+        <div class="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+          <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+            <h3 class="text-xl font-semibold text-gray-900">רשימת לקוחות</h3>
+            <div class="flex items-center gap-4">
+              <span class="text-sm text-gray-600" id="resultsInfo">מציג 0 מתוך 0 תוצאות</span>
+              <div class="flex items-center gap-2">
+                <label class="text-sm font-medium text-gray-700">תוצאות בעמוד:</label>
+                <select id="pageSize" class="px-2 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-primary focus:border-primary">
+                  <option value="10">10</option>
+                  <option value="20" selected>20</option>
+                  <option value="50">50</option>
+                  <option value="100">100</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-6 py-4 text-right text-sm font-bold text-gray-700">#</th>
+                  <th class="px-6 py-4 text-right text-sm font-bold text-gray-700 cursor-pointer hover:bg-gray-100 transition-colors select-none" 
+                      onclick="sortTable('Name')" title="לחץ למיון">
+                    שם לקוח <span id="sort-Name" class="text-gray-400"></span>
+                  </th>
+                  <th class="px-6 py-4 text-right text-sm font-bold text-gray-700">טלפון</th>
+                  <th class="px-6 py-4 text-right text-sm font-bold text-gray-700 cursor-pointer hover:bg-gray-100 transition-colors select-none" 
+                      onclick="sortTable('City')" title="לחץ למיון">
+                    עיר <span id="sort-City" class="text-gray-400"></span>
+                  </th>
+                  <th class="px-6 py-4 text-right text-sm font-bold text-gray-700 cursor-pointer hover:bg-gray-100 transition-colors select-none" 
+                      onclick="sortTable('Status')" title="לחץ למיון">
+                    סטטוס <span id="sort-Status" class="text-gray-400"></span>
+                  </th>
+                  <th class="px-6 py-4 text-right text-sm font-bold text-gray-700 cursor-pointer hover:bg-gray-100 transition-colors select-none" 
+                      onclick="sortTable('CustomerCreatedAt')" title="לחץ למיון">
+                    תאריך יצירה <span id="sort-CustomerCreatedAt" class="text-gray-400"></span>
+                  </th>
+                  <th class="px-6 py-4 text-right text-sm font-bold text-gray-700 cursor-pointer hover:bg-gray-100 transition-colors select-none" 
+                      onclick="sortTable('PlannedDate')" title="לחץ למיון">
+                    תאריך התקנה <span id="sort-PlannedDate" class="text-gray-400"></span>
+                  </th>
+                  <th class="px-6 py-4 text-center text-sm font-bold text-gray-700">שינוי סטטוס</th>
+                  <th class="px-6 py-4 text-right text-sm font-bold text-gray-700">פעולות</th>
+                </tr>
+              </thead>
+              <tbody id="customersTableBody" class="bg-white divide-y divide-gray-200">
+                <!-- Loading state -->
+                <tr>
+                  <td colspan="9" class="px-6 py-12 text-center">
+                    <div class="flex items-center justify-center">
+                      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                      <span class="mr-3 text-gray-600">טוען נתונים...</span>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          
+          <!-- Pagination -->
+          <div class="px-6 py-4 border-t border-gray-200 bg-gray-50" id="paginationContainer">
+            <div class="flex items-center justify-between">
+              <div class="text-sm text-gray-700" id="paginationInfo">
+                מציג 1-20 מתוך 100 תוצאות
+              </div>
+              <div class="flex items-center gap-2" id="paginationControls">
+                <button onclick="changePage('first')" id="firstPageBtn" 
+                        class="px-3 py-1 bg-white border border-gray-300 rounded text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                  ראשון
+                </button>
+                <button onclick="changePage('prev')" id="prevPageBtn" 
+                        class="px-3 py-1 bg-white border border-gray-300 rounded text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                  קודם
+                </button>
+                <div class="flex gap-1" id="pageNumbers">
+                  <!-- Page numbers will be generated by JS -->
+                </div>
+                <button onclick="changePage('next')" id="nextPageBtn" 
+                        class="px-3 py-1 bg-white border border-gray-300 rounded text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                  הבא
+                </button>
+                <button onclick="changePage('last')" id="lastPageBtn" 
+                        class="px-3 py-1 bg-white border border-gray-300 rounded text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                  אחרון
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </main>
   </div>
 
   <script>
-    let sortDirections = { primary: 'asc', secondary: 'asc' };
+    let currentSort = { field: null, direction: 'asc' };
+    let pagination = {
+      currentPage: 1,
+      pageSize: 20,
+      totalRecords: 0,
+      totalPages: 0
+    };
+    
+    // All available statuses
+    const allStatuses = [
+      'טיוטה',
+      'צפייה בסרטון לקוח',
+      'טיוטה להצעת מחיר',
+      'שליחת טיוטה ללקוח',
+      'העברה מקדמה',
+      'תיאום התקנה',
+      'התקנה בוצעה',
+      'קבלת משוב'
+    ];
   
-    function setSortDirection(level, direction) {
-      sortDirections[level] = direction;
+    function sortTable(field) {
+      // Clear previous sort indicators
+      document.querySelectorAll('[id^="sort-"]').forEach(el => el.textContent = '');
+      
+      // Toggle sort direction if same field, otherwise start with asc
+      if (currentSort.field === field) {
+        currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+      } else {
+        currentSort.field = field;
+        currentSort.direction = 'asc';
+      }
+      
+      // Update sort indicator
+      const indicator = document.getElementById(`sort-${field}`);
+      if (indicator) {
+        indicator.textContent = currentSort.direction === 'asc' ? ' ↑' : ' ↓';
+        indicator.className = 'text-primary font-bold';
+      }
+      
       loadCustomers();
     }
   
@@ -259,30 +359,285 @@
       document.getElementById("filterFromDate").value = "";
       document.getElementById("filterToDate").value = "";
       document.getElementById("filterDateType").value = "PlannedDate";
+      
+      // Clear sort
+      currentSort = { field: null, direction: 'asc' };
+      document.querySelectorAll('[id^="sort-"]').forEach(el => {
+        el.textContent = '';
+        el.className = 'text-gray-400';
+      });
+      
+      // Reset pagination
+      pagination.currentPage = 1;
+      
       loadCustomers();
     }
-  
-    function resetSorting() {
-      document.getElementById("primarySort").value = "";
-      document.getElementById("secondarySort").value = "";
-      sortDirections.primary = 'asc';
-      sortDirections.secondary = 'asc';
+
+    // Pagination functions
+    function changePage(action) {
+      switch(action) {
+        case 'first':
+          pagination.currentPage = 1;
+          break;
+        case 'prev':
+          if (pagination.currentPage > 1) pagination.currentPage--;
+          break;
+        case 'next':
+          if (pagination.currentPage < pagination.totalPages) pagination.currentPage++;
+          break;
+        case 'last':
+          pagination.currentPage = pagination.totalPages;
+          break;
+        default:
+          if (typeof action === 'number') {
+            pagination.currentPage = action;
+          }
+      }
       loadCustomers();
     }
-  
-    document.addEventListener("DOMContentLoaded", loadCustomers);
+
+    function updatePagination() {
+      const start = (pagination.currentPage - 1) * pagination.pageSize + 1;
+      const end = Math.min(pagination.currentPage * pagination.pageSize, pagination.totalRecords);
+      
+      document.getElementById('resultsInfo').textContent = 
+        `מציג ${pagination.totalRecords} תוצאות`;
+      document.getElementById('paginationInfo').textContent = 
+        `מציג ${start}-${end} מתוך ${pagination.totalRecords} תוצאות`;
+
+      // Update pagination controls
+      document.getElementById('firstPageBtn').disabled = pagination.currentPage === 1;
+      document.getElementById('prevPageBtn').disabled = pagination.currentPage === 1;
+      document.getElementById('nextPageBtn').disabled = pagination.currentPage === pagination.totalPages;
+      document.getElementById('lastPageBtn').disabled = pagination.currentPage === pagination.totalPages;
+
+      // Generate page numbers
+      generatePageNumbers();
+    }
+
+    function generatePageNumbers() {
+      const pageNumbers = document.getElementById('pageNumbers');
+      pageNumbers.innerHTML = '';
+      
+      const maxVisiblePages = 5;
+      let startPage = Math.max(1, pagination.currentPage - Math.floor(maxVisiblePages / 2));
+      let endPage = Math.min(pagination.totalPages, startPage + maxVisiblePages - 1);
+      
+      if (endPage - startPage + 1 < maxVisiblePages) {
+        startPage = Math.max(1, endPage - maxVisiblePages + 1);
+      }
+
+      for (let i = startPage; i <= endPage; i++) {
+        const button = document.createElement('button');
+        button.onclick = () => changePage(i);
+        button.textContent = i;
+        button.className = `px-3 py-1 border rounded text-sm ${
+          i === pagination.currentPage 
+            ? 'bg-primary text-white border-primary' 
+            : 'bg-white border-gray-300 hover:bg-gray-50'
+        }`;
+        pageNumbers.appendChild(button);
+      }
+    }
+
+    // Status change functions
+    function getStatusDropdown(customer) {
+      const currentStatus = customer.Status || 'טיוטה';
+      const customerId = customer.CustomerID;
+      
+      // יצירת dropdown עם כל הסטטוסים
+      const options = allStatuses.map(status => {
+        const selected = status === currentStatus ? 'selected' : '';
+        return `<option value="${status}" ${selected}>${status}</option>`;
+      }).join('');
+
+      return `
+        <div onclick="event.stopPropagation();" onmousedown="event.stopPropagation();" onmouseup="event.stopPropagation();">
+          <select onchange="changeStatus(${customerId}, this.value, '${currentStatus}')" 
+                  class="text-xs px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary transition-colors bg-white">
+            ${options}
+          </select>
+        </div>
+      `;
+    }
+
+    function changeStatus(customerID, newStatus, oldStatus) {
+      // אם לא השתנה הסטטוס, לא צריך לעשות כלום
+      if (newStatus === oldStatus) {
+        return;
+      }
+
+      if (!confirm(`האם אתה בטוח שברצונך לשנות את הסטטוס מ"${oldStatus}" ל"${newStatus}"?`)) {
+        // אם המשתמש ביטל, החזר את הדרופדאון לערך הקודם
+        event.target.value = oldStatus;
+        return;
+      }
+
+      ajaxCall(
+        "POST",
+        `${API_BASE_URL}/Dashboard/UpdateCustomerStatus`,
+        JSON.stringify({ CustomerID: customerID, NewStatus: newStatus }),
+        function() {
+          showToast(`הסטטוס עודכן מ"${oldStatus}" ל"${newStatus}" בהצלחה`, "success");
+          loadCustomers();
+        },
+        function(error) {
+          console.error("שגיאה בשינוי הסטטוס:", error);
+          showToast("שגיאה בשינוי הסטטוס", "error");
+          // החזר את הדרופדאון לערך הקודם
+          event.target.value = oldStatus;
+        }
+      );
+    }
+
+          // Add real-time search
+      document.addEventListener("DOMContentLoaded", function() {
+        loadCustomers();
+        
+        // Debounced search for name and city
+        let searchTimeout;
+        const searchInputs = ['filterName', 'filterCity'];
+        searchInputs.forEach(id => {
+          document.getElementById(id).addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            pagination.currentPage = 1; // Reset to first page on search
+            searchTimeout = setTimeout(loadCustomers, 500);
+          });
+        });
+        
+        // Immediate search for select fields
+        document.getElementById('filterStatus').addEventListener('change', function() {
+          pagination.currentPage = 1;
+          loadCustomers();
+        });
+        document.getElementById('filterDateType').addEventListener('change', function() {
+          pagination.currentPage = 1;
+          loadCustomers();
+        });
+        
+        // Page size change
+        document.getElementById('pageSize').addEventListener('change', function() {
+          pagination.pageSize = parseInt(this.value);
+          pagination.currentPage = 1;
+          loadCustomers();
+        });
+      });
+
+    function updateStats(data) {
+      const totalCustomers = data.length;
+      const activeRequests = data.filter(c => c.Status && !["התקנה בוצעה", "קבלת משוב"].includes(c.Status)).length;
+      const completedInstalls = data.filter(c => c.Status === "התקנה בוצעה" || c.Status === "קבלת משוב").length;
+      const pendingInstalls = data.filter(c => c.Status === "תיאום התקנה").length;
+
+      document.getElementById('totalCustomers').textContent = totalCustomers;
+      document.getElementById('activeRequests').textContent = activeRequests;
+      document.getElementById('completedInstalls').textContent = completedInstalls;
+      document.getElementById('pendingInstalls').textContent = pendingInstalls;
+    }
+
+    function getStatusClass(status) {
+      const statusClasses = {
+        'טיוטה': 'bg-gray-100 text-gray-800',
+        'צפייה בסרטון לקוח': 'bg-blue-100 text-blue-800',
+        'טיוטה להצעת מחיר': 'bg-yellow-100 text-yellow-800',
+        'שליחת טיוטה ללקוח': 'bg-orange-100 text-orange-800',
+        'העברה מקדמה': 'bg-purple-100 text-purple-800',
+        'תיאום התקנה': 'bg-indigo-100 text-indigo-800',
+        'התקנה בוצעה': 'bg-green-100 text-green-800',
+        'קבלת משוב': 'bg-emerald-100 text-emerald-800'
+      };
+      return statusClasses[status] || 'bg-gray-100 text-gray-800';
+    }
+
+    function displayCustomers(customers) {
+      const tbody = document.getElementById('customersTableBody');
+      
+              if (customers.length === 0) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="9" class="px-6 py-12 text-center">
+                <div class="flex flex-col items-center">
+                  <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+                  </svg>
+                  <h3 class="text-sm font-medium text-gray-900 mb-1">לא נמצאו לקוחות</h3>
+                  <p class="text-sm text-gray-500">נסה לשנות את הסינון או לבטל אותו</p>
+                </div>
+              </td>
+            </tr>
+          `;
+          return;
+        }
+
+      tbody.innerHTML = customers.map((customer, index) => {
+        const fullName = `${customer.FirstName || ''} ${customer.LastName || ''}`.trim();
+        const createdAt = new Date(customer.CustomerCreatedAt).toLocaleDateString("he-IL");
+        const plannedDate = customer.PlannedDate ? new Date(customer.PlannedDate).toLocaleDateString("he-IL") : "לא נקבע";
+        const statusClass = getStatusClass(customer.Status);
+
+        return `
+          <tr class="hover:bg-blue-50 hover:shadow-sm transition-all duration-200 cursor-pointer" onclick="navigateToCustomer(${customer.CustomerID})">
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+              ${index + 1}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span class="text-sm font-medium text-primary">
+                ${fullName}
+              </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+              <div class="flex items-center">
+                <svg class="w-4 h-4 ml-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                </svg>
+                ${customer.Phone || 'לא צוין'}
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+              <div class="flex items-center">
+                <svg class="w-4 h-4 ml-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+                ${customer.City || 'לא צוין'}
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusClass}">
+                ${customer.Status || 'לא צוין'}
+              </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+              ${createdAt}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+              ${plannedDate}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-center">
+              ${getStatusDropdown(customer)}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+              <button onclick="event.stopPropagation(); deleteCustomer(${customer.CustomerID})" 
+                      class="text-red-400 hover:text-red-600 transition-colors p-2 rounded-full hover:bg-red-50"
+                      title="מחק לקוח">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                </svg>
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
   
     function loadCustomers() {
       const fromDateValue = document.getElementById("filterFromDate").value;
       const toDateValue = document.getElementById("filterToDate").value;
       const dateField = document.getElementById("filterDateType").value || "PlannedDate";
   
-      const nameFilter = document.getElementById("filterName").value?.toLowerCase() || "";
+            const nameFilter = document.getElementById("filterName").value?.toLowerCase() || "";
       const cityFilter = document.getElementById("filterCity").value?.toLowerCase() || "";
       const statusFilter = document.getElementById("filterStatus").value || "";
-  
-      const primarySort = document.getElementById("primarySort").value;
-      const secondarySort = document.getElementById("secondarySort").value;
   
       ajaxCall(
         "POST",
@@ -300,17 +655,16 @@
             const cityMatch = city.includes(cityFilter);
             const statusMatch = statusFilter === "" || status === statusFilter;
   
-            // 👇 תיקון: סינון לפי טווח תאריכים כולל תאריך קצה
             let dateMatch = true;
             if (fromDateValue || toDateValue) {
               const compareDate = new Date(c[dateField]);
-              compareDate.setHours(0, 0, 0, 0); // לאיפוס
+              compareDate.setHours(0, 0, 0, 0);
   
               const fromDate = fromDateValue ? new Date(fromDateValue) : null;
               if (fromDate) fromDate.setHours(0, 0, 0, 0);
   
               const toDate = toDateValue ? new Date(toDateValue) : null;
-              if (toDate) toDate.setHours(23, 59, 59, 999); // סוף היום
+              if (toDate) toDate.setHours(23, 59, 59, 999);
   
               if (fromDate && compareDate < fromDate) dateMatch = false;
               if (toDate && compareDate > toDate) dateMatch = false;
@@ -319,46 +673,43 @@
             return nameMatch && cityMatch && statusMatch && dateMatch;
           });
   
-          filtered.sort((a, b) => {
-            const result1 = compareValues(a, b, primarySort, sortDirections.primary);
-            if (result1 !== 0) return result1;
-            return compareValues(a, b, secondarySort, sortDirections.secondary);
-          });
-  
-          const tbody = document.getElementById("customersBody");
-          tbody.innerHTML = "";
-  
-          if (filtered.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="8" class="no-results">לא נמצאו לקוחות</td></tr>`;
-            return;
+          // Apply sorting if field is selected
+          if (currentSort.field) {
+            filtered.sort((a, b) => {
+              return compareValues(a, b, currentSort.field, currentSort.direction);
+            });
           }
-  
-          filtered.forEach((c, index) => {
-            const fullName = `${c.FirstName} ${c.LastName}`.trim();
-            const createdAt = new Date(c.CustomerCreatedAt).toLocaleDateString("he-IL");
-            const plannedDate = c.PlannedDate ? new Date(c.PlannedDate).toLocaleDateString("he-IL") : "";
-            const tr = document.createElement("tr");
-            tr.innerHTML = `
-              <td>${index + 1}</td>
-              <td><a href="InstallerCustomerDetailsPage.html?id=${c.CustomerID}" class="customer-link">${fullName}</a></td>
-              <td>${c.Phone || ""}</td>
-              <td>${c.City || ""}</td>
-              <td class="status">${c.Status || ""}</td>
-              <td>${createdAt}</td>
-              <td>${plannedDate}</td>
-              <td class="actions">
-                <span title="מחק" onclick="deleteCustomer(${c.CustomerID})">🗑️</span>
-              </td>
-            `;
-            tbody.appendChild(tr);
-          });
+
+          // Update pagination info
+          pagination.totalRecords = filtered.length;
+          pagination.totalPages = Math.ceil(pagination.totalRecords / pagination.pageSize);
+          
+          // Apply pagination (client-side for now)
+          const startIndex = (pagination.currentPage - 1) * pagination.pageSize;
+          const endIndex = startIndex + pagination.pageSize;
+          const paginatedData = filtered.slice(startIndex, endIndex);
+
+          updateStats(data);
+          displayCustomers(paginatedData);
+          updatePagination();
         },
         function (err) {
           console.error(err);
-          document.getElementById("customersBody").innerHTML =
-            '<tr><td colspan="8">שגיאה בטעינת לקוחות</td></tr>';
+          document.getElementById("customersTableBody").innerHTML = `
+            <tr>
+              <td colspan="9" class="px-6 py-12 text-center">
+                <div class="flex flex-col items-center text-red-600">
+                  <svg class="mx-auto h-12 w-12 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                  </svg>
+                  <h3 class="text-sm font-medium mb-1">שגיאה בטעינת לקוחות</h3>
+                  <p class="text-sm text-gray-500">נסה לרענן את הדף</p>
+                </div>
+              </td>
+            </tr>
+          `;
         }
-      );
+             );
     }
   
     function compareValues(a, b, key, direction = 'asc') {
@@ -382,24 +733,53 @@
       }
     }
 
-    function deleteCustomer(customerID) {
-  if (!confirm("האם אתה בטוח שברצונך למחוק את הלקוח?")) return;
-
-  $.ajax({
-    url: `${API_BASE_URL}/Dashboard/DeactivateCustomer`, // 👈 עדכון כתובת
-    type: "POST",
-    data: JSON.stringify(customerID), // 👈 שולחים מספר ולא אובייקט
-    contentType: "application/json; charset=utf-8",
-    success: function () {
-      alert("הלקוח הוסר בהצלחה");
-      loadCustomers();
-    },
-    error: function (xhr, status, error) {
-      console.error("שגיאה במחיקת הלקוח:", error);
-      alert("שגיאה במחיקת הלקוח");
+    function navigateToCustomer(customerID) {
+      window.location.href = `InstallerCustomerDetailsPage.html?id=${customerID}`;
     }
-  });
-}
+
+    function deleteCustomer(customerID) {
+      if (!confirm("האם אתה בטוח שברצונך למחוק את הלקוח?")) return;
+
+      ajaxCall(
+        "POST",
+        `${API_BASE_URL}/Dashboard/DeactivateCustomer`,
+        JSON.stringify(customerID),
+        function() {
+          showToast("הלקוח הוסר בהצלחה", "success");
+          loadCustomers();
+        },
+        function(error) {
+          console.error("שגיאה במחיקת הלקוח:", error);
+          showToast("שגיאה במחיקת הלקוח", "error");
+        }
+      );
+    }
+
+    // Toast notification function
+    function showToast(message, type = 'success') {
+      const toast = document.createElement('div');
+      const bgColor = type === 'success' ? 'bg-green-500' : 'bg-red-500';
+      const icon = type === 'success' ? '✅' : '❌';
+      
+      toast.className = `fixed top-4 left-4 px-6 py-4 rounded-lg shadow-lg z-50 transition-all duration-300 transform translate-x-full ${bgColor} text-white`;
+      toast.innerHTML = `
+        <div class="flex items-center space-x-3">
+          <span class="text-lg">${icon}</span>
+          <span class="font-medium">${message}</span>
+        </div>
+      `;
+      document.body.appendChild(toast);
+      
+      setTimeout(() => toast.classList.remove('translate-x-full'), 100);
+      setTimeout(() => {
+        toast.classList.add('translate-x-full');
+        setTimeout(() => {
+          if (document.body.contains(toast)) {
+            document.body.removeChild(toast);
+          }
+        }, 300);
+      }, 3000);
+    }
 
 
   </script>

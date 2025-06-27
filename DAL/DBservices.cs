@@ -533,6 +533,62 @@ public class DBservices
         }
         return items;
     }
+
+    //--------------------------------------------------------------------------------------------------
+    // This method gets item suggestions for autocomplete
+    //--------------------------------------------------------------------------------------------------
+    public List<ItemSuggestion> GetItemSuggestions(string searchText, int maxResults = 10)
+    {
+        SqlConnection con;
+        SqlCommand cmd;
+        
+        try
+        {
+            con = connect("myProjDB");
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+
+        List<ItemSuggestion> suggestions = new List<ItemSuggestion>();
+
+        Dictionary<string, object> paramDic = new Dictionary<string, object>();
+        paramDic.Add("@SearchText", searchText);
+        paramDic.Add("@MaxResults", maxResults);
+
+        cmd = CreateCommandWithStoredProcedureGeneral("GetItemSuggestions", con, paramDic);
+
+        try
+        {
+            SqlDataReader dataReader = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+
+            while (dataReader.Read())
+            {
+                ItemSuggestion suggestion = new ItemSuggestion()
+                {
+                    SuggestionText = dataReader["SuggestionText"].ToString(),
+                    Source = dataReader["Source"].ToString(),
+                    SuggestedPrice = Convert.ToDecimal(dataReader["SuggestedPrice"]),
+                    Priority = Convert.ToInt32(dataReader["Priority"])
+                };
+                suggestions.Add(suggestion);
+            }
+            dataReader.Close();
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+        finally
+        {
+            if (con != null)
+                con.Close();
+        }
+
+        return suggestions;
+    }
+
     //--------------------------------------------------------------------------------------------------
     // This method updates the customer details
     //--------------------------------------------------------------------------------------------------
@@ -678,6 +734,42 @@ public class DBservices
                 con.Close();
         }
     }
+
+    //--------------------------------------------------------------------------------------------------
+    // This method updates customer status
+    //--------------------------------------------------------------------------------------------------
+    public int UpdateCustomerStatus(int customerID, string newStatus)
+    {
+        SqlConnection con;
+        SqlCommand cmd;
+        try
+        {
+            con = connect("myProjDB");
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+        Dictionary<string, object> paramDic = new Dictionary<string, object>();
+        paramDic.Add("@CustomerID", customerID);
+        paramDic.Add("@NewStatus", newStatus);
+        cmd = CreateCommandWithStoredProcedureGeneral("UpdateCustomerStatus", con, paramDic);
+        try
+        {
+            int numEffected = cmd.ExecuteNonQuery();
+            return numEffected;
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+        finally
+        {
+            if (con != null)
+                con.Close();
+        }
+    }
+
     //--------------------------------------------------------------------------------------------------
     // This method insert a new Quote
     //--------------------------------------------------------------------------------------------------

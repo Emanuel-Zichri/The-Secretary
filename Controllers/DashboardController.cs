@@ -57,5 +57,24 @@ namespace FinalProject.Controllers
                 return 0;
             }
         }
+
+        [HttpPost("UpdateCustomerStatus")]
+        public int UpdateCustomerStatus([FromBody] CustomerStatusUpdate statusUpdate)
+        {
+            try
+            {
+                return Customer.UpdateStatus(statusUpdate.CustomerID, statusUpdate.NewStatus);
+            }
+            catch
+            {
+                return 0;
+            }
+        }
+    }
+
+    public class CustomerStatusUpdate
+    {
+        public int CustomerID { get; set; }
+        public string NewStatus { get; set; }
     }
 }
