@@ -48,6 +48,31 @@
         backdrop-filter: blur(8px);
         background: rgba(0, 0, 0, 0.6);
       }
+      
+      /* Enhanced selection animations */
+      .parquet-card.selected {
+        animation: selectedPulse 0.3s ease-out;
+      }
+      
+      @keyframes selectedPulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.08); }
+        100% { transform: scale(1.05); }
+      }
+      
+      .selection-overlay {
+        background: linear-gradient(135deg, rgba(180, 106, 44, 0.2) 0%, rgba(212, 152, 90, 0.15) 100%);
+      }
+      
+      .selection-check {
+        box-shadow: 0 4px 15px rgba(180, 106, 44, 0.4);
+      }
+      
+      /* Smooth hover effects */
+      .parquet-card:hover .selection-text {
+        color: #b46a2c;
+        font-weight: 500;
+      }
     </style>
   </head>
   <body class="bg-gradient-to-br from-orange-50 to-amber-50 min-h-screen font-heebo">
@@ -55,13 +80,13 @@
     <div class="glass-effect sticky top-0 z-40 border-b border-orange-100">
       <div class="max-w-md mx-auto px-4 py-3">
         <div class="flex items-center justify-between">
-          <button onclick="goBack()" class="p-2 hover:bg-orange-100 rounded-full transition-colors">
-            <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+          <button onclick="goBack()" class="flex items-center justify-center w-10 h-10 bg-white/80 hover:bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200">
+            <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19l7-7-7-7"></path>
             </svg>
           </button>
           <div class="flex-1 text-center">
-            <img src="../picturs/logo.png" alt="לוגו" class="h-10 mx-auto" />
+            <img src="../picturs/logo.png" alt="לוגו" class="h-12 mx-auto" />
           </div>
           <div class="w-10"></div>
         </div>
@@ -95,7 +120,7 @@
       <!-- Tabs -->
       <div class="relative mb-6">
         <div class="flex bg-white rounded-xl p-1 shadow-sm border border-orange-100">
-          <div class="tab-indicator absolute top-1 bottom-1 bg-primary rounded-lg transition-all duration-300 ease-out" style="width: 33.33%; right: 66.67%;"></div>
+          <div class="tab-indicator absolute top-1 bottom-1 bg-primary rounded-lg transition-all duration-300 ease-out" style="width: 33.33%; right: 0%;"></div>
           <button class="tab relative z-10 flex-1 py-3 px-4 text-sm font-medium text-white rounded-lg transition-colors active" onclick="selectTab(this, 'solid')" data-index="0">
             עץ מלא
           </button>
@@ -122,8 +147,8 @@
           <button onclick="validateSelection()" class="w-full bg-primary hover:bg-primary-dark text-white font-semibold py-4 px-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 active:scale-95">
             <span class="flex items-center justify-center">
               <span>בואו נמשיך</span>
-              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+              <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
               </svg>
             </span>
           </button>
@@ -152,93 +177,6 @@
       </div>
     </div>
 
-    <script>
-      // Enhanced tab functionality
-      function selectTab(tabEl, type) {
-        const tabs = document.querySelectorAll('.tab');
-        const indicator = document.querySelector('.tab-indicator');
-        const index = parseInt(tabEl.dataset.index);
-        
-        // Update active states
-        tabs.forEach(tab => {
-          tab.classList.remove('text-white');
-          tab.classList.add('text-gray-600');
-        });
-        tabEl.classList.remove('text-gray-600');
-        tabEl.classList.add('text-white');
-        
-        // Move indicator
-        const percentage = 33.33;
-        indicator.style.right = `${(2 - index) * percentage}%`;
-        
-        // Update title
-        document.getElementById("parquet-title").textContent = "פרקטי " + tabEl.textContent;
-        
-        // Load parquet items
-        loadParquetItems(type);
-      }
-
-      function loadParquetItems(type) {
-        const container = document.getElementById("parquet-options");
-        const items = parquetData[type] || [];
-        
-        container.innerHTML = '';
-        
-        items.forEach((item, index) => {
-          const itemHtml = `
-            <div class="parquet-card bg-white rounded-xl shadow-sm border border-orange-100 overflow-hidden">
-              <div class="relative">
-                <img src="../picturs/parquetsTypes/${item.imageURL}" alt="${item.typeName}" class="w-full h-32 object-cover" />
-                <button onclick='showInfo(${JSON.stringify(item).replace(/'/g, "\\'")})'
-                        class="absolute top-2 right-2 w-8 h-8 bg-white/90 hover:bg-white rounded-full shadow-lg flex items-center justify-center transition-colors">
-                  <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                  </svg>
-                </button>
-              </div>
-              <div class="p-4">
-                <h3 class="font-semibold text-gray-800 text-sm mb-2">${item.typeName}</h3>
-                <p class="text-primary font-bold text-sm mb-3">החל מ-${item.pricePerUnit} ש"ח למ"ר</p>
-                <label class="flex items-center justify-center cursor-pointer">
-                  <input type="radio" name="parquet" value="${item.typeName}" class="sr-only peer" />
-                  <div class="w-5 h-5 border-2 border-gray-300 rounded-full peer-checked:border-primary peer-checked:bg-primary flex items-center justify-center transition-colors">
-                    <div class="w-2 h-2 bg-white rounded-full opacity-0 peer-checked:opacity-100 transition-opacity"></div>
-                  </div>
-                  <span class="mr-2 text-sm text-gray-600">בחר</span>
-                </label>
-              </div>
-            </div>
-          `;
-          container.innerHTML += itemHtml;
-        });
-      }
-
-      function showInfo(item) {
-        const modal = document.getElementById("info-modal");
-        const content = document.getElementById("modal-content");
-        
-        document.getElementById("info-title").textContent = item.typeName;
-        document.getElementById("info-description").textContent = item.description || "אין תיאור זמין.";
-        document.getElementById("info-image").src = `../picturs/parquetsTypes/${item.imageURL}`;
-        
-        modal.classList.remove("hidden");
-        setTimeout(() => {
-          content.classList.remove("scale-95", "opacity-0");
-          content.classList.add("scale-100", "opacity-100");
-        }, 50);
-      }
-
-      function closeInfoModal() {
-        const modal = document.getElementById("info-modal");
-        const content = document.getElementById("modal-content");
-        
-        content.classList.remove("scale-100", "opacity-100");
-        content.classList.add("scale-95", "opacity-0");
-        
-        setTimeout(() => {
-          modal.classList.add("hidden");
-        }, 300);
-      }
-    </script>
+    <!-- JavaScript functionality is now in selectParquetPage.js -->
   </body>
 </html>

@@ -127,6 +127,32 @@ namespace FinalProject.Controllers
                 return StatusCode(500, "שגיאה בקבלת סטטוסי בקשות");
             }
         }
+
+        [HttpGet("GetRecentActivity")]
+        public List<RecentActivity> GetRecentActivity([FromQuery] int limit = 10)
+        {
+            try
+            {
+                return RecentActivity.GetRecentActivity(limit);
+            }
+            catch
+            {
+                return new List<RecentActivity>();
+            }
+        }
+
+        [HttpGet("GetUpcomingInstalls")]
+        public List<UpcomingInstall> GetUpcomingInstalls([FromQuery] int days = 7)
+        {
+            try
+            {
+                return UpcomingInstall.GetUpcomingInstalls(days);
+            }
+            catch
+            {
+                return new List<UpcomingInstall>();
+            }
+        }
     }
 
     // מחלקות עזר

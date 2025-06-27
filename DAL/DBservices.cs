@@ -2073,6 +2073,153 @@ public class DBservices
     }
 
     //--------------------------------------------------------------------------------------------------
+    // This method gets recent activity for dashboard
+    //--------------------------------------------------------------------------------------------------
+    public List<RecentActivity> GetRecentActivity(int limit = 10)
+    {
+        SqlConnection con;
+        SqlCommand cmd;
+        try
+        {
+            con = connect("myProjDB");
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+
+        List<RecentActivity> activities = new List<RecentActivity>();
+
+        try
+        {
+            Dictionary<string, object> paramDic = new Dictionary<string, object>
+            {
+                { "@Limit", limit }
+            };
+
+            cmd = CreateCommandWithStoredProcedureGeneral("GetRecentActivity", con, paramDic);
+            SqlDataReader reader = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+
+            while (reader.Read())
+            {
+                var activity = new RecentActivity
+                {
+                    ActivityType = reader["ActivityType"].ToString(),
+                    Description = reader["Description"].ToString(),
+                    CustomerName = reader["CustomerName"].ToString(),
+                    Location = reader["Location"].ToString(),
+                    ActivityDate = Convert.ToDateTime(reader["ActivityDate"]),
+                    RelativeTime = reader["RelativeTime"].ToString(),
+                    IconType = reader["IconType"].ToString(),
+                    ColorClass = reader["ColorClass"].ToString()
+                };
+
+                activities.Add(activity);
+            }
+            reader.Close();
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+        finally
+        {
+            if (con != null)
+                con.Close();
+        }
+
+        return activities;
+    }
+
+    //--------------------------------------------------------------------------------------------------
+    // This method gets upcoming installs for dashboard
+    //--------------------------------------------------------------------------------------------------
+    public List<UpcomingInstall> GetUpcomingInstalls(int days = 7)
+    {
+        SqlConnection con;
+        SqlCommand cmd;
+        try
+        {
+            con = connect("myProjDB");
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+
+        List<UpcomingInstall> installs = new List<UpcomingInstall>();
+
+        try
+        {
+            Dictionary<string, object> paramDic = new Dictionary<string, object>
+            {
+                { "@Days", days }
+            };
+
+            cmd = CreateCommandWithStoredProcedureGeneral("GetUpcomingInstalls", con, paramDic);
+            SqlDataReader reader = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+
+            while (reader.Read())
+            {
+                var install = new UpcomingInstall
+                {
+                    RequestID = Convert.ToInt32(reader["RequestID"]),
+                    CustomerName = reader["CustomerName"].ToString(),
+                    Location = reader["Location"].ToString(),
+                    InstallDate = Convert.ToDateTime(reader["InstallDate"]),
+                    TimeSlot = reader["TimeSlot"].ToString(),
+                    Status = reader["Status"].ToString(),
+                    StatusColor = reader["StatusColor"].ToString(),
+                    FormattedDate = reader["FormattedDate"].ToString()
+                };
+
+                installs.Add(install);
+            }
+            reader.Close();
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+        finally
+        {
+            if (con != null)
+                con.Close();
+        }
+
+        return installs;
+    }
+
+    //--------------------------------------------------------------------------------------------------
+    // Safe methods with mock data
+    //--------------------------------------------------------------------------------------------------
+    public List<RecentActivity> GetRecentActivitySafe(int limit = 10)
+    {
+        try
+        {
+            return GetRecentActivity(limit);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Using mock recent activity data: {ex.Message}");
+            return GetMockRecentActivity();
+        }
+    }
+
+    public List<UpcomingInstall> GetUpcomingInstallsSafe(int days = 7)
+    {
+        try
+        {
+            return GetUpcomingInstalls(days);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Using mock upcoming installs data: {ex.Message}");
+            return GetMockUpcomingInstalls();
+        }
+    }
+
+    //--------------------------------------------------------------------------------------------------
     // This method safely updates system setting
     //--------------------------------------------------------------------------------------------------
     public int UpdateSystemSettingSafe(SystemSetting setting)
@@ -2191,6 +2338,129 @@ public class DBservices
 
         return defaultSettings;
     }
+
+    private List<RecentActivity> GetMockRecentActivity()
+    {
+        var activities = new List<RecentActivity>();
+        var now = DateTime.Now;
+
+        activities.AddRange(new[]
+        {
+            new RecentActivity
+            {
+                ActivityType = "INSTALL_COMPLETED",
+                Description = "התקנה הושלמה",
+                CustomerName = "רחל כהן",
+                Location = "תל אביב",
+                ActivityDate = now.AddHours(-2),
+                RelativeTime = "לפני 2 שעות",
+                IconType = "check",
+                ColorClass = "green"
+            },
+            new RecentActivity
+            {
+                ActivityType = "NEW_CUSTOMER",
+                Description = "לקוח חדש נרשם",
+                CustomerName = "משה לוי",
+                Location = "רמת גן",
+                ActivityDate = now.AddHours(-4),
+                RelativeTime = "לפני 4 שעות",
+                IconType = "user-plus",
+                ColorClass = "blue"
+            },
+            new RecentActivity
+            {
+                ActivityType = "QUOTE_SENT",
+                Description = "הצעת מחיר נשלחה",
+                CustomerName = "שרה אברהם",
+                Location = "פתח תקווה",
+                ActivityDate = now.AddDays(-1),
+                RelativeTime = "אתמול",
+                IconType = "file-text",
+                ColorClass = "yellow"
+            },
+            new RecentActivity
+            {
+                ActivityType = "QUOTE_APPROVED",
+                Description = "הצעת מחיר אושרה",
+                CustomerName = "דוד דוידוביץ'",
+                Location = "הרצליה",
+                ActivityDate = now.AddDays(-1).AddHours(-5),
+                RelativeTime = "אתמול",
+                IconType = "check-circle",
+                ColorClass = "green"
+            },
+            new RecentActivity
+            {
+                ActivityType = "SCHEDULE_SET",
+                Description = "תאריך התקנה נקבע",
+                CustomerName = "מירי חן",
+                Location = "רעננה",
+                ActivityDate = now.AddDays(-2),
+                RelativeTime = "לפני יומיים",
+                IconType = "calendar",
+                ColorClass = "purple"
+            }
+        });
+
+        return activities.Take(10).ToList();
+    }
+
+    private List<UpcomingInstall> GetMockUpcomingInstalls()
+    {
+        var installs = new List<UpcomingInstall>();
+        var now = DateTime.Now;
+
+        installs.AddRange(new[]
+        {
+            new UpcomingInstall
+            {
+                RequestID = 1,
+                CustomerName = "דוד כהן",
+                Location = "רמת השרון",
+                InstallDate = now.AddDays(1).Date.AddHours(10),
+                TimeSlot = "10:00",
+                Status = "מתוכנן",
+                StatusColor = "blue",
+                FormattedDate = "מחר 10:00"
+            },
+            new UpcomingInstall
+            {
+                RequestID = 2,
+                CustomerName = "מרים לוי",
+                Location = "תל אביב",
+                InstallDate = now.AddDays(2).Date.AddHours(14),
+                TimeSlot = "14:00",
+                Status = "מאושר",
+                StatusColor = "green",
+                FormattedDate = "יום ג' 14:00"
+            },
+            new UpcomingInstall
+            {
+                RequestID = 3,
+                CustomerName = "יוסי אברהם",
+                Location = "הרצליה",
+                InstallDate = now.AddDays(4).Date.AddHours(9),
+                TimeSlot = "09:00",
+                Status = "דחוף",
+                StatusColor = "orange",
+                FormattedDate = "יום ה' 09:00"
+            },
+            new UpcomingInstall
+            {
+                RequestID = 4,
+                CustomerName = "שרה דוד",
+                Location = "פתח תקווה",
+                InstallDate = now.AddDays(5).Date.AddHours(11),
+                TimeSlot = "11:00",
+                Status = "מתוכנן",
+                StatusColor = "blue",
+                FormattedDate = "יום ו' 11:00"
+            }
+        });
+
+        return installs;
+    }
 }
 
 // מחלקות עזר חדשות
@@ -2256,4 +2526,6 @@ public class MonthlySalesData
     public int CompletedInstalls { get; set; }
     public decimal TotalArea { get; set; }
 }
+
+
 

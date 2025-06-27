@@ -1,4 +1,4 @@
-// InstallDateSelection.js - לוח שנה מתקדם לבחירת תאריך התקנה
+// InstallDateSelection.js - לוח שנה לבחירת תאריך התקנה
 
 let currentDate = new Date();
 let selectedDate = null;
@@ -220,8 +220,6 @@ function submitAllData() {
   fullData.preferredDate = selectedDate.toISOString();
   fullData.preferredSlot = selectedSlot;
 
-  console.log('📊 נתונים לשליחה:', fullData);
-
   // Build request data for API
   const requestData = {
     customerDetails: fullData.customerDetails || {},
@@ -231,49 +229,34 @@ function submitAllData() {
     preferredSlot: selectedSlot
   };
 
-  console.log('🚀 שליחת בקשה:', requestData);
-
   // Register new request
   ajaxCall(
     'POST',
     `${API_BASE_URL}/NewRequest/RegisterNewRequest`,
     JSON.stringify(requestData),
     function(response) {
-      console.log('✅ תגובה מהשרת:', response);
-      
       // Handle different response formats
       let requestID = null;
       
       if (typeof response === 'number') {
-        // Server returns the ID directly as a number
         requestID = response;
       } else if (response && (response.requestID || response.RequestID)) {
-        // Server returns an object with requestID property
         requestID = response.requestID || response.RequestID;
       } else if (response && response.NewCustomerID) {
-        // Some APIs return NewCustomerID
         requestID = response.NewCustomerID;
       }
       
       if (requestID && requestID > 0) {
-        console.log('✅ RequestID התקבל:', requestID);
-        
-        // Wait a moment then calculate and save estimate
         setTimeout(() => {
-          // Debug: Let's also test the estimate endpoint separately
-          debugEstimateEndpoint(requestID);
           calculateAndSaveEstimate(requestID);
         }, 1000);
-        
       } else {
-        console.error('❌ לא התקבל RequestID מהשרת');
         showErrorToast('שגיאה בשליחת הבקשה - לא התקבל מספר בקשה');
         button.innerHTML = originalContent;
         button.disabled = false;
       }
     },
     function(xhr, status, error) {
-      console.error('❌ שגיאה בשליחת הבקשה:', error, xhr.responseText);
       showErrorToast('שגיאה בשליחת הבקשה. אנא נסו שוב.');
       button.innerHTML = originalContent;
       button.disabled = false;
@@ -281,62 +264,15 @@ function submitAllData() {
   );
 }
 
-function debugEstimateEndpoint(requestID) {
-  console.log('🔍 בודק את endpoint ההערכה עם RequestID:', requestID);
-  
-  // Test if the RequestID exists in the database
-  ajaxCall(
-    'GET',
-    `${API_BASE_URL}/PriceEstimator/CheckWorkRequests`,
-    null,
-    function(response) {
-      console.log('🔍 WorkRequests במערכת:', response);
-    },
-    function(xhr, status, error) {
-      console.error('🔍 שגיאה בבדיקת WorkRequests:', error);
-    }
-  );
-  
-  // Test debug endpoint
-  const fullData = JSON.parse(localStorage.getItem('installationData')) || {};
-  const parquetType = localStorage.getItem('ParquetType') || '';
-  const totalArea = fullData.spaceDetails?.reduce((sum, space) => sum + (Number(space.size) || 0), 0) || 0;
-  const roomCount = fullData.spaceDetails?.length || 1;
-  
-  const debugData = {
-    RequestID: requestID,
-    TotalArea: totalArea,
-    ParquetType: parquetType,
-    RoomCount: roomCount,
-    SpaceDetails: fullData.spaceDetails || []
-  };
-  
-  ajaxCall(
-    'POST',
-    `${API_BASE_URL}/PriceEstimator/DebugEstimate`,
-    JSON.stringify(debugData),
-    function(response) {
-      console.log('🔍 תוצאות דיבוג:', response);
-    },
-    function(xhr, status, error) {
-      console.error('🔍 שגיאה בדיבוג:', xhr.responseText);
-    }
-  );
-}
+
 
 function calculateAndSaveEstimate(requestID) {
-  console.log('🧮 מחשב הערכת מחיר עבור RequestID:', requestID);
-  
   const fullData = JSON.parse(localStorage.getItem('installationData')) || {};
   const parquetType = localStorage.getItem('ParquetType') || '';
-  
-  console.log('📊 נתוני localStorage:', { fullData, parquetType });
   
   // Calculate total area
   const totalArea = fullData.spaceDetails?.reduce((sum, space) => sum + (Number(space.size) || 0), 0) || 0;
   const roomCount = fullData.spaceDetails?.length || 1;
-  
-  console.log('🔢 חישובים:', { totalArea, roomCount });
   
   const estimateData = {
     RequestID: requestID,
@@ -348,38 +284,15 @@ function calculateAndSaveEstimate(requestID) {
     HasMultipleFloorTypes: new Set(fullData.spaceDetails?.map(space => space.floorType)).size > 1
   };
 
-  console.log('📊 נתוני הערכה לשליחה:', JSON.stringify(estimateData, null, 2));
-
   ajaxCall(
     'POST',
     `${API_BASE_URL}/PriceEstimator/CalculateAndSave`,
     JSON.stringify(estimateData),
     function(response) {
-      console.log('✅ הערכת מחיר נשמרה בהצלחה:', response);
-      if (response && response.Success) {
-        console.log('✅ EstimateID:', response.EstimateID);
-      }
       showSuccessModal();
     },
     function(xhr, status, error) {
-      console.error('❌ שגיאה בשמירת הערכת מחיר:');
-      console.error('   Status:', status);
-      console.error('   Error:', error);
-      console.error('   Response Text:', xhr.responseText);
-      console.error('   Status Code:', xhr.status);
-      
-      // Try to parse error response
-      try {
-        const errorResponse = JSON.parse(xhr.responseText);
-        console.error('   Parsed Error:', errorResponse);
-      } catch (e) {
-        console.error('   Raw Error Text:', xhr.responseText);
-      }
-      
-      // Show error message to user
       showErrorToast('שגיאה בשמירת הערכת מחיר. הבקשה נשמרה אך ההערכה לא חושבה.');
-      
-      // Still show success modal since the request was saved
       setTimeout(() => {
         showSuccessModal();
       }, 2000);

@@ -1,6 +1,5 @@
-// customerDetails.js - עמוד פרטי לקוח מתקדם
+// customerDetails.js - עמוד פרטי לקוח
 
-// Initialize page
 document.addEventListener('DOMContentLoaded', function() {
   // Add page load animation
   document.body.style.opacity = '0';
@@ -9,10 +8,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.body.style.opacity = '1';
   }, 100);
   
-  // Add form validation
   setupFormValidation();
-  
-  // Load existing data if available
   loadExistingData();
 });
 

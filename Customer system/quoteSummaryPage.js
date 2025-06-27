@@ -1,15 +1,12 @@
-// quoteSummaryPage.js - עמוד הצעת מחיר מתקדם
+// quoteSummaryPage.js - עמוד הצעת מחיר
 
-// Initialize page
 document.addEventListener('DOMContentLoaded', function() {
-    // Add page load animation
     document.body.style.opacity = '0';
     setTimeout(() => {
         document.body.style.transition = 'opacity 0.5s ease';
         document.body.style.opacity = '1';
     }, 100);
     
-    // Load quote data
     loadQuote();
 });
 

@@ -30,11 +30,21 @@
       font-family: 'Heebo', sans-serif;
     }
     .card-hover {
-      transition: all 0.3s ease;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
     .card-hover:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    }
+    .pulse-slow {
+      animation: pulse 3s infinite;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fadeIn {
+      animation: fadeIn 0.6s ease-out;
     }
     .shimmer {
       background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
@@ -53,7 +63,7 @@
     <aside class="w-64 bg-white shadow-lg">
       <div class="p-6">
         <div class="text-center mb-8">
-          <img src="../picturs/logo.png" alt="לוגו" class="h-16 mx-auto mb-2" />
+          <img src="../picturs/logo.png" alt="לוגו" class="h-20 mx-auto mb-2" />
           <h3 class="text-lg font-semibold text-gray-800">דוד פרקטים</h3>
           <p class="text-sm text-gray-600">מערכת ניהול</p>
         </div>
@@ -100,24 +110,18 @@
     </aside>
 
     <!-- Main Content -->
-    <main class="flex-1 flex flex-col">
+    <main class="flex-1 flex flex-col animate-fadeIn">
       <!-- Top Header -->
       <header class="bg-white shadow-sm border-b border-gray-200 px-8 py-4">
         <div class="flex items-center justify-between">
           <div class="flex items-center space-x-4 space-x-reverse">
-            <img src="../picturs/logo.png" alt="לוגו" class="h-10 w-10" />
+            <img src="../picturs/logo.png" alt="לוגו" class="h-12 w-12" />
             <div>
               <h1 class="text-xl font-semibold text-gray-900">דוד פרקטים</h1>
               <p class="text-sm text-gray-600">ממשק ניהול</p>
             </div>
           </div>
           <div class="flex items-center space-x-4 space-x-reverse">
-            <div class="relative">
-              <input type="text" placeholder="חיפוש..." class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent w-64">
-              <svg class="absolute right-3 top-2.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-              </svg>
-            </div>
             <div class="flex items-center space-x-3 space-x-reverse">
               <div class="text-right">
                 <p class="text-sm font-medium text-gray-900">שלום, דוד</p>
@@ -141,16 +145,45 @@
         <!-- Quick Stats Grid -->
         <div id="statsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 mb-8">
           <!-- Loading state -->
+          <div class="bg-gray-200 rounded-xl p-6 animate-pulse">
+            <div class="h-4 bg-gray-300 rounded mb-2"></div>
+            <div class="h-8 bg-gray-300 rounded"></div>
+          </div>
+          <div class="bg-gray-200 rounded-xl p-6 animate-pulse">
+            <div class="h-4 bg-gray-300 rounded mb-2"></div>
+            <div class="h-8 bg-gray-300 rounded"></div>
+          </div>
+          <div class="bg-gray-200 rounded-xl p-6 animate-pulse">
+            <div class="h-4 bg-gray-300 rounded mb-2"></div>
+            <div class="h-8 bg-gray-300 rounded"></div>
+          </div>
+          <div class="bg-gray-200 rounded-xl p-6 animate-pulse">
+            <div class="h-4 bg-gray-300 rounded mb-2"></div>
+            <div class="h-8 bg-gray-300 rounded"></div>
+          </div>
+          <div class="bg-gray-200 rounded-xl p-6 animate-pulse">
+            <div class="h-4 bg-gray-300 rounded mb-2"></div>
+            <div class="h-8 bg-gray-300 rounded"></div>
+          </div>
+          <div class="bg-gray-200 rounded-xl p-6 animate-pulse">
+            <div class="h-4 bg-gray-300 rounded mb-2"></div>
+            <div class="h-8 bg-gray-300 rounded"></div>
+          </div>
         </div>
 
         <!-- Main Dashboard Grid -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <!-- Calendar Section -->
-          <div class="lg:col-span-2 bg-white rounded-xl shadow-sm p-6">
+          <div class="lg:col-span-2 bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 p-6 border border-gray-100">
             <div class="flex items-center justify-between mb-6">
-              <h3 class="text-lg font-semibold text-gray-900">יומן השבוע</h3>
-              <button onclick="window.location.href='InstallerSchedule.html'" class="text-primary hover:text-primary-dark text-sm font-medium">
-                צפה בכל התאריכים
+              <h3 class="text-xl font-bold text-gray-900">יומן השבוע</h3>
+                              <button onclick="window.location.href='InstallerSchedule.html'" class="group px-4 py-2 bg-primary/10 text-primary hover:bg-primary hover:text-white rounded-lg text-sm font-medium transition-all duration-200 hover:shadow-md" title="עבור ללוח זמנים מלא (Ctrl+S)">
+                <span class="flex items-center">
+                  צפה בכל התאריכים
+                  <svg class="w-4 h-4 mr-2 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                  </svg>
+                </span>
               </button>
             </div>
             
@@ -171,9 +204,41 @@
             
             <!-- Upcoming appointments -->
             <div class="mt-6 pt-6 border-t border-gray-200">
-              <h4 class="text-sm font-semibold text-gray-900 mb-3">התקנות השבוע</h4>
+              <h4 class="text-lg font-bold text-gray-900 mb-4">התקנות השבוע</h4>
               <div class="space-y-3" id="upcomingInstalls">
-                <!-- Will be populated by JavaScript -->
+                <!-- Loading state -->
+                <div class="animate-pulse space-y-3">
+                  <div class="flex items-center justify-between p-3 bg-gray-100 rounded-lg">
+                    <div class="flex items-center space-x-3 space-x-reverse">
+                      <div class="w-3 h-3 bg-gray-300 rounded-full"></div>
+                      <div class="space-y-2">
+                        <div class="h-4 bg-gray-300 rounded w-20"></div>
+                        <div class="h-3 bg-gray-200 rounded w-16"></div>
+                      </div>
+                    </div>
+                    <div class="h-3 bg-gray-300 rounded w-16"></div>
+                  </div>
+                  <div class="flex items-center justify-between p-3 bg-gray-100 rounded-lg">
+                    <div class="flex items-center space-x-3 space-x-reverse">
+                      <div class="w-3 h-3 bg-gray-300 rounded-full"></div>
+                      <div class="space-y-2">
+                        <div class="h-4 bg-gray-300 rounded w-20"></div>
+                        <div class="h-3 bg-gray-200 rounded w-16"></div>
+                      </div>
+                    </div>
+                    <div class="h-3 bg-gray-300 rounded w-16"></div>
+                  </div>
+                  <div class="flex items-center justify-between p-3 bg-gray-100 rounded-lg">
+                    <div class="flex items-center space-x-3 space-x-reverse">
+                      <div class="w-3 h-3 bg-gray-300 rounded-full"></div>
+                      <div class="space-y-2">
+                        <div class="h-4 bg-gray-300 rounded w-20"></div>
+                        <div class="h-3 bg-gray-200 rounded w-16"></div>
+                      </div>
+                    </div>
+                    <div class="h-3 bg-gray-300 rounded w-16"></div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -181,38 +246,72 @@
           <!-- Right Sidebar -->
           <div class="space-y-6">
             <!-- Quick Actions -->
-            <div class="bg-white rounded-xl shadow-sm p-6">
-              <h3 class="text-lg font-semibold text-gray-900 mb-4">פעולות מהירות</h3>
+            <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 p-6 border border-gray-100">
+              <h3 class="text-xl font-bold text-gray-900 mb-6">פעולות מהירות</h3>
               <div class="space-y-3">
-                <button onclick="window.location.href='InstallerCustomersPage.html'" class="w-full flex items-center justify-center px-4 py-3 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors">
-                  <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                <button onclick="window.location.href='InstallerCustomersPage.html'" class="group w-full flex items-center justify-center px-4 py-3 bg-gradient-to-r from-primary to-primary-dark text-white rounded-xl hover:from-primary-dark hover:to-primary transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl" title="ניהול לקוחות ופרטי הזמנות (Ctrl+C)">
+                  <svg class="w-5 h-5 ml-2 transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
                   </svg>
                   צפה בלקוחות
                 </button>
-                <button onclick="window.location.href='InstallerSchedule.html'" class="w-full flex items-center justify-center px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
-                  <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <button onclick="window.location.href='InstallerSchedule.html'" class="group w-full flex items-center justify-center px-4 py-3 bg-white text-gray-700 rounded-xl hover:bg-gray-50 transition-all duration-200 border border-gray-200 hover:border-gray-300 hover:shadow-md" title="תכנון יומן ועדכון תאריכי התקנות (Ctrl+S)">
+                  <svg class="w-5 h-5 ml-2 transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                   </svg>
                   יומן התקנות
                 </button>
-                <button onclick="window.location.href='BIpage.html'" class="w-full flex items-center justify-center px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
-                  <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <button onclick="window.location.href='BIpage.html'" class="group w-full flex items-center justify-center px-4 py-3 bg-white text-gray-700 rounded-xl hover:bg-gray-50 transition-all duration-200 border border-gray-200 hover:border-gray-300 hover:shadow-md" title="דוחות מתקדמים וניתוח ביצועים (Ctrl+B)">
+                  <svg class="w-5 h-5 ml-2 transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                   </svg>
-                  לוח בקרה
+                  דוחות וביצועים
                 </button>
               </div>
             </div>
 
             <!-- Recent Activity -->
-            <div class="bg-white rounded-xl shadow-sm p-6">
-              <h3 class="text-lg font-semibold text-gray-900 mb-4">פעילות אחרונה</h3>
+            <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 p-6 border border-gray-100">
+              <h3 class="text-xl font-bold text-gray-900 mb-6">פעילות אחרונה</h3>
               <div class="space-y-4" id="recentActivity">
-                <!-- Will be populated by JavaScript -->
+                <!-- Loading state -->
+                <div class="animate-pulse space-y-3">
+                  <div class="flex items-start space-x-3 space-x-reverse">
+                    <div class="w-8 h-8 bg-gray-300 rounded-full"></div>
+                    <div class="flex-1 space-y-2">
+                      <div class="h-4 bg-gray-300 rounded w-3/4"></div>
+                      <div class="h-3 bg-gray-200 rounded w-1/2"></div>
+                      <div class="h-3 bg-gray-200 rounded w-1/4"></div>
+                    </div>
+                  </div>
+                  <div class="flex items-start space-x-3 space-x-reverse">
+                    <div class="w-8 h-8 bg-gray-300 rounded-full"></div>
+                    <div class="flex-1 space-y-2">
+                      <div class="h-4 bg-gray-300 rounded w-3/4"></div>
+                      <div class="h-3 bg-gray-200 rounded w-1/2"></div>
+                      <div class="h-3 bg-gray-200 rounded w-1/4"></div>
+                    </div>
+                  </div>
+                  <div class="flex items-start space-x-3 space-x-reverse">
+                    <div class="w-8 h-8 bg-gray-300 rounded-full"></div>
+                    <div class="flex-1 space-y-2">
+                      <div class="h-4 bg-gray-300 rounded w-3/4"></div>
+                      <div class="h-3 bg-gray-200 rounded w-1/2"></div>
+                      <div class="h-3 bg-gray-200 rounded w-1/4"></div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
+        </div>
+        
+        <!-- Refresh indicator -->
+        <div class="mt-8 text-center">
+          <p class="text-sm text-gray-500">
+            <span id="lastRefresh">הדשבורד נטען...</span> • 
+            <span class="text-primary cursor-pointer hover:underline" onclick="location.reload()" title="רענן עכשיו (Ctrl+R)">רענן עכשיו</span>
+          </p>
         </div>
       </div>
     </main>
@@ -222,16 +321,26 @@
     // Toast notification function
     function showToast(message, type = 'success') {
       const toast = document.createElement('div');
-      toast.className = `fixed top-4 left-4 px-6 py-4 rounded-lg shadow-lg z-50 transition-all duration-300 transform translate-x-full ${
-        type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
-      }`;
-      toast.textContent = message;
+      const bgColor = type === 'success' ? 'bg-green-500' : 'bg-red-500';
+      const icon = type === 'success' ? '✅' : '❌';
+      
+      toast.className = `fixed top-4 right-4 px-6 py-4 rounded-lg shadow-lg z-50 transition-all duration-300 transform translate-x-full ${bgColor} text-white`;
+      toast.innerHTML = `
+        <div class="flex items-center space-x-3 space-x-reverse">
+          <span class="text-lg">${icon}</span>
+          <span class="font-medium">${message}</span>
+        </div>
+      `;
       document.body.appendChild(toast);
       
       setTimeout(() => toast.classList.remove('translate-x-full'), 100);
       setTimeout(() => {
         toast.classList.add('translate-x-full');
-        setTimeout(() => document.body.removeChild(toast), 300);
+        setTimeout(() => {
+          if (document.body.contains(toast)) {
+            document.body.removeChild(toast);
+          }
+        }, 300);
       }, 3000);
     }
 
@@ -240,13 +349,14 @@
         function(summary) {
           if (summary) {
             updateStatsGrid(summary);
-            console.log('✅ נתוני דשבורד נטענו בהצלחה');
-            showToast('נתוני הדשבורד נטענו בהצלחה');
+            updateLastRefreshTime();
+            if (!window.dashboardLoaded) {
+              showToast('דשבורד נטען בהצלחה');
+              window.dashboardLoaded = true;
+            }
           }
         },
         function(error) {
-          console.error('❌ שגיאה בטעינת נתוני דשבורד:', error);
-          showToast('שגיאה בטעינת נתוני הדשבורד', 'error');
           updateStatsGrid({
             waitingForDate: 0,
             pendingInstalls: 0,
@@ -255,8 +365,18 @@
             waitingForVideo: 0,
             completedInstalls: 0
           });
+          updateLastRefreshTime();
         }
       );
+    }
+    
+    function updateLastRefreshTime() {
+      const now = new Date();
+      const timeString = now.toLocaleTimeString('he-IL', { 
+        hour: '2-digit', 
+        minute: '2-digit' 
+      });
+      document.getElementById('lastRefresh').textContent = `עודכן לאחרונה: ${timeString}`;
     }
 
     function updateStatsGrid(data) {
@@ -357,18 +477,61 @@
       const startDate = new Date(firstDay);
       startDate.setDate(startDate.getDate() - firstDay.getDay());
 
+      // קבלת התקנות לחודש הנוכחי
+      ajaxCall('GET', `${API_BASE_URL}/BI/GetUpcomingInstalls?days=30`, null, 
+        function(installs) {
+          generateCalendarWithInstalls(startDate, currentMonth, today, installs || []);
+        },
+        function(error) {
+          generateCalendarWithInstalls(startDate, currentMonth, today, []);
+        }
+      );
+    }
+
+    function generateCalendarWithInstalls(startDate, currentMonth, today, installs) {
+      const calendarGrid = document.getElementById('calendarGrid');
+      
+      // יצירת מפה של התקנות לפי תאריך
+      const installsByDate = {};
+      installs.forEach(install => {
+        const dateStr = new Date(install.installDate).toDateString();
+        if (!installsByDate[dateStr]) installsByDate[dateStr] = 0;
+        installsByDate[dateStr]++;
+      });
+
+      // חישוב השבוע הנוכחי
+      const currentWeekStart = new Date(today);
+      const dayOfWeek = currentWeekStart.getDay();
+      currentWeekStart.setDate(today.getDate() - dayOfWeek);
+      const currentWeekEnd = new Date(currentWeekStart);
+      currentWeekEnd.setDate(currentWeekStart.getDate() + 6);
+
       let calendarHTML = '';
       for (let i = 0; i < 42; i++) {
         const date = new Date(startDate);
         date.setDate(startDate.getDate() + i);
         const isCurrentMonth = date.getMonth() === currentMonth;
         const isToday = date.toDateString() === today.toDateString();
+        const isCurrentWeek = date >= currentWeekStart && date <= currentWeekEnd && isCurrentMonth;
+        const dateStr = date.toDateString();
+        const installCount = installsByDate[dateStr] || 0;
+        
+        let dayClass = `text-center py-3 px-2 ${isCurrentMonth ? 'text-gray-900' : 'text-gray-400'} cursor-pointer transition-all duration-200 relative rounded-lg`;
+        
+        if (isToday) {
+          dayClass += ' bg-primary text-white font-bold shadow-md transform scale-105';
+        } else if (isCurrentWeek) {
+          dayClass += ' bg-primary/10 border border-primary/20 font-medium';
+        } else if (installCount > 0) {
+          dayClass += ' bg-blue-50 hover:bg-blue-100 border border-blue-200';
+        } else if (isCurrentMonth) {
+          dayClass += ' hover:bg-gray-100';
+        }
         
         calendarHTML += `
-          <div class="text-center py-2 ${isCurrentMonth ? 'text-gray-900' : 'text-gray-400'} ${
-            isToday ? 'bg-primary text-white rounded-lg font-semibold' : 'hover:bg-gray-100 rounded-lg'
-          } cursor-pointer transition-colors">
+          <div class="${dayClass}" title="${installCount > 0 ? `${installCount} התקנות` : (isCurrentWeek && !isToday ? 'השבוע הנוכחי' : '')}">
             ${date.getDate()}
+            ${installCount > 0 ? `<div class="absolute -top-1 -right-1 w-4 h-4 bg-blue-500 text-white text-xs rounded-full flex items-center justify-center shadow-sm">${installCount}</div>` : ''}
           </div>
         `;
       }
@@ -376,6 +539,48 @@
     }
 
     function loadRecentActivity() {
+      ajaxCall('GET', `${API_BASE_URL}/BI/GetRecentActivity?limit=5`, null, 
+        function(activities) {
+          const recentActivity = document.getElementById('recentActivity');
+          if (activities && activities.length > 0) {
+            recentActivity.innerHTML = activities.map(activity => `
+              <div class="flex items-start space-x-3 space-x-reverse">
+                <div class="flex-shrink-0 w-8 h-8 bg-${activity.colorClass}-100 rounded-full flex items-center justify-center">
+                  ${getActivityIcon(activity.iconType, activity.colorClass)}
+                </div>
+                <div class="flex-1">
+                  <p class="text-sm font-medium text-gray-900">${activity.description}</p>
+                  <p class="text-xs text-gray-600">${activity.customerName} - ${activity.location}</p>
+                  <p class="text-xs text-gray-500">${activity.relativeTime}</p>
+                </div>
+              </div>
+            `).join('');
+          } else {
+            recentActivity.innerHTML = `
+              <div class="text-center py-4">
+                <p class="text-gray-500 text-sm">אין פעילות אחרונה</p>
+              </div>
+            `;
+          }
+        },
+        function(error) {
+          loadMockRecentActivity();
+        }
+      );
+    }
+
+    function getActivityIcon(iconType, colorClass) {
+      const icons = {
+        'check': `<svg class="w-4 h-4 text-${colorClass}-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`,
+        'user-plus': `<svg class="w-4 h-4 text-${colorClass}-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>`,
+        'file-text': `<svg class="w-4 h-4 text-${colorClass}-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>`,
+        'check-circle': `<svg class="w-4 h-4 text-${colorClass}-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`,
+        'calendar': `<svg class="w-4 h-4 text-${colorClass}-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>`
+      };
+      return icons[iconType] || icons['check'];
+    }
+
+    function loadMockRecentActivity() {
       const recentActivity = document.getElementById('recentActivity');
       recentActivity.innerHTML = `
         <div class="flex items-start space-x-3 space-x-reverse">
@@ -390,7 +595,6 @@
             <p class="text-xs text-gray-500">לפני 2 שעות</p>
           </div>
         </div>
-        
         <div class="flex items-start space-x-3 space-x-reverse">
           <div class="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
             <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -403,7 +607,6 @@
             <p class="text-xs text-gray-500">לפני 4 שעות</p>
           </div>
         </div>
-        
         <div class="flex items-start space-x-3 space-x-reverse">
           <div class="flex-shrink-0 w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
             <svg class="w-4 h-4 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -420,6 +623,37 @@
     }
 
     function loadUpcomingInstalls() {
+      ajaxCall('GET', `${API_BASE_URL}/BI/GetUpcomingInstalls?days=7`, null, 
+        function(installs) {
+          const upcomingInstalls = document.getElementById('upcomingInstalls');
+          if (installs && installs.length > 0) {
+            upcomingInstalls.innerHTML = installs.map(install => `
+              <div class="flex items-center justify-between p-3 bg-${install.statusColor}-50 rounded-lg">
+                <div class="flex items-center space-x-3 space-x-reverse">
+                  <div class="w-3 h-3 bg-${install.statusColor}-500 rounded-full"></div>
+                  <div>
+                    <p class="text-sm font-medium text-gray-900">${install.customerName}</p>
+                    <p class="text-xs text-gray-600">${install.location}</p>
+                  </div>
+                </div>
+                <span class="text-xs font-medium text-${install.statusColor}-600">${install.formattedDate}</span>
+              </div>
+            `).join('');
+          } else {
+            upcomingInstalls.innerHTML = `
+              <div class="text-center py-4">
+                <p class="text-gray-500 text-sm">אין התקנות מתוכננות השבוע</p>
+              </div>
+            `;
+          }
+        },
+        function(error) {
+          loadMockUpcomingInstalls();
+        }
+      );
+    }
+
+    function loadMockUpcomingInstalls() {
       const upcomingInstalls = document.getElementById('upcomingInstalls');
       upcomingInstalls.innerHTML = `
         <div class="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
@@ -432,7 +666,6 @@
           </div>
           <span class="text-xs font-medium text-blue-600">מחר 10:00</span>
         </div>
-        
         <div class="flex items-center justify-between p-3 bg-green-50 rounded-lg">
           <div class="flex items-center space-x-3 space-x-reverse">
             <div class="w-3 h-3 bg-green-500 rounded-full"></div>
@@ -443,7 +676,6 @@
           </div>
           <span class="text-xs font-medium text-green-600">יום ג' 14:00</span>
         </div>
-        
         <div class="flex items-center justify-between p-3 bg-orange-50 rounded-lg">
           <div class="flex items-center space-x-3 space-x-reverse">
             <div class="w-3 h-3 bg-orange-500 rounded-full"></div>
@@ -464,8 +696,41 @@
       loadRecentActivity();
       loadUpcomingInstalls();
       
-      // Auto refresh every 5 minutes
-      setInterval(loadDashboardData, 5 * 60 * 1000);
+      // רענון אוטומטי כל 5 דקות
+      setInterval(() => {
+        loadDashboardData();
+        loadRecentActivity();
+        loadUpcomingInstalls();
+      }, 5 * 60 * 1000);
+      
+      // רענון יומן כל שעה
+      setInterval(() => {
+        generateCalendar();
+      }, 60 * 60 * 1000);
+      
+      // Keyboard shortcuts
+      document.addEventListener('keydown', function(e) {
+        if (e.ctrlKey || e.metaKey) {
+          switch(e.key) {
+            case 's':
+              e.preventDefault();
+              window.location.href = 'InstallerSchedule.html';
+              break;
+            case 'c':
+              e.preventDefault();
+              window.location.href = 'InstallerCustomersPage.html';
+              break;
+            case 'b':
+              e.preventDefault();
+              window.location.href = 'BIpage.html';
+              break;
+            case 'r':
+              e.preventDefault();
+              location.reload();
+              break;
+          }
+        }
+      });
     });
   </script>
 </body>

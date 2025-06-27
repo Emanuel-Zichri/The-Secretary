@@ -180,8 +180,6 @@ function saveAllRooms() {
   const roomDivs = document.querySelectorAll('.room-card');
   const spaceDetails = [];
   let isValid = true;
-  const errors = [];
-
   const parquetType = localStorage.getItem('ParquetType');
 
   roomDivs.forEach((div, index) => {
@@ -190,27 +188,18 @@ function saveAllRooms() {
     const textarea = div.querySelector('textarea');
     
     const floorType = select?.value?.trim() || "";
-    const sizeInput = inputs[0]; // number input for area
+    const sizeInput = inputs[0];
     const size = parseFloat(sizeInput?.value.trim());
     const notes = textarea?.value.trim() || "";
-    const mediaFile = inputs[1]?.files[0]; // file input
+    const mediaFile = inputs[1]?.files[0];
 
     // Reset previous error states
     div.classList.remove('ring-2', 'ring-red-500', 'ring-opacity-50');
     
-    if (!floorType) {
-      errors.push(`חלל ${index + 1}: לא נבחר סוג חלל`);
+    if (!floorType || isNaN(size) || size <= 0) {
       isValid = false;
       div.classList.add('ring-2', 'ring-red-500', 'ring-opacity-50');
-    }
-    
-    if (isNaN(size) || size <= 0) {
-      errors.push(`חלל ${index + 1}: שטח לא תקין`);
-      isValid = false;
-      div.classList.add('ring-2', 'ring-red-500', 'ring-opacity-50');
-    }
-
-    if (isValid || (!isNaN(size) && size > 0 && floorType)) {
+    } else {
       spaceDetails.push({
         spaceID: index,
         requestID: 0,
@@ -225,8 +214,6 @@ function saveAllRooms() {
 
   if (!isValid) {
     showErrorToast('אנא תקן את השגיאות המסומנות באדום');
-    
-    // Scroll to first error
     const firstError = document.querySelector('.room-card.ring-red-500');
     if (firstError) {
       firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -241,11 +228,10 @@ function saveAllRooms() {
 
   // Show loading state
   const button = event.target;
-  const originalContent = button.innerHTML;
   button.innerHTML = `
     <svg class="animate-spin w-5 h-5 mx-auto" fill="none" viewBox="0 0 24 24">
       <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 714 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
     </svg>
   `;
   button.disabled = true;
@@ -256,8 +242,6 @@ function saveAllRooms() {
   parsed.spaceDetails = spaceDetails;
 
   localStorage.setItem('installationData', JSON.stringify(parsed));
-  console.log("installationData:", parsed);
-  
   showSuccessToast('הנתונים נשמרו בהצלחה!');
   
   setTimeout(() => {
