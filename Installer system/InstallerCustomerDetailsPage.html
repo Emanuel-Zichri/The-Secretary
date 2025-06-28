@@ -3,1590 +3,2270 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>פרטי לקוח</title>
-  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700&display=swap" rel="stylesheet">
+  <title>פרטי לקוח - דוד פרקטים</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="/ajaxCall.js"></script>  
-<script src="/api.js"></script>
+  <script src="../ajaxCall.js"></script>
+  <script src="../api.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#b46a2c',
+            'primary-dark': '#8b5732',
+            'primary-light': '#d4985a'
+          },
+          fontFamily: {
+            'heebo': ['Heebo', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
   <style>
-    :root {
-      --main-color: #b46a2c;
-      --text-dark: #333;
-      --light-gray: #f5f5f5;
-      --radius: 12px;
-    }
-
     body {
-  overflow-x: hidden;
-      margin: 0;
       font-family: 'Heebo', sans-serif;
-      background-color: #fafafa;
     }
-
-    .container {
-      display: flex;
-      min-height: 100vh;
+    .card-hover {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
-
-    .sidebar {
-  width: 200px;
-  background-color: #fff;
-  padding: 20px;
-  border-left: 1px solid #ddd;
-  height: 100vh;
-  position: fixed;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  overflow-y: auto;
-  box-sizing: border-box;
-  z-index: 1000;
-}
-
-    .sidebar .logo {
-      text-align: center;
-      margin-bottom: 40px;
+    .card-hover:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
     }
-
-    .sidebar nav a {
-      display: block;
-      padding: 12px;
-      color: var(--text-dark);
-      text-decoration: none;
-      border-radius: 8px;
-      margin-bottom: 8px;
+    .progress-step {
+      position: relative;
     }
-
-    .sidebar nav a.active {
-      background-color: #e6f2f2;
-      font-weight: bold;
+    .progress-step::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: -50%;
+      width: 100%;
+      height: 2px;
+      background: #e5e7eb;
+      z-index: -1;
     }
-
-    .main {
-  margin-right: 200px;
-  width: calc(100% - 200px);
-      flex: 1;
-      padding: 30px;
+    .progress-step:first-child::before {
+      display: none;
     }
-
-    .section {
-      background: #fff;
-      border-radius: var(--radius);
-      padding: 30px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-      margin-bottom: 20px;
+    .progress-step.completed::before {
+      background: #10b981;
     }
-
-    .section h2 {
-      margin-top: 0;
+    .progress-step.completed .progress-circle {
+      background: #10b981;
+      color: white;
     }
-
-    .info-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 15px;
+    .loading-skeleton {
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: skeleton-loading 1.5s infinite;
     }
-
-    .info-item {
-      font-size: 15px;
+    @keyframes skeleton-loading {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
     }
-
-    .info-item label {
-      font-weight: bold;
-      margin-left: 6px;
-    }
-
-    .info-item input {
-      padding: 6px;
-      width: 90%;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-    }
-
-    .edit-btn {
-      margin-top: 10px;
-    }
-
-    .btn {
-      background-color: var(--main-color);
-      color: #fff;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 6px;
-      cursor: pointer;
-      margin-right: 10px;
-    }
-
-    .btn-secondary {
-      background-color: #ccc;
-      color: #333;
-    }
-      .quantity-control {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      margin-top: 6px;
-    }
-
-    .quantity-control button {
-      background-color: var(--main-color);
-      color: #fff;
-      border: none;
-      padding: 4px 10px;
-      border-radius: 4px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    .quantity-control .quantity-display {
-      min-width: 20px;
-      text-align: center;
-    }
-
-    html, body {
-      height: 100%;
-    }
-
-    .container {
-      min-height: 100vh;
-      overflow: hidden;
-    }
-
-    main.main {
-      overflow-x: hidden;
-    }
-    .edit-input {
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  padding: 6px;
-  width: 90%;
-}
-.calculator-item {
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 6px;
-  margin: 6px;
-  background-color: #fff;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  font-size: 12px;
-  width: 100%;
-  max-width: 140px;
-  min-height: 120px;
-}
-
-.calculator-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 2px;
-}
-
-.calculator-title {
-  font-weight: bold;
-  font-size: 14px; /* ✅ הגדלה של שם האובייקט */
-  color: var(--text-dark);
-  line-height: 1.1;
-  max-width: 85px;
-  word-break: break-word;
-}
-
-.calculator-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  align-items: center;
-  font-size: 14px;
-}
-
-.calculator-actions button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 15px;
-  padding: 0;
-  margin: 2px 0; 
-  line-height: 1;
-}
-.calculator-actions span {
-  display: block;
-}
-
-
-.calculator-body {
-  display: flex;
-  flex-direction: column;
-  gap: 2px; /* ✅ צמצום הרווחים */
-  font-size: 11px;
-  margin-top: 2px;
-}
-
-.quantity-control {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.quantity-control button {
-  padding: 2px 6px;
-  font-size: 12px;
-  border-radius: 4px;
-}
-
-.quantity-control .quantity-display {
-  min-width: 18px;
-  text-align: center;
-  font-size: 12px;
-}
-#priceCalculator {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  justify-content: flex-start;
-  align-items: flex-start;
-}
-.progress-step {
-    flex: 1;
-    text-align: center;
-    margin: 10px;
-    min-width: 100px;
-  }
-  .progress-circle {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    background: #ccc;
-    margin: auto;
-    margin-bottom: 5px;
-    transition: background 0.3s ease;
-  }
-
-</style>
+  </style>
 </head>
-<body>
-  
-<div class="container">
-  <aside class="sidebar">
-    <div class="logo">
-      <img src="/picturs/logo.png" alt="לוגו" width="100">
-    </div>
-    <nav>
-        <a href="InstallerDashboard.html">מסך הבית</a>
-        <a href="InstallerStatusesPage.html">סטטוסים לביצוע</a>
-        <a href="InstallerCustomersPage.html" class="active">לקוחות</a>
-        <a href="#">יומן התקנות</a>
-        <a href="BIpage.html">לוח בקרה - BI</a>
-        <a href="#">ניהול אתר לקוחות</a>
-        <a href="#">הגדרות</a>
-        <a href="#">התנתקות</a>
-    </nav>
-  </aside>
-  <main class="main">
-    <div class="section" style="text-align:center; margin-bottom: 30px;">
-      <h2>התקדמות טיפול בלקוח</h2>
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px; flex-wrap:wrap;">
-        
-        <div class="progress-step">
-          <div class="progress-circle"></div>
-          <span>צפייה בסרטון לקוח</span>
+<body class="bg-gray-50 font-heebo">
+  <div class="flex min-h-screen">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white shadow-lg">
+      <div class="p-6">
+        <div class="text-center mb-8">
+          <img src="../picturs/logo.png" alt="לוגו" class="h-20 mx-auto mb-2" />
+          <h3 class="text-lg font-semibold text-gray-800">דוד פרקטים</h3>
+          <p class="text-sm text-gray-600">מערכת ניהול</p>
         </div>
-        
-        <div class="progress-step">
-          <div class="progress-circle"></div>
-          <span>טיוטה להצעת מחיר</span>
-        </div>
-        
-        <div class="progress-step">
-          <div class="progress-circle"></div>
-          <span>שליחת טיוטה ללקוח</span>
-        </div>
-        
-        <div class="progress-step">
-          <div class="progress-circle"></div>
-          <span>העברת מקדמה</span>
-        </div>
-        
-        <div class="progress-step">
-          <div class="progress-circle"></div>
-          <span>תיאום התקנה</span>
-        </div>
-        
-        <div class="progress-step">
-          <div class="progress-circle"></div>
-          <span>התקנה בוצעה</span>
-        </div>
-        
-        <div class="progress-step">
-          <div class="progress-circle"></div>
-          <span>קבלת משוב</span>
-        </div>
-    
+        <nav class="space-y-2">
+          <a href="InstallerDashboard.html" class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors">
+            <svg class="w-5 h-5 ml-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
+            </svg>
+            מסך הבית
+          </a>
+          <a href="InstallerStatusesPage.html" class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors">
+            <svg class="w-5 h-5 ml-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+            </svg>
+            סטטוסים לביצוע
+          </a>
+          <a href="InstallerCustomersPage.html" class="flex items-center px-4 py-3 bg-primary text-white rounded-lg">
+            <svg class="w-5 h-5 ml-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+            </svg>
+            לקוחות
+          </a>
+          <a href="InstallerSchedule.html" class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors">
+            <svg class="w-5 h-5 ml-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+            יומן התקנות
+          </a>
+          <a href="BIpage.html" class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors">
+            <svg class="w-5 h-5 ml-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+            </svg>
+            לוח בקרה - BI
+          </a>
+        </nav>
       </div>
-    </div>
-    <div style="display: flex; gap: 20px; flex-wrap: wrap; align-items:flex-start;">
+    </aside>
 
-        
-        <div class="section" style="flex:1; min-width:300px;">
-            <h2>פרטי לקוח</h2>
-            <div id="customerName" style="font-weight:bold; font-size: 18px; margin-bottom: 10px;"></div>
-            <div class="info-grid">
-          
-            <div class="info-item"><label>טלפון:</label><span id="phoneText">-</span></div>
-            <div class="info-item"><label>אימייל:</label><span id="emailText">-</span></div>
-            <div class="info-item"><label>עיר:</label><span id="cityText">-</span></div>
-            <div class="info-item"><label>רחוב:</label><span id="streetText">-</span></div>
-            <div class="info-item"><label>סטטוס:</label><span id="statusText">-</span></div>
-            <div class="info-item"><label>תאריך מועדף להתקנה:</label><span id="preferredDateText">-</span></div>
-            <div class="info-item"><label>תאריך שנקבע להתקנה:</label><span id="plannedDateText">-</span></div>
-            <div class="info-item"><label>תאריך סיום עבודה:</label><span id="completedDateText">-</span></div> 
+    <!-- Main Content -->
+    <main class="flex-1 bg-gray-50">
+      <!-- Header -->
+      <header class="bg-white shadow-sm border-b border-gray-200 px-8 py-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-4 space-x-reverse">
+            <button onclick="history.back()" class="p-2 text-gray-600 hover:text-primary hover:bg-primary/10 rounded-lg transition-colors">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+              </svg>
+            </button>
+            <div>
+              <h1 class="text-xl font-semibold text-gray-900">פרטי לקוח</h1>
+              <p class="text-sm text-gray-600" id="customerNameSubtitle">טוען פרטי לקוח...</p>
+            </div>
+          </div>
+          <div class="flex items-center space-x-3 space-x-reverse">
+            <button id="editModeBtn" onclick="toggleEditMode()" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors">
+              <span class="flex items-center">
+                <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                </svg>
+                ערוך
+              </span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Content -->
+      <div class="p-8 space-y-8">
+        <!-- Progress Bar -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <h2 class="text-lg font-semibold text-gray-900 mb-6">התקדמות טיפול בלקוח</h2>
+          <div class="grid grid-cols-7 gap-4" id="progressBar">
+            <!-- Progress steps will be populated by JavaScript -->
+          </div>
+        </div>
+
+        <!-- Main Content Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <!-- Customer Details -->
+          <div class="lg:col-span-2 space-y-8">
+            <!-- Basic Info -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-6">פרטי לקוח</h3>
+              <div id="customerDetails" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Loading state -->
+                <div class="space-y-4">
+                  <div class="loading-skeleton h-4 rounded w-3/4"></div>
+                  <div class="loading-skeleton h-4 rounded w-1/2"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Space Details -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-6">פרטי החללים להתקנה</h3>
+              <div id="spaceDetails" class="space-y-4">
+                <!-- Loading state -->
+                <div class="loading-skeleton h-32 rounded"></div>
+              </div>
+            </div>
+
+            <!-- Video Section -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6" id="videoSection" style="display: none;">
+              <h3 class="text-lg font-semibold text-gray-900 mb-6">סרטון תיעוד ההתקנה</h3>
+              <video id="video" controls class="w-full max-w-2xl mx-auto rounded-lg">
+                <source src="" type="video/mp4">
+                הדפדפן שלך לא תומך בניגון וידאו
+              </video>
+            </div>
+          </div>
+
+          <!-- Sidebar -->
+          <div class="space-y-8">
+            <!-- Actions -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-6">פעולות</h3>
+              <div class="space-y-3" id="actionsContainer">
+                <!-- Actions will be populated by JavaScript -->
+              </div>
+            </div>
+
+            <!-- Status Update -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-6">עדכון סטטוס</h3>
+              <div class="space-y-4">
+                <div id="statusChecklist" class="space-y-3">
+                  <!-- Status checkboxes will be populated by JavaScript -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Item Candidates Recommendations -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <div class="flex items-center justify-between mb-6">
+                <h3 class="text-lg font-semibold text-gray-900">המלצות למחשבון</h3>
+                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800" id="candidatesCount">
+                  💡 0 המלצות
+                </span>
+              </div>
+              <div id="itemCandidates" class="space-y-3">
+                <!-- Candidates will be populated by JavaScript -->
+                <div class="text-center text-gray-500 text-sm py-4">
+                  טוען המלצות...
+                </div>
+              </div>
+              <button onclick="refreshCandidates()" class="w-full mt-4 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm">
+                רענן המלצות
+              </button>
+            </div>
 
           </div>
         </div>
-      
+      </div>
+    </main>
+  </div>
+
+  <!-- Quote Calculator Modal -->
+  <div id="quoteCalculatorModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-xl max-w-4xl w-full max-h-screen overflow-y-auto">
+      <div class="p-6 border-b border-gray-200">
+        <div class="flex items-center justify-between">
+          <h2 class="text-xl font-semibold text-gray-900">מחשבון הצעת מחיר</h2>
+          <button onclick="closeQuoteCalculator()" class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div class="p-6">
+        <div id="quoteCalculatorContent">
+          <!-- Quote calculator content will be populated by JavaScript -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create Permanent Item Modal -->
+  <div id="createPermanentItemModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-xl max-w-md w-full">
+      <div class="p-6 border-b border-gray-200">
+        <div class="flex items-center justify-between">
+          <h2 class="text-xl font-semibold text-gray-900">יצירת פריט קבוע במחשבון</h2>
+          <button onclick="closePermanentItemModal()" class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div class="p-6">
+        <div class="space-y-4">
+          <!-- Item Name -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">שם הפריט</label>
+            <input type="text" id="permanentItemName" readonly class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700">
+          </div>
+          
+          <!-- Price -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">מחיר מוצע (₪)</label>
+            <input type="number" id="permanentItemPrice" step="0.01" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+          </div>
+          
+          <!-- Description -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">תיאור הפריט</label>
+            <textarea id="permanentItemDescription" rows="3" placeholder="הזן תיאור עבור הפריט..." class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary resize-none"></textarea>
+          </div>
+          
+          <!-- Usage Stats (if exists) -->
+          <div id="usageStatsSection" class="hidden bg-blue-50 border border-blue-200 rounded-lg p-3">
+            <div class="flex items-center">
+              <svg class="w-4 h-4 text-blue-600 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+              </svg>
+              <span class="text-sm text-blue-800 font-medium" id="usageStatsText">נתונים סטטיסטיים</span>
+            </div>
+          </div>
+        </div>
         
-        <div class="section" style="flex:2; min-width:300px;">
-          <h2>פרטי החללים להתקנה</h2>
-          <table style="width:100%; border-collapse: collapse; direction: rtl; text-align: right;">
+        <!-- Action Buttons -->
+        <div class="flex justify-center gap-3 mt-6">
+          <button onclick="confirmCreatePermanentItem()" class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium shadow-md">
+            ✓ צור פריט קבוע
+          </button>
+          <button onclick="closePermanentItemModal()" class="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium">
+            ביטול
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast notifications container -->
+  <div id="toastContainer" class="fixed top-4 right-4 z-50 space-y-2"></div>
+
+  <script>
+    // Global variables
+    let currentCustomerID = null;
+    let currentRequestID = null;
+    let customerData = null;
+    let calculatorItems = [];
+    let isEditMode = false;
+    let existingQuotes = [];
+    let parquetTypes = [];
+    let customItems = []; // Store custom items added to quote
+    let availableStatuses = [
+      "צפייה בסרטון לקוח",
+      "טיוטה להצעת מחיר", 
+      "שליחת טיוטה ללקוח",
+      "העברת מקדמה",
+      "תיאום התקנה",
+      "התקנה בוצעה",
+      "קבלת משוב"
+    ];
+
+    // Initialize page
+    $(document).ready(function() {
+      const urlParams = new URLSearchParams(window.location.search);
+      currentCustomerID = parseInt(urlParams.get('id'));
+      
+      if (!currentCustomerID) {
+        showToast('לא נמצא מזהה לקוח בכתובת', 'error');
+        setTimeout(() => window.location.href = 'InstallerCustomersPage.html', 2000);
+        return;
+      }
+      
+      loadWorkRequestStatuses();
+      loadParquetTypes();
+      loadCustomerData();
+      loadItemCandidates();
+    });
+
+    // Load work request statuses from server
+    function loadWorkRequestStatuses() {
+      ajaxCall('GET', `${API_BASE_URL}/BI/GetWorkRequestStatuses`, null,
+        function(statuses) {
+          if (Array.isArray(statuses)) {
+            availableStatuses = statuses.map(s => s.statusName);
+          }
+        },
+        function(error) {
+          console.warn('Could not load statuses from server, using defaults');
+        }
+      );
+    }
+
+    // Load parquet types from server
+    function loadParquetTypes() {
+      ajaxCall('GET', `${API_BASE_URL}/ParquetType/GetAll`, null,
+        function(types) {
+          if (Array.isArray(types)) {
+            parquetTypes = types;
+            console.log('✅ Loaded parquet types:', parquetTypes);
+          } else {
+            console.error('❌ Invalid parquet types data received:', types);
+          }
+        },
+        function(error) {
+          console.error('Error loading parquet types:', error);
+          // Fallback to static data
+          parquetTypes = [
+            { typeName: 'SPC/למינציה', pricePerUnit: 60, type: 'spc', parquetTypeID: 'spc' },
+            { typeName: 'עץ', pricePerUnit: 85, type: 'wood', parquetTypeID: 'wood' },
+            { typeName: 'פישבון', pricePerUnit: 150, type: 'fishbone', parquetTypeID: 'fishbone' }
+          ];
+        }
+      );
+    }
+
+    // Load customer data
+    function loadCustomerData() {
+      ajaxCall('GET', `${API_BASE_URL}/CustomerDetails/GetCustomerDetails/${currentCustomerID}`, null,
+        function(data) {
+          if (data && data.customer && data.workRequest) {
+            customerData = data;
+            currentRequestID = data.workRequest.requestID;
+            renderCustomerDetails(data);
+            renderSpaceDetails(data.spaceDetails);
+            renderProgressBar(data.workRequest.status, false); // No animation on initial load
+            renderStatusChecklist(data.workRequest.status);
+            loadExistingQuotes();
+            
+            // Update page title
+            document.getElementById('customerNameSubtitle').textContent = 
+              `${data.customer.firstName} ${data.customer.lastName}`;
+          } else {
+            console.error('Invalid customer data received:', data);
+            showToast(data?.message || 'שגיאה בטעינת נתוני הלקוח', 'error');
+          }
+        },
+        function(error) {
+          console.error('Error loading customer data:', error);
+          showToast('שגיאה בטעינת נתוני הלקוח', 'error');
+        }
+      );
+    }
+
+    // Render customer details
+    function renderCustomerDetails(data) {
+      const container = document.getElementById('customerDetails');
+      container.innerHTML = `
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">שם מלא</label>
+            <div class="text-lg font-semibold text-gray-900" id="customerName">
+              ${data.customer.firstName} ${data.customer.lastName}
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">טלפון</label>
+            <div class="text-gray-900" id="customerPhone">${data.customer.phone || '-'}</div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">אימייל</label>
+            <div class="text-gray-900" id="customerEmail">${data.customer.email || '-'}</div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">עיר</label>
+            <div class="text-gray-900" id="customerCity">${data.customer.city || '-'}</div>
+          </div>
+        </div>
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">רחוב ומספר</label>
+            <div class="text-gray-900" id="customerAddress">
+              ${data.customer.street || ''} ${data.customer.number || ''}
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">סטטוס</label>
+            <div class="inline-flex px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800" id="customerStatus">
+              ${data.workRequest.status || '-'}
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">תאריך מועדף</label>
+            <div class="text-gray-900" id="preferredDate">
+              ${data.workRequest.preferredDate ? new Date(data.workRequest.preferredDate).toLocaleDateString('he-IL') : '-'}
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">הערות</label>
+            <div class="text-gray-900" id="customerNotes">${data.customer.notes || 'אין הערות'}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    // Render space details
+    function renderSpaceDetails(spaces) {
+      const container = document.getElementById('spaceDetails');
+      
+      if (!spaces || spaces.length === 0) {
+        container.innerHTML = '<div class="text-gray-500 text-center py-8">לא נמצאו פרטי חללים</div>';
+        return;
+      }
+
+      const totalArea = spaces.reduce((sum, space) => sum + (space.size || 0), 0);
+
+      container.innerHTML = `
+        <div class="overflow-x-auto">
+          <table class="w-full border-collapse">
             <thead>
-                <tr>
-                  <th style="padding: 10px; background-color: #f9f9f9;">#</th>
-                  <th style="padding: 10px; background-color: #f9f9f9;">סוג חלל</th>
-                  <th style="padding: 10px; background-color: #f9f9f9;">סוג פרקט</th>
-                  <th style="padding: 10px; background-color: #f9f9f9;">שטח (מ"ר)</th>
-                  <th style="padding: 10px; background-color: #f9f9f9;">הערות</th>
+              <tr class="bg-gray-50">
+                <th class="text-right px-4 py-3 text-sm font-medium text-gray-700 border-b">#</th>
+                <th class="text-right px-4 py-3 text-sm font-medium text-gray-700 border-b">סוג חלל</th>
+                <th class="text-right px-4 py-3 text-sm font-medium text-gray-700 border-b">סוג פרקט</th>
+                <th class="text-right px-4 py-3 text-sm font-medium text-gray-700 border-b">שטח (מ"ר)</th>
+                <th class="text-right px-4 py-3 text-sm font-medium text-gray-700 border-b">הערות</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${spaces.map((space, index) => `
+                <tr class="hover:bg-gray-50">
+                  <td class="px-4 py-3 text-sm text-gray-900 border-b">${index + 1}</td>
+                  <td class="px-4 py-3 text-sm text-gray-900 border-b">${space.floorType || '-'}</td>
+                  <td class="px-4 py-3 text-sm text-gray-900 border-b">${space.parquetType || '-'}</td>
+                  <td class="px-4 py-3 text-sm text-gray-900 border-b">${space.size || 0} מ"ר</td>
+                  <td class="px-4 py-3 text-sm text-gray-900 border-b">${space.notes || '-'}</td>
                 </tr>
-              </thead>
-              
-            <tbody id="spacesDetails">
-              <tr><td colspan="4">טוען פרטי חללים...</td></tr>
+              `).join('')}
             </tbody>
             <tfoot>
-              <tr>
-                <td colspan="2" style="padding: 10px; font-weight: bold;">סה"כ שטח להתקנה:</td>
-                <td colspan="2" id="totalSpace" style="padding: 10px; font-weight: bold;">0 מ"ר</td>
+              <tr class="bg-gray-50">
+                <td colspan="3" class="px-4 py-3 text-sm font-semibold text-gray-900 border-t">סה"כ שטח:</td>
+                <td class="px-4 py-3 text-sm font-semibold text-gray-900 border-t">${totalArea.toFixed(2)} מ"ר</td>
+                <td class="px-4 py-3 border-t"></td>
               </tr>
             </tfoot>
           </table>
         </div>
-      
-      </div>
-      
-      <div style="margin-top: 10px;">
-        <button class="btn" id="editBtn" onclick="enableEdit()">✏️ ערוך</button>
-        <button class="btn" id="saveBtn" onclick="saveChanges()" style="display:none;">💾 שמור שינויים</button>
-        <button class="btn btn-secondary" id="cancelBtn" onclick="cancelEdit()" style="display:none;">❌ בטל</button>
-        <button class="btn" id="deleteBtn" onclick="deleteCustomerFromUrl()">🗑️ מחק</button>
-
-      </div>
-    
-    <div class="section">
-      <h2>סרטון תיעוד ההתקנה</h2>
-      <video id="video" controls style="width: 100%; max-width: 600px; display: block; margin: auto">
-        <source src="video-placeholder.mp4" type="video/mp4">
-        הדפדפן שלך לא תומך בניגון וידאו
-      </video>
-    </div>
-    <div class="section">
-      <h2>מחשבון חכם</h2>
-      <div style="margin-bottom: 15px;">
-        <strong>סוג פרקט שנבחר:</strong> <span id="selectedFloorType">לא נבחר</span><br>
-      
-        <div class="info-item" style="margin: 10px 0;">
-          <label>בחר סוג פרקט:</label>
-          <select id="floorType" onchange="updateInstallationPrice()" style="padding: 6px; width: 200px; border: 1px solid #ccc; border-radius: 6px;">
-            <option value="spc">SPC/למינציה (60 ש"ח למ"ר)</option>
-            <option value="wood">עץ (85 ש"ח למ"ר)</option>
-            <option value="fishbone">פישבון (150 ש"ח למ"ר)</option>
-          </select>
-        </div>
-      
-        <strong>מחיר למ"ר:</strong>
-        <input type="number" id="pricePerMeter" value="0" style="width: 80px; padding: 4px; margin-right: 6px;"> ₪
-        <br>
-        <strong>סה"כ מ"ר:</strong> <span id="totalMeters">0</span> מ"ר
-      </div>
-      
-      
-      <div style="text-align: left; margin-bottom: 10px;">
-        <button class="btn" onclick="openAddItemPopup()">➕ הוסף פרמטר קבוע</button>
-      </div>
-      
-      <div class="info-grid" id="priceCalculator">
-  <div class="info-item">
-    <label>שטח התקנה (מ"ר):</label>
-<input type="number" data-label="שטח התקנה" data-price="70" value="0" min="0" onchange="updateQuantityDisplay(this)" style="width: 80px; padding: 6px;">
-<div class="quantity-control">
-  <button type="button" onclick="adjustQuantityInput(this, -1)">-</button>
-  <span class="quantity-display">0</span>
-  <button type="button" onclick="adjustQuantityInput(this, 1)">+</button>
-</div>
-  </div>
-  <div class="calculator-item" data-label="פח דבק" data-price="350">
-    <div class="calculator-header">
-      <div class="calculator-title">פח דבק</div>
-      <div class="calculator-actions">
-        <button title="הסבר"><span>ℹ️</span></button>
-        <button title="ערוך"><span>✏️</span></button>
-        <button title="מחק"><span>🗑️</span></button>
-      </div>
-    </div>
-    <div class="calculator-body">
-      <div>
-        <label>כמות:</label>
-        <div class="quantity-control">
-          <button onclick="adjustQuantity(this, -1)">-</button>
-          <span class="quantity-display">0</span>
-          <button onclick="adjustQuantity(this, 1)">+</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  </div>
-  <div class="edit-btn" style="display: flex; justify-content: space-between;">
-    <button class="btn" onclick="addCustomItem()">+ הוסף פרמטר זמני</button>
-    <div>
-      <label style="margin-inline-start:10px; font-weight: bold;">הנחה (%):</label>
-      <input type="number" id="discountPercent" value="0" style="width: 60px; padding: 4px; margin-left: 10px; border-radius: 6px; border: 1px solid #ccc;">
-      <button class="btn" onclick="calculateQuote()">חשב</button>
-
-</div>
-    </div>
-    <div class="section">
-      <h2>טיוטת הצעת מחיר</h2>
-      <div id="quotePreview">
-  <p><strong>לקוח:</strong> <span id="previewName">-</span></p>
-  <ul id="quoteLines"></ul>
-  <p><strong>סה"כ לפני הנחה:</strong> <span id="previewRawTotal">-</span> ₪</p>
-  <p><strong>הנחה:</strong> <span id="previewDiscount">0%</span></p>
-  <p><strong>סה"כ לאחר הנחה ולפני מע"מ:</strong> <span id="previewSubtotal">-</span> ₪</p>
-  <p><strong>מע"מ (18%):</strong> <span id="previewVAT">-</span> ₪</p>
-  <p><strong>סה"כ לתשלום:</strong> <span id="previewTotal">-</span> ₪</p>
-  <p><strong>כולל פרקט, התקנה והנחה (אם קיימת).</strong></p>
-</div>
-  <button class="btn" onclick="submitQuote()">📤 שלח הצעת מחיר</button>
-</div>
-
-    </div>
-    <div class="section">
-      <h2>צ'קליסט משימות לביצוע</h2>
-      <div class="checklist">
-        <label><input type="checkbox" data-key="צפייה בסרטון לקוח"> צפייה בסרטון לקוח</label>
-        <label><input type="checkbox" data-key="טיוטה להצעת מחיר"> טיוטה להצעת מחיר</label>
-        <label><input type="checkbox" data-key="שליחת טיוטה ללקוח"> שליחת טיוטה ללקוח</label>
-        <label><input type="checkbox" data-key="העברת מקדמה"> העברת מקדמה</label>
-        <label><input type="checkbox" data-key="תיאום התקנה"> תיאום התקנה</label>
-        <label><input type="checkbox" data-key="התקנה בוצעה"> התקנה בוצעה</label>
-        <label><input type="checkbox" data-key="קבלת משוב"> קבלת משוב</label>
-      </div>
-    </div>
-  </main>
-</div>
-<!-- פופאפ להוספת פרמטר חדש -->
-<div id="addItemPopup" style="display:none; position:fixed; top:30%; left:50%; transform:translate(-50%, -50%); background:white; padding:20px; border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.2); z-index:2000;">
-  <h3>הוספת פרמטר חדש</h3>
-  <label>שם:</label><br>
-  <input id="popupItemName" type="text" style="width:100%; margin-bottom:10px;" required><br>
-  <label>מחיר:</label><br>
-  <input id="popupItemPrice" type="number" style="width:100%; margin-bottom:10px;" required><br>
-  <label>תיאור:</label><br>
-  <textarea id="popupItemDesc" style="width:100%; margin-bottom:10px;"></textarea><br>
-  <button class="btn" onclick="submitNewItem()">✔️ שמור</button>
-  <button class="btn btn-secondary" onclick="closeAddItemPopup()">❌ ביטול</button>
-</div>
-
-<div id="infoPopup" style="display:none; position:absolute; background:white; border:1px solid #ccc; padding:10px; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.1); z-index:3000;">
-  <div id="infoText">תיאור</div>
-</div>
-
-
-<div id="editPopup" style="display:none; position:fixed; top:30%; left:50%; transform:translate(-50%, -50%); background:white; padding:20px; border-radius:10px; box-shadow:0 0 15px rgba(0,0,0,0.3); z-index:3000;">
-  <h3>עריכת פריט</h3>
-  <label>שם:</label>
-  <input id="editItemName" style="width:100%; margin-bottom:10px;"><br>
-  <label>מחיר:</label>
-  <input id="editItemPrice" type="number" style="width:100%; margin-bottom:10px;"><br>
-  <label>תיאור:</label>
-  <textarea id="editItemDesc" style="width:100%; margin-bottom:10px;"></textarea><br>
-  <input type="hidden" id="editItemId">
-  <button class="btn" onclick="submitEditItem(this)">✔️ שמור</button>
-  <button class="btn btn-secondary" onclick="closeEditPopup()">❌ ביטול</button>
-</div>
-
-<script>
-  let WORKREQUEST_STATUSES = [
-  "צפייה בסרטון לקוח",
-  "טיוטה להצעת מחיר",
-  "שליחת טיוטה ללקוח",
-  "העברת מקדמה",
-  "תיאום התקנה",
-  "התקנה בוצעה",
-  "קבלת משוב"
-];
-
-// טעינת סטטוסים מהשרת
-function loadWorkRequestStatuses() {
-  ajaxCall('GET', `${API_BASE_URL}/BI/GetWorkRequestStatuses`, null,
-    function(statuses) {
-      if (Array.isArray(statuses)) {
-        WORKREQUEST_STATUSES = statuses.map(s => s.StatusName);
-        console.log('✅ סטטוסים נטענו מהשרת:', WORKREQUEST_STATUSES);
-      }
-    },
-    function(error) {
-      console.warn('⚠️ שגיאה בטעינת סטטוסים, משתמש בברירת מחדל:', error);
-    }
-  );
-}
- let currentRequestID = null;
- let currentStatus = null;
-function addCustomItem() {
-  const container = document.getElementById("priceCalculator");
-  const div = document.createElement("div");
-  div.classList.add("calculator-item");
-  div.setAttribute("data-label", "");
-  div.setAttribute("data-price", "0");
-  
-  // יצירת ID יחודי לכל פרמטר זמני
-  const uniqueId = 'temp_' + Date.now();
-  
-  div.innerHTML = `
-    <div class="calculator-header">
-      <div class="calculator-title" style="position: relative;">
-        <input type="text" id="${uniqueId}_name" placeholder="התחל להקליד שם פרמטר..." oninput="this.closest('.calculator-item').dataset.label = this.value" style="width: 90%; padding: 6px;">
-        <div id="${uniqueId}_suggestions" style="position:absolute; top:100%; left:0; right:0; background:white; border:1px solid #ccc; border-top:none; max-height:200px; overflow-y:auto; z-index:1000; display:none;"></div>
-      </div>
-      <div class="calculator-actions">
-        <button title="הסבר"><span>ℹ️</span></button>
-        <button title="ערוך"><span>✏️</span></button>
-        <button title="מחק" onclick="this.closest('.calculator-item').remove(); calculateQuote();"><span>🗑️</span></button>
-      </div>
-    </div>
-    <div class="calculator-body">
-      <div>
-        <label>מחיר:</label>
-        <input type="number" id="${uniqueId}_price" class="price-input" value="0" oninput="this.closest('.calculator-item').dataset.price = this.value" style="width: 80px; padding: 6px;">
-      </div>
-      <div>
-        <label>כמות:</label>
-        <div class="quantity-control">
-          <button onclick="adjustQuantity(this, -1)">-</button>
-          <span class="quantity-display">0</span>
-          <input type="number" class="quantity-input" value="0" style="display: none;">
-          <button onclick="adjustQuantity(this, 1)">+</button>
-        </div>
-      </div>
-    </div>
-  `;
-  
-  container.appendChild(div);
-  
-  // הפעלת האוטוקומפליט עבור הפרמטר החדש
-  setupTempItemAutocomplete(uniqueId);
-}
-
-
-function adjustQuantity(button, delta) {
-  const item = button.closest(".calculator-item");
-  const display = item.querySelector(".quantity-display");
-  let quantity = parseInt(display.textContent) || 0;
-  quantity = Math.max(0, quantity + delta);
-  display.textContent = quantity;
-
-  // עדכון גם ל־input אם יש
-  const quantityInput = item.querySelector('.quantity-input');
-if (quantityInput) {
-  quantityInput.value = quantity;
-}
-
-}
-
-function adjustQuantityInput(button, delta) {
-  const container = button.closest(".info-item, .calculator-item");
-  const input = container.querySelector("input[type='number']");
-  const display = container.querySelector(".quantity-display");
-  let quantity = parseInt(input.value) || 0;
-  quantity = Math.max(0, quantity + delta);
-  input.value = quantity;
-  display.textContent = quantity;
-
-  
-}
-
-function updateQuantityDisplay(input) {
-  const display = input.parentElement.querySelector(".quantity-display");
-  display.textContent = input.value;
-
-  
-}
-
-function calculateQuote() {
-  let total = 0;
-  let quoteLines = [];
-// חישוב מחיר לפי פרקט × מ"ר
-const floorPrice = parseFloat(document.getElementById("pricePerMeter").value) || 0;
-const meters = parseFloat(document.getElementById("totalMeters").innerText) || 0;
-
-if (floorPrice > 0 && meters > 0) {
-  const floorTotal = floorPrice * meters;
-  total += floorTotal;
-  quoteLines.push(`התקנת פרקט: ${meters} × ${floorPrice} = ${floorTotal.toFixed(2)} ש"ח`);
-}
-
-  const items = document.querySelectorAll(".calculator-item");
-
-  items.forEach(item => {
-    // מנסה לשלוף label משם פרמטר או מה־dataset
-    const label =
-      item.dataset.label ||
-      item.querySelector(".calculator-title")?.textContent?.trim() ||
-      item.querySelector(".calculator-title input")?.value?.trim() ||
-      "ללא שם";
-
-
-    let price = parseFloat(item.dataset.price);
-    if (isNaN(price)) {
-      const priceInput = item.querySelector("input[type='number']");
-      if (priceInput) {
-        price = parseFloat(priceInput.value);
-      }
+      `;
     }
 
-   
-    const quantity = parseInt(item.querySelector(".quantity-display")?.textContent) || 0;
-
-    if (quantity > 0 && !isNaN(price)) {
-      const lineTotal = price * quantity;
-      total += lineTotal;
-      quoteLines.push(`${label}: ${quantity} × ${price} = ${lineTotal.toFixed(2)} ש"ח`);
-    } else {
-      console.warn("⚠️ פריט לא חושב:", { label, price, quantity });
-    }
-  });
-
-  const discount = parseFloat(document.getElementById("discountPercent").value) || 0;
-  const discountedTotal = total * (1 - discount / 100);
-  const vat = discountedTotal * 0.17;
-  const finalTotal = discountedTotal + vat;
-
-  document.getElementById("previewName").innerText = document.getElementById("customerName")?.innerText || "-";
-  document.getElementById("previewRawTotal").innerText = total.toFixed(2);
-  document.getElementById("previewDiscount").innerText = discount + "%";
-  document.getElementById("previewSubtotal").innerText = discountedTotal.toFixed(2);
-  document.getElementById("previewVAT").innerText = vat.toFixed(2);
-  document.getElementById("previewTotal").innerText = finalTotal.toFixed(2);
-
-  const quoteLinesContainer = document.getElementById("quoteLines");
-  quoteLinesContainer.innerHTML = quoteLines.map(line => `<li>${line}</li>`).join("");
-}
-
-
-document.addEventListener('DOMContentLoaded', () => {
-  // טעינת סטטוסים מהשרת
-  loadWorkRequestStatuses();
-  
-  const urlParams = new URLSearchParams(window.location.search);
-  const customerId = urlParams.get("id");
-
-  if (!customerId) {
-    alert("לא נמצא מזהה לקוח ב-URL!");
-    return;
-  }
-
-  ajaxCall(
-    'POST',
-    `${API_BASE_URL}/Dashboard/GetDashboardData`,
-    JSON.stringify({ CustomerID: customerId }),
-    function (data) {
-  console.log("🎯 נתונים מהשרת:", data);
-
-  if (!Array.isArray(data) || data.length === 0) {
-    alert("לא נמצאו נתונים עבור לקוח זה.");
-    return;
-  }
-currentRequestID = data[0].RequestID; 
-currentStatus = data[0].Status; // שמירת הסטטוס הנוכחי
-markChecklistAccordingToStatus(currentStatus);
-updateProgressBar(currentStatus);
-
-const item = data[0];
-$("#customerName").text(`${item.FirstName || ''} ${item.LastName || ''}`);
-$("#phoneText").text(item.Phone || '-');
-$("#emailText").text(item.Email || '-');
-$("#cityText").text(item.City || '-');
-$("#streetText").text(item.Street || '-');
-$("#statusText").text(item.Status || '-');
-$("#requestId").text(item.RequestID || '-');
-$("#preferredDateText").text(item.PreferredDate ? new Date(item.PreferredDate).toLocaleDateString('he-IL') : '-');
-$("#plannedDateText").text(item.PlannedDate ? new Date(item.PlannedDate).toLocaleDateString('he-IL') : '-');
-$("#completedDateText").text(item.CompletedDate ? new Date(item.CompletedDate).toLocaleDateString('he-IL') : '-'); 
-
-if (item.MediaURL) {
-  const video = $("#video source");
-  video.attr('src', item.MediaURL);
-  $("#video")[0].load();
-}
-
-if (item.FloorType) {
-  $('#floorType').val(item.FloorType);
-  updateInstallationPrice();
-}
-
-// טבלת כל החללים
-const spacesContainer = $("#spacesDetails");
-spacesContainer.empty();
-
-let firstParquetType = null;
-for (const spaceItem of data) {
-  if (spaceItem.SpaceID && spaceItem.ParquetType) {
-    firstParquetType = spaceItem.ParquetType;
-    break; 
-  }
-}
-
-if (firstParquetType) {
-  document.getElementById('selectedFloorType').innerText = firstParquetType;
-}
-
-
-let totalSize = 0;
-let spaceIndex = 1;
-
-data.forEach((spaceItem) => {
-  if (spaceItem.SpaceID) {
-    const size = parseFloat(spaceItem.Size || 0);
-    totalSize += size;
-
-    spacesContainer.append(`
-      <tr style="text-align:right;" data-spaceid="${spaceItem.SpaceID}">
-        <td style="padding: 8px; border-bottom: 1px solid #ddd;">${spaceIndex++}</td>
-        <td style="padding: 8px; border-bottom: 1px solid #ddd;">${spaceItem.FloorType || '-'}</td>
-        <td style="padding: 8px; border-bottom: 1px solid #ddd;">${spaceItem.ParquetType || '-'}</td>
-        <td style="padding: 8px; border-bottom: 1px solid #ddd;">${spaceItem.Size || '-'} מ"ר</td>
-        <td style="padding: 8px; border-bottom: 1px solid #ddd;">${spaceItem.SpaceNotes || '-'}</td>
-      </tr>
-    `);
-  }
-});
-
-if (spaceIndex === 1) {
-  spacesContainer.append('<tr><td colspan="4">לא נמצאו חללים עבור לקוח זה</td></tr>');
-}
-$("#totalSpace").text(`${totalSize.toFixed(2)} מ"ר`);
-$("#totalMeters").text(totalSize.toFixed(2));
-calculateQuote();
-
-}
-
-,
-    function (err) {
-      console.error("AJAX error:", err);
-      alert("שגיאה בטעינת הנתונים מהשרת");
-    }
-  );
-  loadCalculatorItems();
-});
-
-
-function enableEdit(){
-  $('#editBtn').hide();
-  $('#saveBtn, #cancelBtn').show();
-
-
-  ['phone','email','city','street','status'].forEach(field => {
-    const text = $(`#${field}Text`).text();
-    $(`#${field}Text`).html(`<input id="${field}" value="${text}" style="padding:4px; width:90%;">`);
-  });
-
-  
-  $('#spacesDetails tr').each(function(){
-    $(this).find('td').each(function(index){
-      if(index > 0){ 
-        const text = $(this).text().replace(' מ"ר','').trim();
-        $(this).html(`<input value="${text}" style="padding:4px; width:90%;">`);
-      }
-    });
-  });
-}
-
-function cancelEdit() {
-  $('#saveBtn, #cancelBtn').hide();
-  $('#editBtn').show();
-
-  const customerId = new URLSearchParams(window.location.search).get("id");
-
-  ajaxCall(
-    'POST',
-    `${API_BASE_URL}/Dashboard/GetDashboardData`,
-    JSON.stringify({ CustomerID: customerId }),
-    function(data){
-      if(Array.isArray(data) && data.length > 0){
-        const customer = data.find(d => d.CustomerID == customerId);
-
-        $("#phoneText").text(customer.Phone || '-');
-        $("#emailText").text(customer.Email || '-');
-        $("#cityText").text(customer.City || '-');
-        $("#streetText").text(customer.Street || '-');
-        $("#statusText").text(customer.Status || '-');
-
-        // שיחזור פרטי החללים
-        const spacesContainer = $("#spacesDetails");
-        spacesContainer.empty();
-        let totalSize = 0;
-
-        data.forEach((item, index) => {
-          if(item.SpaceID){ 
-            totalSize += parseFloat(item.Size || 0);
-            spacesContainer.append(`
-              <tr style="text-align:right;">
-                <td style="padding: 8px; border-bottom: 1px solid #ddd;">${index + 1}</td>
-                <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.FloorType || '-'}</td>
-                <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.Size || '-'} מ"ר</td>
-                <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.SpaceNotes || '-'}</td>
-              </tr>
-            `);
-          }
-        });
-
-        if(totalSize == 0){
-          spacesContainer.append('<tr><td colspan="4">לא נמצאו חללים עבור לקוח זה</td></tr>');
-        }
-
-        $("#totalSpace").text(`${totalSize.toFixed(2)} מ"ר`);
-      }
-    },
-    function(err){
-      console.error("AJAX error:", err);
-      alert("שגיאה בטעינת הנתונים המקוריים");
-    }
-  );
-}
-
-function saveChanges(){
-  const saveBtn = $('#saveBtn');
-  saveBtn.text('⏳ שומר...').prop('disabled', true);
-
-  const customerId = new URLSearchParams(window.location.search).get("id");
-
-  const updatedCustomer = {
-    CustomerID: customerId,
-    Phone: $('#phone').val(),
-    Email: $('#email').val(),
-    City: $('#city').val(),
-    Street: $('#street').val(),
-    Status: $('#status').val()
-  };
-
-  const updatedSpaces = [];
-  $('#spacesDetails tr').each(function(){
-    const inputs = $(this).find('input');
-const spaceID = $(this).data('spaceid') || 0;
-
-if(inputs.length === 3){
-  updatedSpaces.push({
-    SpaceID: spaceID,
-    FloorType: inputs[0].value,
-    Size: parseFloat(inputs[1].value),
-    SpaceNotes: inputs[2].value
-  });
-}
-
-  });
-
-  ajaxCall(
-    'POST',
-    `${API_BASE_URL}/newRequest/updateRequest`,
-    JSON.stringify({
-      customerDetails: updatedCustomer,
-      spaceDetails: updatedSpaces
-    }),
-    function(res){
-      if (res === 1 || res === 2 || res === 3) {
-        saveBtn.text('✔️ נשמר!'); 
-        setTimeout(() => location.reload(), 500);
-      } else {
-        alert("השמירה נכשלה. נסה שוב.");
-        saveBtn.text('💾 שמור שינויים').prop('disabled', false);
-      }
-    },
-    function(err){
-      console.error(err);
-      alert("אירעה שגיאה בשמירה");
-      saveBtn.text('💾 שמור שינויים').prop('disabled', false);
-    }
-  );
-}
-
-function openAddItemPopup() {
-  document.getElementById('addItemPopup').style.display = 'block';
-}
-
-function closeAddItemPopup() {
-  document.getElementById('addItemPopup').style.display = 'none';
-}
-function submitNewItem() {
-  const name = $('#popupItemName').val();
-  const price = parseFloat($('#popupItemPrice').val());
-  const desc = $('#popupItemDesc').val();
-
-  if (!name || isNaN(price)) {
-    alert("נא למלא שם ומחיר תקין");
-    return;
-  }
-
-  const newItem = {
-    ItemName: name,
-    Price: price,
-    Description: desc,
-    IsActive: true
-  };
-
-  ajaxCall(
-    'POST',
-    `${API_BASE_URL}/PriceCalculatorItem/AddNewCalculatorItem`,
-    JSON.stringify(newItem),
-    function (id) {
-      if (id > 0) {
-        alert("✔️ הפריט נוסף בהצלחה");
-        closeAddItemPopup();
-        loadCalculatorItems();
-      } else {
-        alert("⚠️ שגיאה בהוספת הפריט");
-      }
-    },
-    function (err) {
-      console.error("שגיאה בשליחת הפריט:", err);
-      alert("❌ שגיאה בשרת");
-    }
-  );
-}
-function loadCalculatorItems() {
-  const container = document.getElementById("priceCalculator");
-  container.innerHTML = ''; 
-
-  ajaxCall(
-    'GET',
-    `${API_BASE_URL}/PriceCalculatorItem/GetCalculatorItems`,
-    null,
-    function (items) {
-      if (Array.isArray(items)) {
-        items.forEach(item => {
-          const div = document.createElement("div");
-          div.className = "calculator-item";
-
-          div.dataset.label = item.itemName;
-          div.dataset.price = item.price;
-          div.dataset.fixedId = item.calculatorItemID; 
-
-          div.innerHTML = `
-            <div class="calculator-header">
-              <div class="calculator-title">${item.itemName}</div>
-             <div class="calculator-actions">
-  <button onclick="showInfoPopup(this, \`${item.description || 'ללא תיאור'}\`)"><span>ℹ️</span></button>
-  <button onclick="openEditPopup(${item.calculatorItemID}, '${item.itemName}', ${item.price}, \`${item.description || ''}\`)"><span>✏️</span></button>
-<button title="מחק" onclick="deleteCalculatorItem(${item.calculatorItemID})"><span>🗑️</span></button>
-</div>
-
+    // Render progress bar
+    function renderProgressBar(currentStatus, animate = true) {
+      const container = document.getElementById('progressBar');
+      const currentIndex = availableStatuses.indexOf(currentStatus);
+      
+      const newHTML = availableStatuses.map((status, index) => {
+        const isCompleted = index <= currentIndex;
+        const isCurrent = index === currentIndex;
+        
+        return `
+          <div class="progress-step text-center ${isCompleted ? 'completed' : ''} ${animate ? 'transition-all duration-500' : ''}" data-step="${index}">
+            <div class="progress-circle w-10 h-10 rounded-full border-2 flex items-center justify-center text-sm font-semibold mx-auto mb-2 transition-all duration-500 ${
+              isCompleted 
+                ? 'bg-green-500 border-green-500 text-white shadow-lg transform scale-110' 
+                : 'bg-white border-gray-300 text-gray-600'
+            } ${isCurrent ? 'ring-4 ring-green-200 ring-opacity-75' : ''}">
+              ${isCompleted ? '✓' : index + 1}
             </div>
-            <div class="calculator-body">
-              <div><label>מחיר:</label> ${item.price} ₪</div>
+            <div class="text-xs leading-tight transition-colors duration-300 ${
+              isCompleted ? 'text-green-700 font-medium' : 'text-gray-600'
+            }">${status}</div>
+            ${isCurrent ? '<div class="mt-1 w-2 h-2 bg-green-500 rounded-full mx-auto animate-pulse"></div>' : ''}
+          </div>
+        `;
+      }).join('');
+      
+      container.innerHTML = newHTML;
+      
+             // Add celebration effect for completion
+       if (animate && currentIndex === availableStatuses.length - 1) {
+         setTimeout(() => {
+           showToast('כל השלבים הושלמו בהצלחה! התהליך הסתיים.', 'success');
+         }, 600);
+       }
+    }
+
+    // Render status checklist
+    function renderStatusChecklist(currentStatus) {
+      const container = document.getElementById('statusChecklist');
+      const currentIndex = availableStatuses.indexOf(currentStatus);
+      
+      container.innerHTML = availableStatuses.map((status, index) => {
+        const isCompleted = index <= currentIndex;
+        const isCurrent = index === currentIndex;
+        const canNavigateTo = true; // All statuses are clickable now
+        
+        let statusIcon = '';
+        let statusDescription = '';
+        
+                 if (isCompleted && !isCurrent) {
+           statusIcon = '✓';
+           statusDescription = 'הושלם';
+         } else if (isCurrent) {
+           statusIcon = '→';
+           statusDescription = 'נוכחי';
+         } else {
+           statusIcon = '•';
+           statusDescription = 'ממתין';
+         }
+        
+                 return `
+           <label class="group flex items-center justify-between p-4 rounded-xl border-2 shadow-sm ${
+             isCompleted ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-200 hover:from-green-100 hover:to-emerald-100 hover:shadow-md' : 'bg-gradient-to-r from-white to-gray-50 border-gray-200 hover:from-blue-50 hover:to-indigo-50 hover:border-blue-300 hover:shadow-md'
+           } cursor-pointer transition-all duration-300 transform hover:scale-[1.02] ${isCurrent ? 'ring-2 ring-primary ring-opacity-50 shadow-lg' : ''}">
+             <div class="flex items-center gap-6">
+               <div class="relative">
+                 <input 
+                   type="checkbox" 
+                   ${isCompleted ? 'checked' : ''} 
+                   onchange="updateStatusToLevel('${status}', ${index})"
+                   class="sr-only"
+                 >
+                 <div class="w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all duration-200 ${
+                   isCompleted 
+                     ? 'bg-gradient-to-br from-green-400 to-green-600 border-green-500 text-white shadow-lg' 
+                     : 'bg-white border-gray-300 group-hover:border-blue-400 group-hover:shadow-sm'
+                 }">
+                   ${isCompleted ? '<span class="text-xs font-bold">✓</span>' : ''}
+                 </div>
+               </div>
+               <div class="flex flex-col">
+                 <span class="text-base font-medium ${isCompleted ? 'text-green-800' : 'text-gray-700'} group-hover:text-gray-900 transition-colors">${status}</span>
+               </div>
+             </div>
+             <div class="flex items-center space-x-3">
+               <span class="text-xs px-3 py-1 rounded-full font-medium shadow-sm ${
+                 isCompleted ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-gray-100 text-gray-600 border border-gray-200'
+               } transition-all duration-200">${statusDescription}</span>
+               <span class="text-xl transition-transform duration-200 group-hover:scale-110">${statusIcon}</span>
+             </div>
+           </label>
+         `;
+      }).join('');
+      
+      // Add instructions for user
+      const instructionsHTML = `
+        <div class="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <svg class="w-5 h-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+              </svg>
+            </div>
+                         <div class="mr-3">
+               <p class="text-sm text-blue-700">
+                 <strong>טיפ:</strong> לחץ על כל סטטוס כדי לעדכן את ההתקדמות. כל השלבים עד הנקודה הנבחרת יסומנו כהושלמו.
+               </p>
+             </div>
+          </div>
+        </div>
+      `;
+      
+      container.innerHTML += instructionsHTML;
+    }
+
+    // Load existing quotes
+    function loadExistingQuotes() {
+      ajaxCall('GET', `${API_BASE_URL}/Quote/GetCustomerQuotes/${currentCustomerID}`, null,
+        function(quotes) {
+          existingQuotes = quotes || [];
+          // Update action buttons based on quotes existence
+          updateActionButtons();
+        },
+        function(error) {
+          console.error('Error loading quotes:', error);
+          existingQuotes = [];
+          updateActionButtons();
+        }
+      );
+    }
+
+    // Update action buttons based on existing quotes
+    function updateActionButtons() {
+      const container = document.getElementById('actionsContainer');
+      const hasQuotes = existingQuotes.length > 0;
+      
+      container.innerHTML = `
+        <!-- Create Quote Button -->
+        <button onclick="${hasQuotes ? '' : 'openQuoteCalculator()'}" 
+                class="w-full px-4 py-3 rounded-lg transition-colors ${
+                  hasQuotes 
+                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed' 
+                    : 'bg-primary text-white hover:bg-primary-dark'
+                }"
+                ${hasQuotes ? 'disabled' : ''}>
+          <span class="flex items-center justify-center">
+            <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+            </svg>
+            יצירת הצעת מחיר
+          </span>
+        </button>
+
+        <!-- View/Edit Quote Button -->
+        <button onclick="${hasQuotes ? 'viewEditQuote()' : ''}" 
+                class="w-full px-4 py-3 rounded-lg transition-colors ${
+                  hasQuotes 
+                    ? 'bg-blue-600 text-white hover:bg-blue-700' 
+                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                }"
+                ${hasQuotes ? '' : 'disabled'}>
+          <span class="flex items-center justify-center">
+            <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+            </svg>
+            צפייה ועריכת הצעת מחיר
+          </span>
+        </button>
+
+        <!-- Back to Customers Button -->
+        <button onclick="window.location.href='InstallerCustomersPage.html'" 
+                class="w-full px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
+          <span class="flex items-center justify-center">
+            <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16l-4-4m0 0l4-4m-4 4h18"/>
+            </svg>
+            חזור לרשימת לקוחות
+          </span>
+        </button>
+      `;
+    }
+
+
+
+    // Update status to specific level
+    function updateStatusToLevel(targetStatus, targetIndex) {
+      const currentIndex = availableStatuses.indexOf(customerData.workRequest.status);
+      const isMovingForward = targetIndex > currentIndex;
+      const isMovingBackward = targetIndex < currentIndex;
+      
+      console.log(`🎯 עודכן סטטוס לרמה: ${targetStatus} (אינדקס ${targetIndex})`);
+      
+      // Show confirmation for moving backward
+      if (isMovingBackward) {
+        const confirmMessage = `האם אתה בטוח שברצונך לחזור מ"${customerData.workRequest.status}" ל"${targetStatus}"?`;
+        if (!confirm(confirmMessage)) {
+          // Revert the checkbox
+          renderStatusChecklist(customerData.workRequest.status);
+          return;
+        }
+      }
+      
+      const oldStatus = customerData.workRequest.status;
+      
+      ajaxCall('POST', `${API_BASE_URL}/CustomerDetails/UpdateWorkRequestStatus`, 
+        JSON.stringify({ requestID: currentRequestID, newStatus: targetStatus }), 
+        function(result) {
+          if (result && result.success) {
+            customerData.workRequest.status = targetStatus;
+            renderProgressBar(targetStatus);
+            renderStatusChecklist(targetStatus);
+            
+            // Show detailed message based on action type
+            let message = '';
+            const completedSteps = targetIndex + 1;
+            const totalSteps = availableStatuses.length;
+            
+                        if (isMovingForward) {
+               message = `עברת ל"${targetStatus}"`;
+             } else if (isMovingBackward) {
+               message = `חזרת ל"${targetStatus}"`;
+             } else {
+               message = `סטטוס "${targetStatus}"`;
+             }
+            
+            showToast(message, 'info');
+            
+                         // Show completion celebration
+             if (targetIndex === totalSteps - 1 && isMovingForward) {
+               setTimeout(() => {
+                 showToast('מזל טוב! כל השלבים הושלמו בהצלחה!', 'success');
+               }, 1000);
+             }
+            
+          } else {
+            showToast(result?.message || 'שגיאה בעדכון הסטטוס', 'error');
+            renderStatusChecklist(customerData.workRequest.status);
+          }
+        },
+        function(error) {
+          console.error('Error updating status:', error);
+          showToast('שגיאה בעדכון הסטטוס', 'error');
+          // Reload the checklist to revert changes
+          renderStatusChecklist(customerData.workRequest.status);
+        }
+      );
+    }
+
+    // Legacy function for backward compatibility
+    function updateStatus(newStatus, isChecked) {
+      const statusIndex = availableStatuses.indexOf(newStatus);
+      if (statusIndex !== -1) {
+        updateStatusToLevel(newStatus, statusIndex);
+      }
+    }
+
+    // Open quote calculator
+    function openQuoteCalculator() {
+      // Check if quotes already exist - prevent opening for new quote creation
+      if (existingQuotes && existingQuotes.length > 0) {
+        showToast('יש כבר הצעת מחיר עבור הלקוח. השתמש ב"צפייה ועריכה" במקום', 'warning');
+        return;
+      }
+      
+      // Clear custom items when opening new calculator
+      customItems = [];
+      const modal = document.getElementById('quoteCalculatorModal');
+      if (modal) {
+        modal.classList.remove('hidden');
+        loadQuoteCalculator();
+      } else {
+        console.error('Quote calculator modal not found!');
+        showToast('שגיאה בפתיחת מחשבון הצעת מחיר', 'error');
+      }
+    }
+
+    // Close quote calculator
+    function closeQuoteCalculator() {
+      // Clear custom items when closing calculator
+      customItems = [];
+      const modal = document.getElementById('quoteCalculatorModal');
+      if (modal) {
+        modal.classList.add('hidden');
+      }
+    }
+
+    // Load quote calculator content
+    function loadQuoteCalculator() {
+      const container = document.getElementById('quoteCalculatorContent');
+      const totalArea = customerData.spaceDetails.reduce((sum, space) => sum + (space.size || 0), 0);
+      
+      container.innerHTML = `
+        <div class="space-y-6">
+          <!-- Floor Selection -->
+          <div class="bg-gray-50 rounded-lg p-4">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">פרטי פרקט בסיסי</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label>כמות:</label>
-                <div class="quantity-control">
-                  <button onclick="adjustQuantity(this, -1)">-</button>
-                  <span class="quantity-display">0</span>
-                  <button onclick="adjustQuantity(this, 1)">+</button>
+                <label class="block text-sm font-medium text-gray-700 mb-2">סוג פרקט</label>
+                <select id="floorType" onchange="updateFloorPrice()" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                  <option value="spc">SPC/למינציה</option>
+                  <option value="wood">עץ</option>
+                  <option value="fishbone">פישבון</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">מחיר למ"ר</label>
+                <input type="number" id="floorPricePerMeter" value="60" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">סה"כ שטח</label>
+                <input type="number" id="totalArea" value="${totalArea}" readonly class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg">
+              </div>
+            </div>
+            <div class="mt-4">
+              <label class="flex items-center">
+                <input type="checkbox" id="includeBaseFloor" checked class="mr-2 w-4 h-4 text-primary bg-gray-100 border-gray-300 rounded focus:ring-primary focus:ring-2">
+                <span class="text-sm font-medium text-gray-700">כלול פרקט בסיסי בהצעה</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Calculator Items -->
+          <div>
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">פריטים נוספים</h3>
+            <div id="calculatorItems" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <!-- Calculator items will be loaded here -->
+            </div>
+            
+            <!-- Add Custom Item -->
+            <div class="mt-6 border-2 border-dashed border-gray-300 rounded-lg p-6">
+              <h4 class="text-md font-medium text-gray-900 mb-4">הוסף פריט מותאם אישית</h4>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="relative">
+                  <label class="block text-sm font-medium text-gray-700 mb-2">שם הפריט</label>
+                  <input type="text" id="customItemName" placeholder="הקלד שם פריט..." 
+                         oninput="showItemSuggestions(this.value)" onblur="setTimeout(hideSuggestions, 200)"
+                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                  <div id="itemSuggestions" class="absolute z-10 w-full bg-white border border-gray-300 rounded-lg shadow-lg mt-1 hidden max-h-40 overflow-y-auto">
+                    <!-- Suggestions will appear here -->
+                  </div>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">מחיר ליחידה (₪)</label>
+                  <input type="number" id="customItemPrice" placeholder="0" min="0" step="0.01"
+                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">כמות</label>
+                  <div class="flex items-center space-x-2">
+                    <button onclick="adjustCustomQuantity(-1)" class="w-8 h-8 bg-gray-100 text-gray-600 rounded hover:bg-gray-200 transition-colors">-</button>
+                    <span id="customItemQuantity" class="w-8 text-center font-medium">1</span>
+                    <button onclick="adjustCustomQuantity(1)" class="w-8 h-8 bg-gray-100 text-gray-600 rounded hover:bg-gray-200 transition-colors">+</button>
+                  </div>
+                </div>
+              </div>
+              <div class="mt-4 flex justify-center gap-3">
+                <button onclick="addCustomItemToQuote()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                  הוסף לחישוב
+                </button>
+                <button onclick="clearCustomItem()" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
+                  נקה
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quote Preview -->
+          <div class="bg-gray-50 rounded-lg p-4">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">תצוגה מקדימה</h3>
+            <div id="quotePreview" class="space-y-2">
+              <!-- Quote preview will be updated here -->
+            </div>
+            <div class="mt-4 pt-4 border-t border-gray-200">
+              <div class="flex items-center justify-between mb-4">
+                <label class="text-sm font-medium text-gray-700">הנחה (%)</label>
+                <input type="number" id="discountPercent" value="0" min="0" max="100" onchange="calculateQuote()" class="w-20 px-2 py-1 border border-gray-300 rounded">
+              </div>
+              <!-- Calculate button right under discount input -->
+              <div class="mb-4 flex justify-end">
+                <button onclick="calculateQuote()" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors shadow-sm">
+                  חשב מחדש
+                </button>
+              </div>
+              <!-- Create quote button - centered and wider -->
+              <div class="flex justify-center">
+                <button onclick="createQuote()" class="px-8 py-3 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors font-medium text-lg shadow-md">
+                  שמור הצעת מחיר
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      loadCalculatorItems();
+      // Update parquet options after HTML is inserted
+      setTimeout(() => {
+        const floorTypeSelect = document.getElementById('floorType');
+        if (floorTypeSelect) {
+          floorTypeSelect.innerHTML = generateParquetOptions();
+        }
+        updateFloorPrice();
+      }, 100);
+    }
+
+
+
+    // Load calculator items
+    function loadCalculatorItems() {
+      ajaxCall('GET', `${API_BASE_URL}/Quote/GetCalculatorItems`, null,
+        function(items) {
+          calculatorItems = items;
+          renderCalculatorItems(items);
+          calculateQuote();
+        },
+        function(error) {
+          console.error('Error loading calculator items:', error);
+          document.getElementById('calculatorItems').innerHTML = '<div class="text-gray-500 text-center py-4">שגיאה בטעינת פריטי מחשבון</div>';
+        }
+      );
+    }
+
+    // Render calculator items
+    function renderCalculatorItems(items) {
+      const container = document.getElementById('calculatorItems');
+      container.innerHTML = items.map(item => `
+        <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow" data-item-id="${item.calculatorItemID}">
+          <h4 class="font-medium text-gray-900 mb-2">${item.itemName}</h4>
+          <p class="text-sm text-gray-600 mb-3">${item.description || ''}</p>
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-sm font-medium text-primary">₪${item.price}</span>
+            <div class="flex items-center space-x-2">
+              <button onclick="adjustQuantity(${item.calculatorItemID}, -1)" class="w-8 h-8 bg-gray-100 text-gray-600 rounded hover:bg-gray-200 transition-colors">-</button>
+              <span id="qty_${item.calculatorItemID}" class="w-8 text-center font-medium">0</span>
+              <button onclick="adjustQuantity(${item.calculatorItemID}, 1)" class="w-8 h-8 bg-gray-100 text-gray-600 rounded hover:bg-gray-200 transition-colors">+</button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Generate parquet type options HTML
+    function generateParquetOptions() {
+      if (!parquetTypes || parquetTypes.length === 0) {
+        // Fallback options if data not loaded yet
+        return `
+          <option value="spc">SPC/למינציה</option>
+          <option value="wood">עץ</option>
+          <option value="fishbone">פישבון</option>
+        `;
+      }
+      
+      return parquetTypes.map((parquet, index) => {
+        // הראשון ברשימה תמיד יהיה ברירת המחדל
+        const isSelected = index === 0;
+        return `<option value="${parquet.parquetTypeID}" ${isSelected ? 'selected' : ''}>${parquet.typeName}</option>`;
+      }).join('');
+    }
+
+    // Show item suggestions for custom item (now using smart API)
+    function showItemSuggestions(query) {
+      const suggestionsContainer = document.getElementById('itemSuggestions');
+      
+      if (!query || query.length < 2) {
+        suggestionsContainer.classList.add('hidden');
+        return;
+      }
+      
+      // Show loading state
+      suggestionsContainer.innerHTML = `
+        <div class="px-4 py-2 text-center text-gray-500">
+          <div class="text-sm">טוען הצעות...</div>
+        </div>
+      `;
+      suggestionsContainer.classList.remove('hidden');
+      
+      // Get smart suggestions from API
+      ajaxCall('GET', `${API_BASE_URL}/PriceCalculatorItem/GetItemSuggestions?query=${encodeURIComponent(query)}&maxResults=8`, null,
+        function(suggestions) {
+          if (!suggestions || suggestions.length === 0) {
+            suggestionsContainer.classList.add('hidden');
+            return;
+          }
+          
+          suggestionsContainer.innerHTML = suggestions.map(suggestion => `
+            <div class="px-4 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0" 
+                 onclick="selectSuggestedItem('${suggestion.suggestionText}', ${suggestion.suggestedPrice})">
+              <div class="flex items-center justify-between">
+                <div class="flex-1">
+                  <div class="font-medium text-gray-900">${suggestion.suggestionText}</div>
+                  <div class="text-xs text-gray-600">₪${suggestion.suggestedPrice.toFixed(2)}</div>
+                </div>
+                <div class="flex items-center">
+                  <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                    suggestion.source === 'קבוע' 
+                      ? 'bg-green-100 text-green-800' 
+                      : 'bg-yellow-100 text-yellow-800'
+                  }">
+                    ${suggestion.source === 'קבוע' ? '🔧 קבוע' : '💡 מוצע'}
+                  </span>
                 </div>
               </div>
             </div>
-          `;
+          `).join('');
+        },
+        function(error) {
+          console.error('Error getting item suggestions:', error);
+          suggestionsContainer.classList.add('hidden');
+        }
+      );
+    }
 
-          container.appendChild(div);
-        });
+    // Hide suggestions
+    function hideSuggestions() {
+      const suggestionsContainer = document.getElementById('itemSuggestions');
+      suggestionsContainer.classList.add('hidden');
+    }
 
-       
-        calculateQuote();
+    // Select suggested item
+    function selectSuggestedItem(itemName, price) {
+      document.getElementById('customItemName').value = itemName;
+      document.getElementById('customItemPrice').value = price;
+      hideSuggestions();
+    }
+
+    // Adjust custom item quantity
+    function adjustCustomQuantity(delta) {
+      const qtyElement = document.getElementById('customItemQuantity');
+      const currentQty = parseInt(qtyElement.textContent) || 1;
+      const newQty = Math.max(1, currentQty + delta);
+      qtyElement.textContent = newQty;
+    }
+
+    // Add custom item to quote
+    function addCustomItemToQuote() {
+      const itemName = document.getElementById('customItemName').value.trim();
+      const itemPrice = parseFloat(document.getElementById('customItemPrice').value) || 0;
+      const itemQuantity = parseInt(document.getElementById('customItemQuantity').textContent) || 1;
+      
+      if (!itemName) {
+        showToast('נא להזין שם פריט', 'error');
+        return;
       }
-    },
-    function (err) {
-      console.error("⚠️ שגיאה בטעינת פריטים קבועים:", err);
+      
+      if (itemPrice <= 0) {
+        showToast('נא להזין מחיר תקין', 'error');
+        return;
+      }
+      
+      // Add to custom items array
+      const customItem = {
+        id: Date.now(), // Unique ID for custom items
+        itemName: itemName,
+        price: itemPrice,
+        quantity: itemQuantity,
+        isCustom: true
+      };
+      
+      customItems.push(customItem);
+      
+      // Render the custom item in the calculator area
+      renderCustomItem(customItem);
+      
+      // Clear the form
+      clearCustomItem();
+      
+      // Recalculate quote
+      calculateQuote();
+      
+      showToast(`פריט "${itemName}" נוסף לחישוב`, 'success');
     }
-  );
-}
-function updateInstallationPrice() {
-  const select = document.getElementById("floorType");
-  const display = document.getElementById("selectedFloorType");
-  const priceInput = document.getElementById("pricePerMeter");
 
-  const type = select.value;
-  
-  // קבלת מחירים מהשרת במקום מחירים קשיחים
-  ajaxCall('GET', `${API_BASE_URL}/SystemSettings/GetParquetPrices`, null, 
-    function(prices) {
-      const priceMap = {
-        spc: parseInt(prices.SPC) || 60,
-        wood: parseInt(prices.Wood) || 85,
-        fishbone: parseInt(prices.Fishbone) || 150
-      };
-
-      const typeNameMap = {
-        spc: "SPC/למינציה",
-        wood: "עץ",
-        fishbone: "פישבון"
-      };
-
-      priceInput.value = priceMap[type] || 0;
-      calculateQuote(); 
-    },
-    function(error) {
-      console.error('שגיאה בקבלת מחירי פרקט:', error);
-      // ברירת מחדל במקרה של שגיאה
-      const priceMap = {
-        spc: 60,
-        wood: 85,
-        fishbone: 150
-      };
-      priceInput.value = priceMap[type] || 0;
-      calculateQuote(); 
+    // Render custom item in calculator
+    function renderCustomItem(item) {
+      const calculatorContainer = document.getElementById('calculatorItems');
+      const customItemHTML = `
+        <div class="border border-blue-200 bg-blue-50 rounded-lg p-4 hover:shadow-md transition-shadow" data-custom-item-id="${item.id}">
+          <div class="flex items-center justify-between mb-2">
+            <h4 class="font-medium text-gray-900">${item.itemName}</h4>
+            <button onclick="removeCustomItem(${item.id})" class="text-red-500 hover:text-red-700 transition-colors">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+          <p class="text-sm text-blue-600 mb-3">פריט מותאם אישית</p>
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-sm font-medium text-primary">₪${item.price}</span>
+            <div class="flex items-center space-x-2">
+              <button onclick="adjustCustomItemQuantity(${item.id}, -1)" class="w-8 h-8 bg-gray-100 text-gray-600 rounded hover:bg-gray-200 transition-colors">-</button>
+              <span id="custom_qty_${item.id}" class="w-8 text-center font-medium">${item.quantity}</span>
+              <button onclick="adjustCustomItemQuantity(${item.id}, 1)" class="w-8 h-8 bg-gray-100 text-gray-600 rounded hover:bg-gray-200 transition-colors">+</button>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      calculatorContainer.insertAdjacentHTML('beforeend', customItemHTML);
     }
-  );
-}
 
-function showItemDescription(desc) {
-  const popup = document.createElement("div");
-  popup.innerHTML = `
-    <div style="position: fixed; top: 30%; left: 50%; transform: translate(-50%, -50%);
-                background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px #aaa; z-index: 5000;">
-      <p>${desc}</p>
-      <button class="btn btn-secondary" onclick="this.parentElement.remove()">סגור</button>
-    </div>
-  `;
-  document.body.appendChild(popup);
-}
-function editCalculatorItem(button, id) {
-  const itemDiv = button.closest(".calculator-item");
-  const currentLabel = itemDiv.dataset.label;
-  const currentPrice = itemDiv.dataset.price;
+    // Adjust custom item quantity in calculator
+    function adjustCustomItemQuantity(itemId, delta) {
+      const qtyElement = document.getElementById(`custom_qty_${itemId}`);
+      const currentQty = parseInt(qtyElement.textContent) || 1;
+      const newQty = Math.max(0, currentQty + delta);
+      
+      // Update in DOM
+      qtyElement.textContent = newQty;
+      
+      // Update in array
+      const item = customItems.find(i => i.id === itemId);
+      if (item) {
+        item.quantity = newQty;
+        
+        // If quantity is 0, remove the item
+        if (newQty === 0) {
+          removeCustomItem(itemId);
+          return;
+        }
+      }
+      
+      // Recalculate quote
+      calculateQuote();
+    }
 
-  const newLabel = prompt("עדכן שם פרמטר:", currentLabel);
-  if (!newLabel) return;
+    // Remove custom item
+    function removeCustomItem(itemId) {
+      // Remove from array
+      customItems = customItems.filter(item => item.id !== itemId);
+      
+      // Remove from DOM
+      const itemElement = document.querySelector(`[data-custom-item-id="${itemId}"]`);
+      if (itemElement) {
+        itemElement.remove();
+      }
+      
+      // Recalculate quote
+      calculateQuote();
+      
+      showToast('פריט הוסר מהחישוב', 'info');
+    }
 
-  const newPrice = prompt("עדכן מחיר:", currentPrice);
-  if (newPrice === null || isNaN(parseFloat(newPrice))) return;
+    // Clear custom item form
+    function clearCustomItem() {
+      document.getElementById('customItemName').value = '';
+      document.getElementById('customItemPrice').value = '';
+      document.getElementById('customItemQuantity').textContent = '1';
+    }
 
-  ajaxCall(
-    'POST',
-   `${API_BASE_URL}/PriceCalculatorItem/UpdateCalculatorItem`,
-    JSON.stringify({
-      CalculatorItemID: id,
-      ItemName: newLabel,
-      Price: parseFloat(newPrice)
-    }),
-    function (res) {
-      if (res === 1) {
-        alert("✔️ עודכן בהצלחה");
-        loadCalculatorItems(); 
+    // Update floor price based on selection
+    function updateFloorPrice() {
+      const floorTypeElement = document.getElementById('floorType');
+      if (!floorTypeElement) return;
+      
+      const selectedValue = floorTypeElement.value;
+      const selectedParquet = parquetTypes.find(p => p.parquetTypeID == selectedValue || p.type == selectedValue);
+      
+      if (selectedParquet) {
+        document.getElementById('floorPricePerMeter').value = selectedParquet.pricePerUnit;
       } else {
-        alert("⚠️ עדכון נכשל");
+        document.getElementById('floorPricePerMeter').value = 60; // fallback
       }
-    },
-    function (err) {
-      console.error("❌ שגיאה בעדכון:", err);
-      alert("שגיאה בשרת");
+      
+      calculateQuote();
     }
-  );
-}
-function deleteCalculatorItem(itemId) {
-  if (!confirm("האם אתה בטוח שברצונך למחוק את הפריט?")) return;
 
-  const itemDiv = [...document.querySelectorAll(".calculator-item")].find(el =>
-    el.querySelector("button[onclick*='deleteCalculatorItem']").outerHTML.includes(`deleteCalculatorItem(${itemId})`)
-  );
-
-  const name = itemDiv?.dataset.label || "";
-  const price = parseFloat(itemDiv?.dataset.price || 0);
-
-  const payload = {
-    calculatorItemID: itemId,
-    itemName: name,
-    description: "", 
-    price: price,
-    isActive: false
-  };
-
-  ajaxCall(
-    'DELETE',
-    `${API_BASE_URL}/PriceCalculatorItem/DeleteCalculatorItem`,
-    JSON.stringify(payload),
-    function () {
-      alert("🗑️ הפריט נמחק בהצלחה");
-      loadCalculatorItems();
-    },
-    function (err) {
-      console.error("שגיאה במחיקה:", err);
-      alert("❌ לא ניתן למחוק את הפריט כרגע");
+    // Adjust item quantity
+    function adjustQuantity(itemId, delta) {
+      const qtyElement = document.getElementById(`qty_${itemId}`);
+      const currentQty = parseInt(qtyElement.textContent) || 0;
+      const newQty = Math.max(0, currentQty + delta);
+      qtyElement.textContent = newQty;
+      calculateQuote();
     }
-  );
-}
 
-
-
-
-
-function showInfoPopup(button, description) {
-  const popup = document.getElementById("infoPopup");
-  const text = document.getElementById("infoText");
-  text.innerText = description || "אין תיאור";
-  popup.style.display = "block";
-
-  const rect = button.getBoundingClientRect();
-  popup.style.top = (rect.bottom + window.scrollY + 5) + "px";
-  popup.style.left = (rect.left + window.scrollX - 50) + "px";
-
-  // סגירה אוטומטית אחרי 5 שניות
-  setTimeout(() => popup.style.display = "none", 5000);
-}
-
-function openEditPopup(itemId, name, price, desc) {
-  $("#editItemId").val(itemId);
-  $("#editItemName").val(name);
-  $("#editItemPrice").val(price);
-  $("#editItemDesc").val(desc);
-  $("#editPopup").show();
-}
-
-function closeEditPopup() {
-  $("#editPopup").hide();
-}
-
-function submitEditItem(buttonElement) {
-  const itemId = $('#editItemId').val(); 
-
-  const name = $('#editItemName').val();
-  const price = parseFloat($('#editItemPrice').val());
-  const description = $('#editItemDesc').val();
-
-  if (!itemId || !name || isNaN(price)) {
-    alert("יש להזין שם ומחיר תקין");
-    return;
-  }
-
-  const updatedItem = {
-    CalculatorItemID: parseInt(itemId),
-    ItemName: name,
-    Price: price,
-    Description: description,
-    IsActive: true
-  };
-
-  ajaxCall(
-    'POST',
-    `${API_BASE_URL}/PriceCalculatorItem/UpdateCalculatorItem`,
-    JSON.stringify(updatedItem),
-    function () {
-      closeEditPopup();
-      loadCalculatorItems();
-    },
-    function (err) {
-      console.error("⚠️ שגיאה בעדכון פריט:", err);
-      alert("שגיאה בשמירת הפריט");
-    }
-  );
-}
-function submitQuote() {
-  const customerId = new URLSearchParams(window.location.search).get("id");
-  const subtotal = parseFloat(document.getElementById("previewSubtotal").innerText) || 0;
-  const discountPercent = parseFloat(document.getElementById("discountPercent").value) || 0;
-  const totalWithVAT = parseFloat(document.getElementById("previewTotal").innerText) || 0;
-
-  const discountAmount = subtotal * (discountPercent / 100);  // ← מחושב מ־subtotal
-
-  const quote = {
-    RequestID: parseInt(currentRequestID),
-    TotalPrice: totalWithVAT,       // ← שים לב לשם השדה
-    DiscountAmount: discountAmount, // ← חובה לפי ה־Swagger
-    DiscountPercent: discountPercent
-  };
-
-  ajaxCall(
-    "POST",
-    `${API_BASE_URL}/Quote/InsertQuote`,
-    JSON.stringify(quote),
-    function (quoteId) {
-      if (quoteId > 0) {
-        submitQuoteItems(quoteId);
-      } else {
-        alert("⚠️ שגיאה ביצירת הצעת המחיר");
-      }
-    },
-    function (err) {
-      console.error("❌ שגיאה בשליחת הצעת המחיר:", err);
-      alert("שגיאה בשרת");
-    }
-  );
-}
-function submitQuoteItems(quoteId) {
-  const submitBtn = document.querySelector('button[onclick="submitQuote()"]');
-  submitBtn.textContent = "📤 שולח...";
-  submitBtn.disabled = true;
-
-  const items = document.querySelectorAll(".calculator-item");
-
-  const quoteItems = Array.from(items).map((item) => {
-    const label = item.dataset.label || "ללא שם";
-    const price = parseFloat(item.dataset.price || "0");
-    const quantity = parseInt(item.querySelector(".quantity-display")?.textContent || "0");
-    const finalPrice = price * quantity;
-    const calculatorItemID = item.dataset.fixedId ? parseInt(item.dataset.fixedId) : null;
-
-    return {
-      quoteItemID: 0,
-      quoteID: quoteId,
-      calculatorItemID: calculatorItemID,
-      customItemName: label,
-      priceForItem: price,
-      quantity: quantity,
-      finalPrice: finalPrice,
-      notes: ""
-    };
-  }).filter(item => item.quantity > 0 && item.priceForItem > 0);
-
-  if (quoteItems.length === 0) {
-    alert("אין פריטים להצעת מחיר.");
-    submitBtn.textContent = "📤 שלח הצעת מחיר";
-    submitBtn.disabled = false;
-    return;
-  }
-
-  let sentCount = 0;
-  let failedCount = 0;
-
-  quoteItems.forEach((item) => {
-    ajaxCall(
-      "POST",
-      `${API_BASE_URL}/Quote/AddQuoteItem`,
-      JSON.stringify([item]),
-      function () {
-        sentCount++;
-        if (sentCount + failedCount === quoteItems.length) {
-          if (failedCount === 0) {
-            submitBtn.textContent = "✔️ נשלח בהצלחה";
-            alert("🎉 הצעת המחיר נשלחה בהצלחה!");
-            checkPopularCandidates();
+    // Calculate quote
+    function calculateQuote() {
+      const data = gatherQuoteData();
+      console.log('📊 נתוני ההצעה שנשלחים לשרת:', data);
+      
+      ajaxCall('POST', `${API_BASE_URL}/Quote/CalculateQuote`, JSON.stringify(data),
+        function(result) {
+          if (result && (result.subtotal !== undefined || result.items)) {
+            displayQuotePreview(result);
           } else {
-            submitBtn.textContent = "📤 שלח הצעת מחיר";
-            alert("⚠️ חלק מהפריטים לא נשלחו. נסה שוב.");
+            console.error('Invalid quote calculation result:', result);
+            showToast(result?.message || 'שגיאה בחישוב הצעת המחיר', 'error');
           }
-          submitBtn.disabled = false;
+        },
+        function(error) {
+          console.error('Error calculating quote:', error);
+          showToast('שגיאה בחישוב הצעת המחיר', 'error');
         }
-      },
-      function (err) {
-        console.error("⚠️ שגיאה בפריט:", item, err);
-        failedCount++;
-        if (sentCount + failedCount === quoteItems.length) {
-          submitBtn.textContent = "📤 שלח הצעת מחיר";
-          alert("⚠️ חלק מהפריטים לא נשלחו. נסה שוב.");
-          submitBtn.disabled = false;
+      );
+    }
+
+    // Gather quote data
+    function gatherQuoteData() {
+      const items = [];
+      
+      // Get all calculator items with quantities > 0
+      document.querySelectorAll('[id^="qty_"]').forEach(element => {
+        const itemId = parseInt(element.id.replace('qty_', ''));
+        const quantity = parseInt(element.textContent) || 0;
+        if (quantity > 0) {
+          const item = calculatorItems.find(i => i.calculatorItemID === itemId);
+          if (item) {
+            items.push({
+              CalculatorItemID: itemId,
+              ItemName: item.itemName,
+              UnitPrice: item.price,
+              Quantity: quantity,
+              Notes: ""
+            });
+          }
         }
-      }
-    );
-  });
-}
-
-
-
-function checkPopularCandidates() {
-  ajaxCall(
-    "GET",
-    `${API_BASE_URL}/PriceCalculatorItem/GetPopularCandidates`,
-    null,
-    function (candidates) {
-      if (Array.isArray(candidates) && candidates.length > 0) {
-        showCandidatePopup(candidates);
-      }
-    },
-    function (err) {
-      console.error("⚠️ שגיאה בבדיקת מועמדים פופולריים:", err);
-    }
-  );
-}
-function showCandidatePopup(candidates) {
-  const popup = document.createElement("div");
-  popup.style.cssText = `
-    position: fixed; top: 20%; left: 50%; transform: translateX(-50%);
-    background: white; padding: 20px; border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.2); z-index: 9999;
-    max-width: 400px;
-  `;
-
-  popup.innerHTML = `
-    <h3>🧠 זיהינו פרמטרים חוזרים</h3>
-    <p>האם להפוך אותם לפריטים קבועים במחשבון?</p>
-    <ul style="text-align: right; padding-right: 20px;">
-      ${candidates.map(c => `<li><strong>${c.customItemName}</strong> (≈ ${c.suggestedPrice} ₪)</li>`).join("")}
-    </ul>
-    <div style="text-align: left; margin-top: 15px;">
-      <button class="btn" onclick='approveCandidates(${JSON.stringify(candidates).replace(/"/g, '&quot;')})'>✔️ כן</button>
-<button class="btn btn-secondary" onclick='rejectCandidates(${JSON.stringify(candidates).replace(/"/g, '&quot;')})'>❌ לא</button>
-    </div>
-  `;
-
-  document.body.appendChild(popup);
-}
-function approveCandidates(candidates) {
-  candidates.forEach(c => {
-    ajaxCall(
-      "POST",
-      `${API_BASE_URL}/PriceCalculatorItem/CreateFromCandidate`,
-      JSON.stringify(c.customItemName), 
-      function () {
-        console.log(`✅ נוסף פריט קבוע: ${c.customItemName}`);
-        loadCalculatorItems(); 
-      },
-      function (err) {
-        console.error(`❌ שגיאה ביצירת קבוע: ${c.customItemName}`, err);
-      }
-    );
-  });
-
-  document.querySelector("div[style*='z-index: 9999']")?.remove(); 
-}
-function rejectCandidates(candidates) {
-  candidates.forEach(c => {
-    ajaxCall(
-      "POST",
-      `${API_BASE_URL}/PriceCalculatorItem/RejectCandidate`,
-      JSON.stringify(c.customItemName), 
-      function () {
-        console.log(`🚫 נדחה פריט זמני: ${c.customItemName}`);
-      },
-      function (err) {
-        console.error(`❌ שגיאה בדחיית פריט: ${c.customItemName}`, err);
-      }
-    );
-  });
-
-  document.querySelector("div[style*='z-index: 9999']")?.remove(); 
-}
-
-// ==================== AUTOCOMPLETE FUNCTIONALITY ====================
-function getItemSuggestions(query, callback) {
-  if (!query || query.length < 2) {
-    callback([]);
-    return;
-  }
-
-  ajaxCall(
-    'GET',
-    `${API_BASE_URL}/PriceCalculatorItem/GetItemSuggestions?query=${encodeURIComponent(query)}&maxResults=10`,
-    null,
-    function(suggestions) {
-      callback(suggestions || []);
-    },
-    function(err) {
-      console.error('שגיאה בקבלת הצעות:', err);
-      callback([]);
-    }
-  );
-}
-
-function showSuggestions(suggestions, uniqueId) {
-  const list = document.getElementById(uniqueId + '_suggestions');
-  
-  if (!suggestions || suggestions.length === 0) {
-    list.style.display = 'none';
-    return;
-  }
-
-  list.innerHTML = '';
-  list.style.display = 'block';
-
-  suggestions.forEach(suggestion => {
-    const item = document.createElement('div');
-    item.style.cssText = 'padding:8px; cursor:pointer; border-bottom:1px solid #eee; text-align:right;';
-    item.innerHTML = `
-      <div style="font-weight:bold;">${suggestion.suggestionText}</div>
-      <div style="font-size:12px; color:#666;">
-        ${suggestion.source} • ${suggestion.suggestedPrice} ₪
-      </div>
-    `;
-    
-    item.addEventListener('click', () => {
-      const nameInput = document.getElementById(uniqueId + '_name');
-      const priceInput = document.getElementById(uniqueId + '_price');
-      
-      nameInput.value = suggestion.suggestionText;
-      priceInput.value = suggestion.suggestedPrice;
-      
-      // עדכון הdataset של הפריט
-      const calculatorItem = nameInput.closest('.calculator-item');
-      calculatorItem.dataset.label = suggestion.suggestionText;
-      calculatorItem.dataset.price = suggestion.suggestedPrice;
-      
-      list.style.display = 'none';
-      calculateQuote(); // עדכון החישוב
-    });
-
-    item.addEventListener('mouseenter', () => {
-      item.style.backgroundColor = '#f0f8ff';
-    });
-
-    item.addEventListener('mouseleave', () => {
-      item.style.backgroundColor = 'white';
-    });
-
-    list.appendChild(item);
-  });
-}
-
-function hideSuggestions(uniqueId) {
-  setTimeout(() => {
-    const list = document.getElementById(uniqueId + '_suggestions');
-    if (list) {
-      list.style.display = 'none';
-    }
-  }, 200); // דיליי קטן כדי לאפשר לחיצה על הצעה
-}
-
-function setupTempItemAutocomplete(uniqueId) {
-  const input = document.getElementById(uniqueId + '_name');
-  let debounceTimer;
-
-  input.addEventListener('input', function() {
-    clearTimeout(debounceTimer);
-    const query = this.value.trim();
-    
-    debounceTimer = setTimeout(() => {
-      getItemSuggestions(query, (suggestions) => {
-        showSuggestions(suggestions, uniqueId);
       });
-    }, 300); // חכה 300ms אחרי שהמשתמש הפסיק להקליד
-  });
 
-  input.addEventListener('focus', function() {
-    if (this.value.length >= 2) {
-      getItemSuggestions(this.value, (suggestions) => {
-        showSuggestions(suggestions, uniqueId);
+      // Add custom items with quantities > 0
+      customItems.forEach(customItem => {
+        if (customItem.quantity > 0) {
+          items.push({
+            CalculatorItemID: null, // Custom items don't have calculator item ID
+            ItemName: customItem.itemName,
+            UnitPrice: customItem.price,
+            Quantity: customItem.quantity,
+            Notes: "פריט מותאם אישית"
+          });
+        }
       });
+
+      return {
+        RequestID: currentRequestID,
+        IncludeBaseFloor: document.getElementById('includeBaseFloor').checked,
+        TotalArea: parseFloat(document.getElementById('totalArea').value) || 0,
+        FloorType: document.getElementById('floorType').value,
+        FloorPricePerMeter: parseFloat(document.getElementById('floorPricePerMeter').value) || 0,
+        DiscountPercent: parseFloat(document.getElementById('discountPercent').value) || 0,
+        Items: items
+      };
     }
-  });
 
-  input.addEventListener('blur', () => hideSuggestions(uniqueId));
+    // Display quote preview
+    function displayQuotePreview(quote) {
+      const container = document.getElementById('quotePreview');
+      container.innerHTML = `
+        <div class="space-y-2">
+          ${quote.items.map(item => `
+            <div class="flex justify-between text-sm">
+              <span>${item.itemName} (${item.quantity}x)</span>
+              <span>₪${item.totalPrice.toFixed(2)}</span>
+            </div>
+          `).join('')}
+        </div>
+        <div class="pt-2 border-t border-gray-300 space-y-1">
+          <div class="flex justify-between text-sm">
+            <span>סה"כ לפני הנחה:</span>
+            <span>₪${quote.subtotal.toFixed(2)}</span>
+          </div>
+          ${quote.discountAmount > 0 ? `
+          <div class="flex justify-between text-sm text-red-600">
+            <span>הנחה (${quote.discountPercent}%):</span>
+            <span>-₪${quote.discountAmount.toFixed(2)}</span>
+          </div>
+          ` : ''}
+          <div class="flex justify-between text-sm">
+            <span>לאחר הנחה:</span>
+            <span>₪${quote.afterDiscount.toFixed(2)}</span>
+          </div>
+          <div class="flex justify-between text-sm">
+            <span>מע"מ (${quote.vatPercent}%):</span>
+            <span>₪${quote.vatAmount.toFixed(2)}</span>
+          </div>
+          <div class="flex justify-between text-lg font-semibold border-t border-gray-300 pt-2">
+            <span>סה"כ לתשלום:</span>
+            <span class="text-primary">₪${quote.finalTotal.toFixed(2)}</span>
+          </div>
+        </div>
+      `;
+    }
 
-  // מקשי מקלדת
-  input.addEventListener('keydown', function(e) {
-    const list = document.getElementById(uniqueId + '_suggestions');
+    // Create quote
+    function createQuote() {
+      // Check if quotes already exist - prevent duplicate creation
+      if (existingQuotes && existingQuotes.length > 0) {
+        showToast('יש כבר הצעת מחיר עבור הלקוח. השתמש ב"צפייה ועריכה" במקום', 'warning');
+        return;
+      }
+      
+      const data = gatherQuoteData();
+      
+      // Check for popular candidates before saving quote
+      checkForPopularCandidatesBeforeSave(data);
+    }
     
-    if (e.key === 'Escape') {
-      list.style.display = 'none';
+    // Check for popular candidates in custom items before saving quote
+    function checkForPopularCandidatesBeforeSave(quoteData) {
+      // Extract custom items (items without calculatorItemID) 
+      const customItems = quoteData.Items.filter(item => 
+        !item.CalculatorItemID && item.Quantity > 0
+      );
+      
+      if (customItems.length === 0) {
+        // No custom items, save directly
+        saveQuoteDirectly(quoteData);
+        return;
+      }
+      
+      console.log('🔍 בודק מועמדים פופולריים עבור פריטים מותאמים:', customItems);
+      
+      // Get popular candidates
+      ajaxCall('GET', `${API_BASE_URL}/PriceCalculatorItem/GetPopularCandidates`, null,
+        function(candidates) {
+          // Find which custom items are popular candidates
+          const popularCustomItems = customItems.filter(customItem => 
+            candidates.some(candidate => candidate.customItemName === customItem.ItemName)
+          );
+          
+          if (popularCustomItems.length > 0) {
+            // Show suggestion dialog for popular items
+            showPopularCandidatesDialog(popularCustomItems, candidates, quoteData);
+          } else {
+            // No popular candidates found, save directly
+            console.log('📝 לא נמצאו מועמדים פופולריים, שומר הצעה ישירות');
+            saveQuoteDirectly(quoteData);
+          }
+        },
+        function(error) {
+          console.error('Error checking candidates:', error);
+          // On error, save directly
+          saveQuoteDirectly(quoteData);
+        }
+      );
     }
-  });
-}
+    
+    // Save quote directly without candidate suggestions
+    function saveQuoteDirectly(quoteData) {
+      ajaxCall('POST', `${API_BASE_URL}/Quote/CreateQuote`, JSON.stringify(quoteData),
+        function(result) {
+          if (result && result.success) {
+            showToast(result.message || 'הצעת מחיר נשמרה בהצלחה!');
+            closeQuoteCalculator();
+            loadExistingQuotes(); // Refresh quotes list and update buttons
+          } else {
+            showToast(result?.message || 'שגיאה בשמירת הצעת המחיר', 'error');
+            // Even if there's an error, close the calculator
+            closeQuoteCalculator();
+          }
+        },
+        function(error) {
+          console.error('Error creating quote:', error);
+          showToast('שגיאה בשמירת הצעת המחיר', 'error');
+          // Even if there's an error, close the calculator
+          closeQuoteCalculator();
+        }
+      );
+    }
 
-function updateWorkRequestStatus(newStatus) {
-  if (!currentRequestID) {
-    alert("⚠️ לא נמצא בקשת עבודה לעדכון סטטוס");
-    return;
-  }
+    // View/Edit existing quote
+    function viewEditQuote() {
+      if (existingQuotes.length === 0) {
+        showToast('לא נמצאו הצעות מחיר קיימות', 'error');
+        return;
+      }
 
-  ajaxCall(
-    "POST",
-    `${API_BASE_URL}/WorkRequest/UpdateStatus?workRequestID=${currentRequestID}&workRequestNewStatus=${newStatus}`,
-    null,
-    function (response) {
-      if (response > 0) {
-        console.log(`סטטוס עודכן ל: ${newStatus}`);
+      // If there's only one quote, open it directly
+      if (existingQuotes.length === 1) {
+        editSpecificQuote(existingQuotes[0]);
+        return;
+      }
+
+      // If there are multiple quotes, show selection modal
+      showQuoteSelectionModal();
+    }
+
+    // Show quote selection modal for multiple quotes
+    function showQuoteSelectionModal() {
+      const modal = document.createElement('div');
+      modal.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4';
+      modal.innerHTML = `
+        <div class="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-96 overflow-y-auto">
+          <div class="p-6 border-b border-gray-200">
+            <div class="flex items-center justify-between">
+              <h2 class="text-xl font-semibold text-gray-900">בחר הצעת מחיר לעריכה</h2>
+              <button onclick="this.closest('.fixed').remove()" class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div class="p-6">
+            <div class="space-y-3">
+              ${existingQuotes.map(quote => `
+                <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer"
+                     onclick="editSpecificQuote(${JSON.stringify(quote).replace(/"/g, '&quot;')}); this.closest('.fixed').remove();">
+                  <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-medium text-gray-900">הצעה #${quote.quoteID}</span>
+                    <span class="text-sm text-gray-500">${new Date(quote.createdAt).toLocaleDateString('he-IL')}</span>
+                  </div>
+                  <div class="text-lg font-semibold text-primary mb-2">₪${quote.totalPrice.toLocaleString()}</div>
+                  <div class="text-sm text-gray-600">${quote.items.length} פריטים</div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+      `;
+      
+      document.body.appendChild(modal);
+    }
+
+    // Edit specific quote
+    function editSpecificQuote(quote) {
+      // Open quote calculator modal
+      const modal = document.getElementById('quoteCalculatorModal');
+      if (modal) {
+        modal.classList.remove('hidden');
+        // Load the quote data into the calculator
+        loadQuoteCalculatorForEdit(quote);
       } else {
-        alert("❌ שגיאה בעדכון הסטטוס");
+        console.error('Quote calculator modal not found!');
+        showToast('שגיאה בפתיחת מחשבון הצעת מחיר לעריכה', 'error');
       }
-    },
-    function (err) {
-      console.error("שגיאה בעדכון סטטוס:", err);
-      alert("❌ שגיאה בשרת");
     }
-  );
-}
 
+    // Load quote calculator with existing quote data for editing
+    function loadQuoteCalculatorForEdit(quote) {
+      const container = document.getElementById('quoteCalculatorContent');
+      const totalArea = customerData.spaceDetails.reduce((sum, space) => sum + (space.size || 0), 0);
+      
+      container.innerHTML = `
+        <div class="space-y-6">
+          <!-- Edit Mode Header -->
+          <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div class="flex items-center">
+              <svg class="w-5 h-5 text-blue-600 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+              </svg>
+              <span class="text-blue-800 font-medium">עריכת הצעה #${quote.quoteID}</span>
+            </div>
+          </div>
 
-document.querySelectorAll('.checklist input[type="checkbox"]').forEach(checkbox => {
-  checkbox.addEventListener('change', function () {
-    if (this.checked) {
-      const newStatus = this.dataset.key; 
-      updateWorkRequestStatus(newStatus);
+          <!-- Floor Selection -->
+          <div class="bg-gray-50 rounded-lg p-4">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">פרטי פרקט בסיסי</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">סוג פרקט</label>
+                <select id="floorType" onchange="updateFloorPrice()" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                  <option value="spc">SPC/למינציה</option>
+                  <option value="wood">עץ</option>
+                  <option value="fishbone">פישבון</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">מחיר למ"ר</label>
+                <input type="number" id="floorPricePerMeter" value="60" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">סה"כ שטח</label>
+                <input type="number" id="totalArea" value="${totalArea}" readonly class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg">
+              </div>
+            </div>
+            <div class="mt-4">
+              <label class="flex items-center">
+                <input type="checkbox" id="includeBaseFloor" checked class="mr-2 w-4 h-4 text-primary bg-gray-100 border-gray-300 rounded focus:ring-primary focus:ring-2">
+                <span class="text-sm font-medium text-gray-700">כלול פרקט בסיסי בהצעה</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Calculator Items -->
+          <div>
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">פריטים נוספים</h3>
+            <div id="calculatorItems" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <!-- Calculator items will be loaded here -->
+            </div>
+            
+            <!-- Add Custom Item -->
+            <div class="mt-6 border-2 border-dashed border-gray-300 rounded-lg p-6">
+              <h4 class="text-md font-medium text-gray-900 mb-4">הוסף פריט מותאם אישית</h4>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="relative">
+                  <label class="block text-sm font-medium text-gray-700 mb-2">שם הפריט</label>
+                  <input type="text" id="customItemName" placeholder="הקלד שם פריט..." 
+                         oninput="showItemSuggestions(this.value)" onblur="setTimeout(hideSuggestions, 200)"
+                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                  <div id="itemSuggestions" class="absolute z-10 w-full bg-white border border-gray-300 rounded-lg shadow-lg mt-1 hidden max-h-40 overflow-y-auto">
+                    <!-- Suggestions will appear here -->
+                  </div>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">מחיר ליחידה (₪)</label>
+                  <input type="number" id="customItemPrice" placeholder="0" min="0" step="0.01"
+                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">כמות</label>
+                  <div class="flex items-center space-x-2">
+                    <button onclick="adjustCustomQuantity(-1)" class="w-8 h-8 bg-gray-100 text-gray-600 rounded hover:bg-gray-200 transition-colors">-</button>
+                    <span id="customItemQuantity" class="w-8 text-center font-medium">1</span>
+                    <button onclick="adjustCustomQuantity(1)" class="w-8 h-8 bg-gray-100 text-gray-600 rounded hover:bg-gray-200 transition-colors">+</button>
+                  </div>
+                </div>
+              </div>
+              <div class="mt-4 flex justify-center gap-3">
+                <button onclick="addCustomItemToQuote()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                  הוסף לחישוב
+                </button>
+                <button onclick="clearCustomItem()" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
+                  נקה
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quote Preview -->
+          <div class="bg-gray-50 rounded-lg p-4">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">תצוגה מקדימה</h3>
+            <div id="quotePreview" class="space-y-2">
+              <!-- Quote preview will be updated here -->
+            </div>
+                          <div class="mt-4 pt-4 border-t border-gray-200">
+                <div class="flex items-center justify-between mb-4">
+                  <label class="text-sm font-medium text-gray-700">הנחה (%)</label>
+                  <input type="number" id="discountPercent" value="${quote.discountPercent || 0}" min="0" max="100" onchange="calculateQuote()" class="w-20 px-2 py-1 border border-gray-300 rounded">
+                </div>
+                <!-- Calculate button right under discount input -->
+                <div class="mb-4 flex justify-end">
+                  <button onclick="calculateQuote()" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors shadow-sm">
+                    חשב מחדש
+                  </button>
+                </div>
+                <!-- Edit mode buttons - centered -->
+                <div class="flex justify-center gap-3">
+                  <button onclick="updateQuote(${quote.quoteID})" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-md">
+                    עדכן הצעת מחיר
+                  </button>
+                  <button onclick="deleteQuote(${quote.quoteID})" class="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium shadow-md">
+                    מחק הצעה
+                  </button>
+                </div>
+              </div>
+          </div>
+        </div>
+      `;
+      
+      loadCalculatorItemsForEdit(quote);
+      // Update parquet options after HTML is inserted for edit mode
+      setTimeout(() => {
+        const floorTypeSelect = document.getElementById('floorType');
+        if (floorTypeSelect) {
+          floorTypeSelect.innerHTML = generateParquetOptions();
+        }
+        
+        // Load existing quote data into form fields
+        if (quote.items && quote.items.length > 0) {
+          // Try to find base floor item to extract floor details
+          const baseFloorItem = quote.items.find(item => item.itemName && item.itemName.includes('התקנת פרקט'));
+          if (baseFloorItem && baseFloorItem.notes) {
+            // Extract area and price from notes (format: "XX מ"ר × YY ש"ח")
+            const match = baseFloorItem.notes.match(/([0-9.]+)\s*מ"ר\s*×\s*([0-9.]+)\s*ש"ח/);
+            if (match) {
+              const area = parseFloat(match[1]);
+              const pricePerMeter = parseFloat(match[2]);
+              
+              document.getElementById('totalArea').value = area;
+              document.getElementById('floorPricePerMeter').value = pricePerMeter;
+            }
+          }
+        }
+        
+        updateFloorPrice();
+      }, 100);
     }
-  });
-});
-function markChecklistAccordingToStatus(currentStatus) {
-  const statusIndex = WORKREQUEST_STATUSES.indexOf(currentStatus);
-  
-  if (statusIndex === -1) {
-    console.warn("סטאטוס לא נמצא ברשימה הידועה.");
-    return;
-  }
 
-  
-  document.querySelectorAll('.checklist input[type="checkbox"]').forEach((checkbox) => {
-    const checkboxStatus = checkbox.dataset.key;
-    const checkboxIndex = WORKREQUEST_STATUSES.indexOf(checkboxStatus);
-
-    if (checkboxIndex !== -1 && checkboxIndex <= statusIndex) {
-      checkbox.checked = true;
-    } else {
-      checkbox.checked = false;
+    // Load calculator items with existing quote data
+    function loadCalculatorItemsForEdit(quote) {
+      console.log('📋 טוען נתוני הצעת מחיר קיימת:', quote);
+      ajaxCall('GET', `${API_BASE_URL}/Quote/GetCalculatorItems`, null,
+        function(items) {
+          calculatorItems = items;
+          console.log('🔧 פריטי מחשבון:', items);
+          console.log('📦 פריטי ההצעה:', quote.items);
+          renderCalculatorItemsForEdit(items, quote.items);
+          calculateQuote();
+        },
+        function(error) {
+          console.error('Error loading calculator items:', error);
+          document.getElementById('calculatorItems').innerHTML = '<div class="text-gray-500 text-center py-4">שגיאה בטעינת פריטי מחשבון</div>';
+        }
+      );
     }
-  });
-}
 
-
-function updateProgressBar(currentStatus) {
-  const stageIndex = WORKREQUEST_STATUSES.indexOf(currentStatus);
-
-  if (stageIndex === -1) {
-    console.warn("סטאטוס לא נמצא ברשימה.");
-    return;
-  }
-
-  const steps = document.querySelectorAll('.progress-step .progress-circle');
-
-  steps.forEach((circle, index) => {
-    if (index <= stageIndex) {
-      circle.style.background = "#4CAF50"; 
-    } else {
-      circle.style.background = "#ccc"; 
+    // Render calculator items with existing quantities
+    function renderCalculatorItemsForEdit(items, quoteItems) {
+      const container = document.getElementById('calculatorItems');
+      
+      console.log('🎯 מעבד פריטים לעריכה:', { items, quoteItems });
+      
+      // Clear existing custom items array and DOM
+      customItems = [];
+      
+      // Regular calculator items HTML
+      const calculatorItemsHTML = items.map(item => {
+        const existingItem = quoteItems.find(qi => qi.calculatorItemID === item.calculatorItemID);
+        const quantity = existingItem ? existingItem.quantity : 0;
+        
+        return `
+          <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow" data-item-id="${item.calculatorItemID}">
+            <h4 class="font-medium text-gray-900 mb-2">${item.itemName}</h4>
+            <p class="text-sm text-gray-600 mb-3">${item.description || ''}</p>
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-sm font-medium text-primary">₪${item.price}</span>
+              <div class="flex items-center space-x-2">
+                <button onclick="adjustQuantity(${item.calculatorItemID}, -1)" class="w-8 h-8 bg-gray-100 text-gray-600 rounded hover:bg-gray-200 transition-colors">-</button>
+                <span id="qty_${item.calculatorItemID}" class="w-8 text-center font-medium">${quantity}</span>
+                <button onclick="adjustQuantity(${item.calculatorItemID}, 1)" class="w-8 h-8 bg-gray-100 text-gray-600 rounded hover:bg-gray-200 transition-colors">+</button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+      
+      // Custom items (items without calculatorItemID) - excluding base floor
+      const customQuoteItems = quoteItems.filter(qi => 
+        (!qi.calculatorItemID || qi.calculatorItemID === null || qi.calculatorItemID === undefined) &&
+        (!qi.itemName || !qi.itemName.includes('התקנת פרקט'))
+      );
+      console.log('🔵 פריטים מותאמים אישית:', customQuoteItems);
+      const customItemsHTML = customQuoteItems.map((customQuoteItem, index) => {
+        // Add to custom items array for tracking
+        const customItem = {
+          id: Date.now() + index, // Unique ID
+          itemName: customQuoteItem.itemName,
+          price: customQuoteItem.unitPrice,
+          quantity: customQuoteItem.quantity,
+          isCustom: true,
+          notes: customQuoteItem.notes || ""
+        };
+        customItems.push(customItem);
+        
+        return `
+          <div class="border border-blue-200 bg-blue-50 rounded-lg p-4 hover:shadow-md transition-shadow" data-custom-item-id="${customItem.id}">
+            <div class="flex items-center justify-between mb-2">
+              <h4 class="font-medium text-gray-900">${customItem.itemName}</h4>
+              <button onclick="removeCustomItem(${customItem.id})" class="text-red-500 hover:text-red-700 transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+              </button>
+            </div>
+            <p class="text-sm text-blue-600 mb-3">פריט מותאם אישית</p>
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-sm font-medium text-primary">₪${customItem.price}</span>
+              <div class="flex items-center space-x-2">
+                <button onclick="adjustCustomItemQuantity(${customItem.id}, -1)" class="w-8 h-8 bg-gray-100 text-gray-600 rounded hover:bg-gray-200 transition-colors">-</button>
+                <span id="custom_qty_${customItem.id}" class="w-8 text-center font-medium">${customItem.quantity}</span>
+                <button onclick="adjustCustomItemQuantity(${customItem.id}, 1)" class="w-8 h-8 bg-gray-100 text-gray-600 rounded hover:bg-gray-200 transition-colors">+</button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+      
+      // Combine both calculator items and custom items
+      container.innerHTML = calculatorItemsHTML + customItemsHTML;
     }
-  });
-}
-function deleteCustomer(customerID) {
-  if (!confirm("האם אתה בטוח שברצונך למחוק את הלקוח?")) return;
 
-  $.ajax({
-    url: `${API_BASE_URL}/Dashboard/DeactivateCustomer`, // 👈 עדכון כתובת
-    type: "POST",
-    data: JSON.stringify(customerID), // 👈 שולחים מספר ולא אובייקט
-    contentType: "application/json; charset=utf-8",
-    success: function () {
-      alert("הלקוח הוסר בהצלחה");
-      window.location.href = "InstallerCustomersPage.html"; // 👈 מעבר למסך הלקוחות
-    },
-    error: function (xhr, status, error) {
-      console.error("שגיאה במחיקת הלקוח:", error);
-      alert("שגיאה במחיקת הלקוח");
+    // Update existing quote
+    function updateQuote(quoteId) {
+      const data = gatherQuoteData();
+      data.quoteID = quoteId;
+      
+      ajaxCall('POST', `${API_BASE_URL}/Quote/UpdateQuote`, JSON.stringify(data),
+        function(result) {
+          if (result && result.success) {
+            showToast(result.message || 'הצעת מחיר עודכנה בהצלחה!');
+            closeQuoteCalculator();
+            loadExistingQuotes(); // Refresh quotes list
+          } else {
+            showToast(result?.message || 'שגיאה בעדכון הצעת המחיר', 'error');
+            // Even if there's an error, close the calculator
+            closeQuoteCalculator();
+          }
+        },
+        function(error) {
+          console.error('Error updating quote:', error);
+          showToast('שגיאה בעדכון הצעת המחיר', 'error');
+          // Even if there's an error, close the calculator
+          closeQuoteCalculator();
+        }
+      );
     }
-  });
-}
-function deleteCustomerFromUrl() {
-  const customerId = new URLSearchParams(window.location.search).get("id");
-  if (!customerId) {
-    alert("לא ניתן למחוק – מזהה לקוח חסר");
-    return;
-  }
-  deleteCustomer(customerId);
-}
 
+    // Delete quote
+    function deleteQuote(quoteId) {
+      if (!confirm('האם אתה בטוח שברצונך למחוק את הצעת המחיר?')) {
+        return;
+      }
+      
+      ajaxCall('DELETE', `${API_BASE_URL}/Quote/DeleteQuote/${quoteId}`, null,
+        function(result) {
+          if (result && result.success) {
+            showToast(result.message || 'הצעת מחיר נמחקה בהצלחה!');
+            closeQuoteCalculator();
+            loadExistingQuotes(); // Refresh quotes list and update buttons
+          } else {
+            showToast(result?.message || 'שגיאה במחיקת הצעת המחיר', 'error');
+          }
+        },
+        function(error) {
+          console.error('Error deleting quote:', error);
+          showToast('שגיאה במחיקת הצעת המחיר', 'error');
+        }
+      );
+    }
 
+    // Toggle edit mode
+    function toggleEditMode() {
+      isEditMode = !isEditMode;
+      // Implementation for edit mode would go here
+      showToast('מצב עריכה יתווסף בגרסה הבאה', 'info');
+    }
 
-</script>
+    // === ITEM CANDIDATES FUNCTIONS === //
+    
+    // Load item candidates on page load
+    function loadItemCandidates() {
+      ajaxCall('GET', `${API_BASE_URL}/PriceCalculatorItem/GetPopularCandidates`, null,
+        function(candidates) {
+          console.log('📈 טוען מועמדים:', candidates);
+          renderItemCandidates(candidates || []);
+        },
+        function(error) {
+          console.error('Error loading candidates:', error);
+          renderItemCandidates([]);
+        }
+      );
+    }
+
+    // Render item candidates
+    function renderItemCandidates(candidates) {
+      const container = document.getElementById('itemCandidates');
+      const countElement = document.getElementById('candidatesCount');
+      
+      countElement.innerHTML = `💡 ${candidates.length} המלצות`;
+      
+      if (candidates.length === 0) {
+        container.innerHTML = `
+          <div class="text-center text-gray-500 text-sm py-4">
+            <div class="mb-2">🎯</div>
+            <div>לא נמצאו המלצות כרגע</div>
+            <div class="text-xs text-gray-400 mt-1">המלצות יופיעו לאחר שימוש חוזר בפריטים מותאמים</div>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = candidates.map(candidate => `
+        <div class="border border-yellow-200 bg-yellow-50 rounded-lg p-4 hover:shadow-md transition-all duration-200">
+          <div class="flex items-start justify-between mb-2">
+            <div class="flex-1">
+              <h4 class="font-medium text-gray-900 text-sm leading-tight">${candidate.customItemName}</h4>
+              <p class="text-xs text-gray-600 mt-1">${candidate.suggestedDescription || candidate.customItemName}</p>
+            </div>
+            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 ml-2">
+              ${candidate.occurrences} שימושים
+            </span>
+          </div>
+          
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-sm font-semibold text-primary">₪${candidate.suggestedPrice.toFixed(2)}</span>
+            <span class="text-xs text-gray-500">מחיר מוצע</span>
+          </div>
+          
+          <div class="flex gap-2">
+            <button onclick="createCalculatorItemFromCandidate('${candidate.customItemName}')" 
+                    class="flex-1 px-3 py-2 bg-green-600 text-white text-xs rounded-md hover:bg-green-700 transition-colors">
+              ✓ צור פריט קבוע
+            </button>
+            <button onclick="rejectCandidate('${candidate.customItemName}')" 
+                    class="px-3 py-2 bg-gray-200 text-gray-700 text-xs rounded-md hover:bg-gray-300 transition-colors">
+              ✗ דחה
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Create calculator item from candidate
+    function createCalculatorItemFromCandidate(itemName) {
+      if (!confirm(`האם אתה בטוח שברצונך ליצור פריט קבוע במחשבון עבור "${itemName}"?`)) {
+        return;
+      }
+
+      ajaxCall('POST', `${API_BASE_URL}/PriceCalculatorItem/CreateFromCandidate`, JSON.stringify(itemName),
+        function(result) {
+          if (result && result > 0) {
+            showToast(`פריט "${itemName}" נוצר בהצלחה במחשבון!`, 'success');
+            refreshCandidates();
+          } else {
+            showToast('שגיאה ביצירת הפריט - ייתכן שהוא כבר קיים', 'error');
+          }
+        },
+        function(error) {
+          console.error('Error creating item from candidate:', error);
+          showToast('שגיאה ביצירת הפריט', 'error');
+        }
+      );
+    }
+
+    // Reject candidate
+    function rejectCandidate(itemName) {
+      if (!confirm(`האם אתה בטוח שברצונך לדחות את ההמלצה עבור "${itemName}"?`)) {
+        return;
+      }
+
+      ajaxCall('POST', `${API_BASE_URL}/PriceCalculatorItem/RejectCandidate`, JSON.stringify(itemName),
+        function(result) {
+          if (result && result > 0) {
+            showToast(`ההמלצה עבור "${itemName}" נדחתה`, 'info');
+            refreshCandidates();
+          } else {
+            showToast('שגיאה בדחיית ההמלצה', 'error');
+          }
+        },
+        function(error) {
+          console.error('Error rejecting candidate:', error);
+          showToast('שגיאה בדחיית ההמלצה', 'error');
+        }
+      );
+    }
+
+    // Refresh candidates
+    function refreshCandidates() {
+      const container = document.getElementById('itemCandidates');
+      container.innerHTML = '<div class="text-center text-gray-500 text-sm py-4">טוען המלצות...</div>';
+      loadItemCandidates();
+    }
+
+    // === END ITEM CANDIDATES FUNCTIONS === //
+
+    // === PERMANENT ITEM MODAL FUNCTIONS === //
+    
+    let currentModalItemName = null; // Track current item for rejection handling
+    let modalClosedByCreation = false; // Track if modal was closed by successful creation
+    
+    // Show dialog for popular candidates before saving quote
+    function showPopularCandidatesDialog(popularCustomItems, allCandidates, quoteData) {
+      console.log('🎯 נמצאו מועמדים פופולריים:', popularCustomItems);
+      
+      const modal = document.createElement('div');
+      modal.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4';
+      modal.innerHTML = `
+        <div class="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-screen overflow-y-auto">
+          <div class="p-6 border-b border-gray-200">
+            <div class="flex items-center justify-between">
+              <h2 class="text-xl font-semibold text-gray-900">מועמדים פופולריים להמרה לפריטים קבועים</h2>
+                             <button id="closeBtn" class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+              </button>
+            </div>
+            <p class="text-sm text-gray-600 mt-2">זוהו פריטים מותאמים אישית שכבר שימשו מספר פעמים. האם תרצה ליצור מהם פריטים קבועים במחשבון?</p>
+          </div>
+          <div class="p-6">
+            <div class="space-y-4" id="candidatesDialogList">
+              ${popularCustomItems.map((customItem, index) => {
+                const candidate = allCandidates.find(c => c.customItemName === customItem.ItemName);
+                return `
+                  <div class="border border-yellow-200 bg-yellow-50 rounded-lg p-4" data-item-name="${customItem.ItemName}">
+                    <div class="flex items-start justify-between mb-3">
+                      <div class="flex-1">
+                        <h4 class="font-medium text-gray-900">${customItem.ItemName}</h4>
+                        <p class="text-sm text-gray-600 mt-1">מחיר בהצעה: ₪${customItem.UnitPrice} • כמות: ${customItem.Quantity}</p>
+                        <div class="flex items-center mt-2">
+                          <svg class="w-4 h-4 text-blue-600 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                          </svg>
+                          <span class="text-sm text-blue-800 font-medium">שימש ${candidate.occurrences} פעמים • מחיר מוצע: ₪${candidate.suggestedPrice.toFixed(2)}</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div class="flex items-center space-x-3 space-x-reverse">
+                      <label class="flex items-center cursor-pointer">
+                        <input type="checkbox" class="candidate-action" data-action="create" data-item="${customItem.ItemName}" 
+                               class="mr-2 w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500">
+                        <span class="text-sm font-medium text-green-700 mr-2">צור פריט קבוע</span>
+                      </label>
+                      
+                      <label class="flex items-center cursor-pointer">
+                        <input type="checkbox" class="candidate-action" data-action="reject" data-item="${customItem.ItemName}"
+                               class="mr-2 w-4 h-4 text-red-600 bg-gray-100 border-gray-300 rounded focus:ring-red-500">
+                        <span class="text-sm font-medium text-red-700 mr-2">דחה המלצה</span>
+                      </label>
+                      
+                      <label class="flex items-center cursor-pointer">
+                        <input type="checkbox" class="candidate-action" data-action="ignore" data-item="${customItem.ItemName}" checked
+                               class="mr-2 w-4 h-4 text-gray-600 bg-gray-100 border-gray-300 rounded focus:ring-gray-500">
+                        <span class="text-sm font-medium text-gray-700 mr-2">התעלם (לא עכשיו)</span>
+                      </label>
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+            
+                         <div class="flex justify-center gap-3 mt-6">
+               <button id="processBtn" class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium shadow-md">
+                 ✓ בצע פעולות ושמור הצעה
+               </button>
+               <button id="ignoreBtn" class="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium">
+                 התעלם משמור הצעה
+               </button>
+             </div>
+          </div>
+        </div>
+      `;
+             
+       document.body.appendChild(modal);
+       
+       // Add event listeners for radio-like behavior
+       modal.addEventListener('change', function(e) {
+         if (e.target.type === 'checkbox' && e.target.classList.contains('candidate-action')) {
+           const itemName = e.target.dataset.item;
+           const allCheckboxes = modal.querySelectorAll(`input[data-item="${itemName}"]`);
+           
+           // Uncheck all other checkboxes for this item
+           allCheckboxes.forEach(checkbox => {
+             if (checkbox !== e.target) {
+               checkbox.checked = false;
+             }
+           });
+         }
+       });
+       
+       // Add button event listeners
+       modal.querySelector('#processBtn').addEventListener('click', function() {
+         processSelectedCandidates(quoteData);
+       });
+       
+       modal.querySelector('#ignoreBtn').addEventListener('click', function() {
+         modal.remove();
+         saveQuoteDirectly(quoteData);
+       });
+       
+       modal.querySelector('#closeBtn').addEventListener('click', function() {
+         modal.remove();
+         saveQuoteDirectly(quoteData);
+       });
+     }
+     
+           // Process selected candidate actions and save quote
+      function processSelectedCandidates(quoteData) {
+        const modal = document.querySelector('.fixed.inset-0.bg-black.bg-opacity-50');
+        const selectedActions = [];
+       
+       // Collect all selected actions
+       const checkboxes = modal.querySelectorAll('input.candidate-action:checked');
+       checkboxes.forEach(checkbox => {
+         selectedActions.push({
+           itemName: checkbox.dataset.item,
+           action: checkbox.dataset.action
+         });
+       });
+       
+       console.log('🎯 פעולות נבחרות:', selectedActions);
+       
+       // Close modal first
+       if (modal) {
+         modal.remove();
+       }
+       
+       // Process actions in sequence, then save quote
+       processActionsSequentially(selectedActions, 0, quoteData);
+     }
+     
+     // Process actions one by one
+     function processActionsSequentially(actions, index, quoteData) {
+       if (index >= actions.length) {
+         // All actions processed, save quote
+         console.log('✅ כל הפעולות הושלמו, שומר הצעת מחיר');
+         
+         // Refresh candidates display after all actions
+         refreshCandidates();
+         
+         saveQuoteDirectly(quoteData);
+         return;
+       }
+       
+       const action = actions[index];
+       console.log(`🔄 מעבד פעולה ${index + 1}/${actions.length}: ${action.action} עבור "${action.itemName}"`);
+       
+       switch (action.action) {
+         case 'create':
+           // Create permanent item from candidate
+           ajaxCall('POST', `${API_BASE_URL}/PriceCalculatorItem/CreateFromCandidate`, JSON.stringify(action.itemName),
+             function(result) {
+               if (result && result > 0) {
+                 console.log(`✅ פריט "${action.itemName}" נוצר כפריט קבוע`);
+                 showToast(`פריט "${action.itemName}" נוצר בהצלחה במחשבון!`, 'success');
+               } else {
+                 console.log(`❌ שגיאה ביצירת פריט "${action.itemName}"`);
+               }
+               // Continue to next action
+               processActionsSequentially(actions, index + 1, quoteData);
+             },
+             function(error) {
+               console.error(`Error creating item "${action.itemName}":`, error);
+               // Continue even on error
+               processActionsSequentially(actions, index + 1, quoteData);
+             }
+           );
+           break;
+           
+         case 'reject':
+           // Reject candidate
+           ajaxCall('POST', `${API_BASE_URL}/PriceCalculatorItem/RejectCandidate`, JSON.stringify(action.itemName),
+             function(result) {
+               if (result && result > 0) {
+                 console.log(`✅ המלצה עבור "${action.itemName}" נדחתה`);
+                 showToast(`ההמלצה עבור "${action.itemName}" נדחתה`, 'info');
+               } else {
+                 console.log(`❌ שגיאה בדחיית המלצה עבור "${action.itemName}"`);
+               }
+               // Continue to next action
+               processActionsSequentially(actions, index + 1, quoteData);
+             },
+             function(error) {
+               console.error(`Error rejecting candidate "${action.itemName}":`, error);
+               // Continue even on error
+               processActionsSequentially(actions, index + 1, quoteData);
+             }
+           );
+           break;
+           
+         case 'ignore':
+         default:
+           // Do nothing, just continue
+           console.log(`⏭️ מתעלם מ-"${action.itemName}"`);
+           processActionsSequentially(actions, index + 1, quoteData);
+           break;
+       }
+     }
+     
+     // Open permanent item creation modal
+    function openPermanentItemModal(itemName, itemPrice) {
+      currentModalItemName = itemName;
+      modalClosedByCreation = false;
+      
+      document.getElementById('permanentItemName').value = itemName;
+      document.getElementById('permanentItemPrice').value = itemPrice;
+      document.getElementById('permanentItemDescription').value = '';
+      
+      // Check if item exists in candidates to get smart data
+      ajaxCall('GET', `${API_BASE_URL}/PriceCalculatorItem/GetPopularCandidates`, null,
+        function(candidates) {
+          const existingCandidate = candidates.find(c => c.customItemName === itemName);
+          
+          if (existingCandidate) {
+            // Use suggested price from candidates table
+            document.getElementById('permanentItemPrice').value = existingCandidate.suggestedPrice;
+            
+            // Show usage statistics
+            const statsSection = document.getElementById('usageStatsSection');
+            const statsText = document.getElementById('usageStatsText');
+            statsText.textContent = `הפריט שימש ${existingCandidate.occurrences} פעמים • מחיר ממוצע: ₪${existingCandidate.suggestedPrice.toFixed(2)}`;
+            statsSection.classList.remove('hidden');
+            
+            // Suggest description based on existing data
+            if (existingCandidate.suggestedDescription) {
+              document.getElementById('permanentItemDescription').value = existingCandidate.suggestedDescription;
+            }
+          } else {
+            // Hide stats section if no candidate data
+            document.getElementById('usageStatsSection').classList.add('hidden');
+          }
+          
+          // Show the modal
+          document.getElementById('createPermanentItemModal').classList.remove('hidden');
+        },
+        function(error) {
+          console.error('Error loading candidates:', error);
+          // Show modal anyway with default values
+          document.getElementById('usageStatsSection').classList.add('hidden');
+          document.getElementById('createPermanentItemModal').classList.remove('hidden');
+        }
+      );
+    }
+    
+    // Close permanent item modal
+    function closePermanentItemModal() {
+      document.getElementById('createPermanentItemModal').classList.add('hidden');
+      
+      // If modal was closed without creation, mark item as rejected
+      if (currentModalItemName && !modalClosedByCreation) {
+        rejectCurrentCandidate();
+      }
+      
+      // Reset tracking variables
+      currentModalItemName = null;
+      modalClosedByCreation = false;
+    }
+    
+    // Reject current candidate
+    function rejectCurrentCandidate() {
+      if (!currentModalItemName) return;
+      
+      ajaxCall('POST', `${API_BASE_URL}/PriceCalculatorItem/RejectCandidate`, JSON.stringify(currentModalItemName),
+        function(result) {
+          if (result && result > 0) {
+            console.log(`פריט "${currentModalItemName}" סומן כנדחה`);
+            // Refresh candidates to remove rejected items
+            refreshCandidates();
+          }
+        },
+        function(error) {
+          console.error('Error rejecting candidate:', error);
+        }
+      );
+    }
+    
+    // Confirm creation of permanent item
+    function confirmCreatePermanentItem() {
+      const itemName = document.getElementById('permanentItemName').value.trim();
+      const itemPrice = parseFloat(document.getElementById('permanentItemPrice').value) || 0;
+      const itemDescription = document.getElementById('permanentItemDescription').value.trim();
+      
+      if (!itemName) {
+        showToast('שם הפריט חובה', 'error');
+        return;
+      }
+      
+      if (itemPrice <= 0) {
+        showToast('מחיר הפריט חייב להיות גדול מ-0', 'error');
+        return;
+      }
+      
+      createPermanentCalculatorItem(itemName, itemPrice, itemDescription);
+      modalClosedByCreation = true; // Mark that modal is closing due to successful creation
+      closePermanentItemModal();
+    }
+
+    // Create permanent calculator item from custom item
+    function createPermanentCalculatorItem(itemName, itemPrice, itemDescription = '') {
+      // Always create with the custom description and price
+      const itemData = {
+        ItemName: itemName,
+        Price: itemPrice,
+        Description: itemDescription || `פריט ${itemName}`,
+        IsActive: true
+      };
+      
+      ajaxCall('POST', `${API_BASE_URL}/PriceCalculatorItem/AddNewCalculatorItem`, JSON.stringify(itemData),
+        function(result) {
+          if (result && result > 0) {
+            showToast(`פריט "${itemName}" נוצר בהצלחה במחשבון הקבוע! 🎉`, 'success');
+            
+            // If this item was a candidate, mark it as created
+            markCandidateAsCreated(itemName);
+            
+            // Refresh calculator items if in creation mode
+            if (document.getElementById('calculatorItems')) {
+              loadCalculatorItems();
+            }
+            
+            // Refresh candidates display
+            refreshCandidates();
+          } else {
+            showToast('שגיאה ביצירת הפריט במחשבון - ייתכן שהוא כבר קיים', 'error');
+          }
+        },
+        function(error) {
+          console.error('Error creating permanent calculator item:', error);
+          showToast('שגיאה ביצירת פריט קבוע במחשבון', 'error');
+        }
+      );
+    }
+    
+    // Mark candidate as created (updates IsCreated field)
+    function markCandidateAsCreated(itemName) {
+      ajaxCall('POST', `${API_BASE_URL}/PriceCalculatorItem/CreateFromCandidate`, JSON.stringify(itemName),
+        function(result) {
+          console.log(`מועמד "${itemName}" סומן כנוצר בהצלחה`);
+        },
+        function(error) {
+          console.log(`מועמד "${itemName}" לא נמצא בטבלת המועמדים`);
+        }
+      );
+    }
+
+    // Show toast notification
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      
+      let bgColor, icon, duration;
+      
+      switch(type) {
+        case 'success':
+          bgColor = 'bg-green-500';
+          icon = '✓';
+          duration = 3000;
+          break;
+        case 'error':
+          bgColor = 'bg-red-500';
+          icon = '✗';
+          duration = 4000;
+          break;
+        case 'info':
+          bgColor = 'bg-blue-500';
+          icon = '💡';
+          duration = 4000;
+          break;
+        default:
+          bgColor = 'bg-gray-500';
+          icon = '•';
+          duration = 3000;
+      }
+      
+      toast.className = `${bgColor} text-white px-6 py-4 rounded-lg shadow-lg transform transition-all duration-300 translate-x-full max-w-md`;
+      toast.innerHTML = `
+        <div class="flex items-center space-x-3 space-x-reverse">
+          <span class="text-lg flex-shrink-0">${icon}</span>
+          <span class="font-medium text-sm leading-tight">${message}</span>
+        </div>
+      `;
+      
+      container.appendChild(toast);
+      
+      setTimeout(() => toast.classList.remove('translate-x-full'), 100);
+      setTimeout(() => {
+        toast.classList.add('translate-x-full');
+        setTimeout(() => {
+          if (container.contains(toast)) {
+            container.removeChild(toast);
+          }
+        }, 300);
+      }, duration);
+    }
+
+    // Handle escape key to close modals
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        closeQuoteCalculator();
+        closePermanentItemModal();
+      }
+    });
+  </script>
 </body>
 </html>

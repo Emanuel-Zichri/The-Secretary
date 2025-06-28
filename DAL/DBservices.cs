@@ -919,6 +919,99 @@ public class DBservices
     }
 
     //--------------------------------------------------------------------------------------------------
+    // This method deletes all quote items for a specific quote
+    //--------------------------------------------------------------------------------------------------
+    public int DeleteQuoteItems(int quoteID)
+    {
+        SqlConnection con;
+        SqlCommand cmd;
+        try
+        {
+            con = connect("myProjDB");
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+
+        try
+        {
+            Dictionary<string, object> paramDic = new Dictionary<string, object>
+            {
+                { "@QuoteID", quoteID }
+            };
+
+            cmd = CreateCommandWithStoredProcedureGeneral("DeleteQuoteItems", con, paramDic);
+            
+            // Use ExecuteScalar to get the count returned by the stored procedure
+            object result = cmd.ExecuteScalar();
+            
+            if (result != null && result != DBNull.Value)
+            {
+                return Convert.ToInt32(result);
+            }
+            
+            return 0;
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+        finally
+        {
+            if (con != null)
+                con.Close();
+        }
+    }
+
+    //--------------------------------------------------------------------------------------------------
+    // This method deletes a quote
+    //--------------------------------------------------------------------------------------------------
+    public bool DeleteQuote(int quoteID)
+    {
+        SqlConnection con;
+        SqlCommand cmd;
+        try
+        {
+            con = connect("myProjDB");
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+
+        try
+        {
+            Dictionary<string, object> paramDic = new Dictionary<string, object>
+            {
+                { "@QuoteID", quoteID }
+            };
+
+            cmd = CreateCommandWithStoredProcedureGeneral("DeleteQuote", con, paramDic);
+            
+            // Use ExecuteScalar to get the count returned by the stored procedure
+            object result = cmd.ExecuteScalar();
+            
+            if (result != null && result != DBNull.Value)
+            {
+                int deletedCount = Convert.ToInt32(result);
+                return deletedCount > 0;
+            }
+            
+            return false;
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+        finally
+        {
+            if (con != null)
+                con.Close();
+        }
+    }
+
+    //--------------------------------------------------------------------------------------------------
     // This method add new parquetType 
     //--------------------------------------------------------------------------------------------------
     public int AddParquetType(ParquetType newParquet)
@@ -2420,7 +2513,7 @@ public class DBservices
             new SystemSetting { SettingID = 4, SettingKey = "BUSINESS_PHONE", SettingValue = "050-1234567", SettingType = "STRING", Description = "מספר טלפון העסק", UpdatedAt = DateTime.Now },
             new SystemSetting { SettingID = 5, SettingKey = "BUSINESS_EMAIL", SettingValue = "info@davidparquet.co.il", SettingType = "STRING", Description = "כתובת אימייל העסק", UpdatedAt = DateTime.Now },
             new SystemSetting { SettingID = 6, SettingKey = "WORKING_HOURS", SettingValue = "א'-ה': 8:00-18:00 | ו': 8:00-14:00", SettingType = "STRING", Description = "שעות פעילות העסק", UpdatedAt = DateTime.Now },
-            new SystemSetting { SettingID = 7, SettingKey = "VAT_PERCENTAGE", SettingValue = "17", SettingType = "DECIMAL", Description = "אחוז מע\"מ", UpdatedAt = DateTime.Now }
+                            new SystemSetting { SettingID = 7, SettingKey = "VAT_PERCENTAGE", SettingValue = "18", SettingType = "DECIMAL", Description = "אחוז מע\"מ", UpdatedAt = DateTime.Now }
         };
 
         if (!string.IsNullOrEmpty(settingKey))

@@ -10,11 +10,11 @@
         public CalculatorItemCandidate(){}
         
         
-            public static List<CalculatorItemCandidate> GetCandidates()
-            {
-                DBservices db = new DBservices();
-                return db.GetUncreatedPopularCandidates();
-            }
+                    public static List<CalculatorItemCandidate> GetCandidates()
+        {
+            DBservices db = new DBservices();
+            return db.GetUncreatedPopularCandidates(2); // מציג פריטים עם 2+ שימושים
+        }
         public static int AddCalcItem(string item)
         {
             DBservices db = new DBservices();

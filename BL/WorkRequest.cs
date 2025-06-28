@@ -9,6 +9,7 @@
         public string? Notes { get; set; }
         public DateTime? PlannedDate { get; set; }
         public DateTime? CompletedDate { get; set; }
+        public DateTime? PreferredDate { get; set; }
         public int? PreferredSlot { get; set; }
 
         public static int Register(int costumerID, DateTime PreferredDate,int PreferredSlot)

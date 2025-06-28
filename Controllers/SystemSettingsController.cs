@@ -191,7 +191,7 @@ namespace FinalProject.Controllers
                     Phone = settings.FirstOrDefault(s => s.SettingKey == "BUSINESS_PHONE")?.SettingValue ?? "050-1234567",
                     Email = settings.FirstOrDefault(s => s.SettingKey == "BUSINESS_EMAIL")?.SettingValue ?? "info@davidparquet.co.il",
                     WorkingHours = settings.FirstOrDefault(s => s.SettingKey == "WORKING_HOURS")?.SettingValue ?? "א'-ה': 8:00-18:00 | ו': 8:00-14:00",
-                    VATPercentage = decimal.Parse(settings.FirstOrDefault(s => s.SettingKey == "VAT_PERCENTAGE")?.SettingValue ?? "17")
+                    VATPercentage = decimal.Parse(settings.FirstOrDefault(s => s.SettingKey == "VAT_PERCENTAGE")?.SettingValue ?? "18")
                 };
                 
                 return Ok(businessInfo);

@@ -124,7 +124,7 @@ namespace FinalProject.Controllers
             catch (Exception ex)
             {
                 Console.WriteLine($"Error getting work request statuses: {ex.Message}");
-                return StatusCode(500, "שגיאה בקבלת סטטוסי בקשות");
+                return StatusCode(500, new { success = false, message = "שגיאה בקבלת סטטוסי בקשות" });
             }
         }
 
