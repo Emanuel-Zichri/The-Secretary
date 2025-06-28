@@ -143,14 +143,7 @@
               <label class="block text-sm font-bold text-primary mb-2">📊 סטטוס</label>
               <select id="filterStatus" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors">
                 <option value="">כל הסטטוסים</option>
-                <option value="טיוטה">טיוטה</option>
-                <option value="צפייה בסרטון לקוח">צפייה בסרטון לקוח</option>
-                <option value="טיוטה להצעת מחיר">טיוטה להצעת מחיר</option>
-                <option value="שליחת טיוטה ללקוח">שליחת טיוטה ללקוח</option>
-                <option value="העברה מקדמה">העברה מקדמה</option>
-                <option value="תיאום התקנה">תיאום התקנה</option>
-                <option value="התקנה בוצעה">התקנה בוצעה</option>
-                <option value="קבלת משוב">קבלת משוב</option>
+                <!-- Options will be populated by JavaScript based on current view -->
               </select>
             </div>
           </div>
@@ -189,7 +182,21 @@
           </div>
         </div>
 
-
+        <!-- Toggle Buttons -->
+        <div class="flex items-center justify-center mb-8 gap-4">
+          <button id="openViewBtn" onclick="toggleView('open')" 
+                  class="flex items-center gap-3 px-6 py-3 bg-blue-500 text-white rounded-lg font-medium shadow-md transition-all duration-300 hover:bg-blue-600">
+            <span class="text-xl">📋</span>
+            <span>פניות פתוחות</span>
+            <span id="openCount" class="bg-blue-600 text-white px-2 py-1 rounded-full text-sm font-bold">0</span>
+          </button>
+          <button id="completedViewBtn" onclick="toggleView('completed')" 
+                  class="flex items-center gap-3 px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-medium shadow-md hover:bg-gray-300 transition-all duration-300">
+            <span class="text-xl">✅</span>
+            <span>פניות שהושלמו</span>
+            <span id="completedCount" class="bg-gray-400 text-white px-2 py-1 rounded-full text-sm font-bold">0</span>
+          </button>
+        </div>
 
         <!-- Stats Bar -->
         <div class="bg-gradient-to-r from-primary to-primary-dark rounded-xl shadow-lg p-6 mb-8 text-white">
@@ -216,7 +223,7 @@
         <!-- Customers Table -->
         <div class="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
           <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-            <h3 class="text-xl font-semibold text-gray-900">רשימת לקוחות</h3>
+            <h3 class="text-xl font-semibold text-gray-900" id="tableTitle">פניות פתוחות</h3>
             <div class="flex items-center gap-4">
               <span class="text-sm text-gray-600" id="resultsInfo">מציג 0 מתוך 0 תוצאות</span>
               <div class="flex items-center gap-2">
@@ -318,6 +325,9 @@
       totalPages: 0
     };
     
+    // Toggle between open and completed requests
+    let currentView = 'open'; // 'open' or 'completed'
+    
     // All available statuses
     const allStatuses = [
       'טיוטה',
@@ -329,6 +339,76 @@
       'התקנה בוצעה',
       'קבלת משוב'
     ];
+
+    // Define status groups
+    const openStatuses = [
+      'טיוטה',
+      'צפייה בסרטון לקוח',
+      'טיוטה להצעת מחיר',
+      'שליחת טיוטה ללקוח',
+      'העברה מקדמה',
+      'תיאום התקנה'
+    ];
+
+    const completedStatuses = [
+      'התקנה בוצעה',
+      'קבלת משוב'
+    ];
+
+    function updateStatusFilter() {
+      const statusSelect = document.getElementById('filterStatus');
+      const currentValue = statusSelect.value;
+      
+      // Clear existing options except the first one
+      statusSelect.innerHTML = '<option value="">כל הסטטוסים</option>';
+      
+      // Add relevant status options based on current view
+      const relevantStatuses = currentView === 'open' ? openStatuses : completedStatuses;
+      
+      let hasCurrentValue = false;
+      relevantStatuses.forEach(status => {
+        const option = document.createElement('option');
+        option.value = status;
+        option.textContent = status;
+        if (status === currentValue) {
+          option.selected = true;
+          hasCurrentValue = true;
+        }
+        statusSelect.appendChild(option);
+      });
+      
+      // If current value is not in the new list, reset to "all"
+      if (!hasCurrentValue && currentValue !== "") {
+        statusSelect.value = "";
+      }
+    }
+
+    function toggleView(view) {
+      currentView = view;
+      pagination.currentPage = 1; // Reset to first page
+      
+      // Update toggle buttons
+      if (view === 'open') {
+        document.getElementById('openViewBtn').className = 'flex items-center gap-3 px-6 py-3 bg-blue-500 text-white rounded-lg font-medium shadow-md transition-all duration-300 hover:bg-blue-600';
+        document.getElementById('completedViewBtn').className = 'flex items-center gap-3 px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-medium shadow-md hover:bg-gray-300 transition-all duration-300';
+        
+        // Update table styling
+        document.getElementById('tableTitle').textContent = 'פניות פתוחות';
+        document.querySelector('.bg-white.rounded-xl.shadow-lg.border').style.borderTop = '4px solid #3b82f6';
+      } else {
+        document.getElementById('openViewBtn').className = 'flex items-center gap-3 px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-medium shadow-md hover:bg-gray-300 transition-all duration-300';
+        document.getElementById('completedViewBtn').className = 'flex items-center gap-3 px-6 py-3 bg-green-500 text-white rounded-lg font-medium shadow-md transition-all duration-300 hover:bg-green-600';
+        
+        // Update table styling
+        document.getElementById('tableTitle').textContent = 'פניות שהושלמו';
+        document.querySelector('.bg-white.rounded-xl.shadow-lg.border').style.borderTop = '4px solid #10b981';
+      }
+
+      // Update status filter dropdown
+      updateStatusFilter();
+      
+      loadCustomers();
+    }
   
     function sortTable(field) {
       // Clear previous sort indicators
@@ -492,6 +572,8 @@
 
           // Add real-time search
       document.addEventListener("DOMContentLoaded", function() {
+        // Initialize status filter for default view
+        updateStatusFilter();
         loadCustomers();
         
         // Debounced search for name and city
@@ -523,16 +605,51 @@
         });
       });
 
-    function updateStats(data) {
-      const totalCustomers = data.length;
-      const activeRequests = data.filter(c => c.Status && !["התקנה בוצעה", "קבלת משוב"].includes(c.Status)).length;
-      const completedInstalls = data.filter(c => c.Status === "התקנה בוצעה" || c.Status === "קבלת משוב").length;
-      const pendingInstalls = data.filter(c => c.Status === "תיאום התקנה").length;
+    function updateStats(data, filteredData) {
+      // Update toggle button counters (always based on all data)
+      const openRequests = data.filter(c => openStatuses.includes(c.Status)).length;
+      const completedRequests = data.filter(c => completedStatuses.includes(c.Status)).length;
+      
+      document.getElementById('openCount').textContent = openRequests;
+      document.getElementById('completedCount').textContent = completedRequests;
 
-      document.getElementById('totalCustomers').textContent = totalCustomers;
-      document.getElementById('activeRequests').textContent = activeRequests;
-      document.getElementById('completedInstalls').textContent = completedInstalls;
-      document.getElementById('pendingInstalls').textContent = pendingInstalls;
+      // Update main stats based on current view and filtered data
+      const totalInView = filteredData.length;
+      
+      if (currentView === 'open') {
+        const pendingQuotes = filteredData.filter(c => ["טיוטה", "צפייה בסרטון לקוח", "טיוטה להצעת מחיר", "שליחת טיוטה ללקוח"].includes(c.Status)).length;
+        const pendingInstalls = filteredData.filter(c => c.Status === "תיאום התקנה").length;
+        const awaitingApproval = filteredData.filter(c => c.Status === "העברה מקדמה").length;
+        const inProgress = filteredData.filter(c => ["תיאום התקנה", "העברה מקדמה"].includes(c.Status)).length;
+
+        document.getElementById('totalCustomers').textContent = totalInView;
+        document.getElementById('activeRequests').textContent = pendingQuotes;
+        document.getElementById('completedInstalls').textContent = pendingInstalls;
+        document.getElementById('pendingInstalls').textContent = inProgress;
+
+        // Update labels for open view
+        document.querySelector('#totalCustomers').nextElementSibling.textContent = 'פניות פתוחות';
+        document.querySelector('#activeRequests').nextElementSibling.textContent = 'ממתינות להצעה';
+        document.querySelector('#completedInstalls').nextElementSibling.textContent = 'לתיאום התקנה';
+        document.querySelector('#pendingInstalls').nextElementSibling.textContent = 'בתהליך';
+      } else {
+        const thisWeek = new Date();
+        thisWeek.setDate(thisWeek.getDate() - 7);
+        const recentCompleted = filteredData.filter(c => c.CompletedDate && new Date(c.CompletedDate) > thisWeek).length;
+        const withFeedback = filteredData.filter(c => c.Status === "קבלת משוב").length;
+        const withoutFeedback = filteredData.filter(c => c.Status === "התקנה בוצעה").length;
+
+        document.getElementById('totalCustomers').textContent = totalInView;
+        document.getElementById('activeRequests').textContent = recentCompleted;
+        document.getElementById('completedInstalls').textContent = withFeedback;
+        document.getElementById('pendingInstalls').textContent = withoutFeedback;
+
+        // Update labels for completed view
+        document.querySelector('#totalCustomers').nextElementSibling.textContent = 'סה"כ הושלמו';
+        document.querySelector('#activeRequests').nextElementSibling.textContent = 'השבוע האחרון';
+        document.querySelector('#completedInstalls').nextElementSibling.textContent = 'עם משוב';
+        document.querySelector('#pendingInstalls').nextElementSibling.textContent = 'ללא משוב';
+      }
     }
 
     function getStatusClass(status) {
@@ -646,30 +763,36 @@
         function (data) {
           if (!Array.isArray(data)) return;
   
-          let filtered = data.filter(c => {
+                    let filtered = data.filter(c => {
+            // First filter by current view (open/completed)
+            const currentStatuses = currentView === 'open' ? openStatuses : completedStatuses;
+            const statusInView = currentStatuses.includes(c.Status);
+            
+            if (!statusInView) return false;
+
             const fullName = `${c.FirstName || ''} ${c.LastName || ''}`.toLowerCase();
             const city = (c.City || "").toLowerCase();
             const status = c.Status || "";
-  
+
             const nameMatch = fullName.includes(nameFilter);
             const cityMatch = city.includes(cityFilter);
             const statusMatch = statusFilter === "" || status === statusFilter;
-  
+
             let dateMatch = true;
             if (fromDateValue || toDateValue) {
               const compareDate = new Date(c[dateField]);
               compareDate.setHours(0, 0, 0, 0);
-  
+
               const fromDate = fromDateValue ? new Date(fromDateValue) : null;
               if (fromDate) fromDate.setHours(0, 0, 0, 0);
-  
+
               const toDate = toDateValue ? new Date(toDateValue) : null;
               if (toDate) toDate.setHours(23, 59, 59, 999);
-  
+
               if (fromDate && compareDate < fromDate) dateMatch = false;
               if (toDate && compareDate > toDate) dateMatch = false;
             }
-  
+
             return nameMatch && cityMatch && statusMatch && dateMatch;
           });
   
@@ -689,7 +812,7 @@
           const endIndex = startIndex + pagination.pageSize;
           const paginatedData = filtered.slice(startIndex, endIndex);
 
-          updateStats(data);
+          updateStats(data, filtered);
           displayCustomers(paginatedData);
           updatePagination();
         },
