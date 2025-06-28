@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>פרטי לקוח - דוד פרקטים</title>
+  <link rel="icon" href="data:;base64,iVBORw0KGgo=">
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -110,6 +111,13 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
             </svg>
             לוח בקרה - BI
+          </a>
+          <a href="SystemSettingsPage.html" class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors">
+            <svg class="w-5 h-5 ml-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            </svg>
+            הגדרות
           </a>
         </nav>
       </div>
@@ -330,7 +338,7 @@
       "טיוטה להצעת מחיר", 
       "שליחת טיוטה ללקוח",
       "העברת מקדמה",
-      "תיאום התקנה",
+      "תואמה התקנה",
       "התקנה בוצעה",
       "קבלת משוב"
     ];
@@ -357,7 +365,15 @@
       ajaxCall('GET', `${API_BASE_URL}/BI/GetWorkRequestStatuses`, null,
         function(statuses) {
           if (Array.isArray(statuses)) {
-            availableStatuses = statuses.map(s => s.statusName);
+            // Fix old status names from server
+            availableStatuses = statuses.map(s => {
+              let statusName = s.statusName;
+              // Fix the old status name
+              if (statusName === 'תיאום התקנה') {
+                statusName = 'תואמה התקנה';
+              }
+              return statusName;
+            });
           }
         },
         function(error) {
@@ -396,6 +412,12 @@
           if (data && data.customer && data.workRequest) {
             customerData = data;
             currentRequestID = data.workRequest.requestID;
+            
+            // Fix old status name from server
+            if (customerData.workRequest.status === 'תיאום התקנה') {
+              customerData.workRequest.status = 'תואמה התקנה';
+            }
+            
             renderCustomerDetails(data);
             renderSpaceDetails(data.spaceDetails);
             renderProgressBar(data.workRequest.status, false); // No animation on initial load
@@ -564,7 +586,7 @@
         let statusDescription = '';
         
                  if (isCompleted && !isCurrent) {
-           statusIcon = '✓';
+           statusIcon = '•';
            statusDescription = 'הושלם';
          } else if (isCurrent) {
            statusIcon = '→';
@@ -1311,7 +1333,7 @@
     }
     
     // Check for popular candidates in custom items before saving quote
-    function checkForPopularCandidatesBeforeSave(quoteData) {
+    function checkForPopularCandidatesBeforeSave(quoteData, isUpdate = false) {
       // Extract custom items (items without calculatorItemID) 
       const customItems = quoteData.Items.filter(item => 
         !item.CalculatorItemID && item.Quantity > 0
@@ -1319,7 +1341,7 @@
       
       if (customItems.length === 0) {
         // No custom items, save directly
-        saveQuoteDirectly(quoteData);
+        saveQuoteDirectly(quoteData, isUpdate);
         return;
       }
       
@@ -1335,38 +1357,41 @@
           
           if (popularCustomItems.length > 0) {
             // Show suggestion dialog for popular items
-            showPopularCandidatesDialog(popularCustomItems, candidates, quoteData);
+            showPopularCandidatesDialog(popularCustomItems, candidates, quoteData, isUpdate);
           } else {
             // No popular candidates found, save directly
             console.log('📝 לא נמצאו מועמדים פופולריים, שומר הצעה ישירות');
-            saveQuoteDirectly(quoteData);
+            saveQuoteDirectly(quoteData, isUpdate);
           }
         },
         function(error) {
           console.error('Error checking candidates:', error);
           // On error, save directly
-          saveQuoteDirectly(quoteData);
+          saveQuoteDirectly(quoteData, isUpdate);
         }
       );
     }
     
     // Save quote directly without candidate suggestions
-    function saveQuoteDirectly(quoteData) {
+    function saveQuoteDirectly(quoteData, isUpdate = false) {
+      const actionText = isUpdate ? 'עודכנה' : 'נשמרה';
+      const errorText = isUpdate ? 'עדכון' : 'שמירת';
+      
       ajaxCall('POST', `${API_BASE_URL}/Quote/CreateQuote`, JSON.stringify(quoteData),
         function(result) {
           if (result && result.success) {
-            showToast(result.message || 'הצעת מחיר נשמרה בהצלחה!');
+            showToast(result.message || `הצעת מחיר ${actionText} בהצלחה!`);
             closeQuoteCalculator();
             loadExistingQuotes(); // Refresh quotes list and update buttons
           } else {
-            showToast(result?.message || 'שגיאה בשמירת הצעת המחיר', 'error');
+            showToast(result?.message || `שגיאה ב${errorText} הצעת המחיר`, 'error');
             // Even if there's an error, close the calculator
             closeQuoteCalculator();
           }
         },
         function(error) {
           console.error('Error creating quote:', error);
-          showToast('שגיאה בשמירת הצעת המחיר', 'error');
+          showToast(`שגיאה ב${errorText} הצעת המחיר`, 'error');
           // Even if there's an error, close the calculator
           closeQuoteCalculator();
         }
@@ -1685,27 +1710,30 @@
       container.innerHTML = calculatorItemsHTML + customItemsHTML;
     }
 
-    // Update existing quote
+    // Update existing quote (delete old and create new)
     function updateQuote(quoteId) {
-      const data = gatherQuoteData();
-      data.quoteID = quoteId;
+      console.log(`🔄 מעדכן הצעת מחיר ${quoteId} - מוחק ויוצר מחדש`);
       
-      ajaxCall('POST', `${API_BASE_URL}/Quote/UpdateQuote`, JSON.stringify(data),
-        function(result) {
-          if (result && result.success) {
-            showToast(result.message || 'הצעת מחיר עודכנה בהצלחה!');
-            closeQuoteCalculator();
-            loadExistingQuotes(); // Refresh quotes list
+      // First delete the existing quote
+      ajaxCall('DELETE', `${API_BASE_URL}/Quote/DeleteQuote/${quoteId}`, null,
+        function(deleteResult) {
+          if (deleteResult && deleteResult.success) {
+            console.log('✅ הצעת מחיר ישנה נמחקה, יוצר הצעה חדשה');
+            
+            // Now create a new quote with the current data
+            const data = gatherQuoteData();
+            
+            // Check for popular candidates before saving the new quote (as update)
+            checkForPopularCandidatesBeforeSave(data, true);
           } else {
-            showToast(result?.message || 'שגיאה בעדכון הצעת המחיר', 'error');
-            // Even if there's an error, close the calculator
+            console.error('❌ שגיאה במחיקת הצעת המחיר הישנה');
+            showToast('שגיאה בעדכון הצעת המחיר', 'error');
             closeQuoteCalculator();
           }
         },
         function(error) {
-          console.error('Error updating quote:', error);
+          console.error('Error deleting quote for update:', error);
           showToast('שגיאה בעדכון הצעת המחיר', 'error');
-          // Even if there's an error, close the calculator
           closeQuoteCalculator();
         }
       );
@@ -1865,10 +1893,11 @@
     let modalClosedByCreation = false; // Track if modal was closed by successful creation
     
     // Show dialog for popular candidates before saving quote
-    function showPopularCandidatesDialog(popularCustomItems, allCandidates, quoteData) {
+    function showPopularCandidatesDialog(popularCustomItems, allCandidates, quoteData, isUpdate = false) {
       console.log('🎯 נמצאו מועמדים פופולריים:', popularCustomItems);
       
       const modal = document.createElement('div');
+      modal.id = 'candidatesModal';
       modal.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4';
       modal.innerHTML = `
         <div class="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-screen overflow-y-auto">
@@ -1904,7 +1933,7 @@
                     
                     <div class="flex items-center space-x-3 space-x-reverse">
                       <label class="flex items-center cursor-pointer">
-                        <input type="checkbox" class="candidate-action" data-action="create" data-item="${customItem.ItemName}" 
+                        <input type="checkbox" class="candidate-action" data-action="create" data-item="${customItem.ItemName}" checked
                                class="mr-2 w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500">
                         <span class="text-sm font-medium text-green-700 mr-2">צור פריט קבוע</span>
                       </label>
@@ -1913,12 +1942,6 @@
                         <input type="checkbox" class="candidate-action" data-action="reject" data-item="${customItem.ItemName}"
                                class="mr-2 w-4 h-4 text-red-600 bg-gray-100 border-gray-300 rounded focus:ring-red-500">
                         <span class="text-sm font-medium text-red-700 mr-2">דחה המלצה</span>
-                      </label>
-                      
-                      <label class="flex items-center cursor-pointer">
-                        <input type="checkbox" class="candidate-action" data-action="ignore" data-item="${customItem.ItemName}" checked
-                               class="mr-2 w-4 h-4 text-gray-600 bg-gray-100 border-gray-300 rounded focus:ring-gray-500">
-                        <span class="text-sm font-medium text-gray-700 mr-2">התעלם (לא עכשיו)</span>
                       </label>
                     </div>
                   </div>
@@ -1931,7 +1954,7 @@
                  ✓ בצע פעולות ושמור הצעה
                </button>
                <button id="ignoreBtn" class="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium">
-                 התעלם משמור הצעה
+                 ביטול
                </button>
              </div>
           </div>
@@ -1957,27 +1980,48 @@
        
        // Add button event listeners
        modal.querySelector('#processBtn').addEventListener('click', function() {
-         processSelectedCandidates(quoteData);
+         console.log('🔘 לחיצה על כפתור "בצע פעולות"');
+         processSelectedCandidates(quoteData, isUpdate);
        });
        
        modal.querySelector('#ignoreBtn').addEventListener('click', function() {
+         console.log('🔘 לחיצה על כפתור "ביטול"');
          modal.remove();
-         saveQuoteDirectly(quoteData);
+         saveQuoteDirectly(quoteData, isUpdate);
        });
        
        modal.querySelector('#closeBtn').addEventListener('click', function() {
+         console.log('🔘 לחיצה על כפתור סגירה (X)');
          modal.remove();
-         saveQuoteDirectly(quoteData);
+         saveQuoteDirectly(quoteData, isUpdate);
+       });
+       
+       // Close modal when clicking outside
+       modal.addEventListener('click', function(e) {
+         if (e.target === modal) {
+           modal.remove();
+           saveQuoteDirectly(quoteData, isUpdate);
+         }
        });
      }
      
            // Process selected candidate actions and save quote
-      function processSelectedCandidates(quoteData) {
-        const modal = document.querySelector('.fixed.inset-0.bg-black.bg-opacity-50');
+      function processSelectedCandidates(quoteData, isUpdate = false) {
+        console.log('🔄 מתחיל לעבד פעולות נבחרות');
+        const modal = document.getElementById('candidatesModal');
+        
+        if (!modal) {
+          console.error('❌ לא נמצא מודל המועמדים');
+          saveQuoteDirectly(quoteData);
+          return;
+        }
+        
         const selectedActions = [];
        
        // Collect all selected actions
        const checkboxes = modal.querySelectorAll('input.candidate-action:checked');
+       console.log('📝 נמצאו', checkboxes.length, 'תיבות סימון מסומנות');
+       
        checkboxes.forEach(checkbox => {
          selectedActions.push({
            itemName: checkbox.dataset.item,
@@ -1988,16 +2032,15 @@
        console.log('🎯 פעולות נבחרות:', selectedActions);
        
        // Close modal first
-       if (modal) {
-         modal.remove();
-       }
+       console.log('🚪 סוגר את המודל');
+       modal.remove();
        
        // Process actions in sequence, then save quote
-       processActionsSequentially(selectedActions, 0, quoteData);
+       processActionsSequentially(selectedActions, 0, quoteData, isUpdate);
      }
      
      // Process actions one by one
-     function processActionsSequentially(actions, index, quoteData) {
+     function processActionsSequentially(actions, index, quoteData, isUpdate = false) {
        if (index >= actions.length) {
          // All actions processed, save quote
          console.log('✅ כל הפעולות הושלמו, שומר הצעת מחיר');
@@ -2005,7 +2048,7 @@
          // Refresh candidates display after all actions
          refreshCandidates();
          
-         saveQuoteDirectly(quoteData);
+         saveQuoteDirectly(quoteData, isUpdate);
          return;
        }
        
@@ -2024,12 +2067,12 @@
                  console.log(`❌ שגיאה ביצירת פריט "${action.itemName}"`);
                }
                // Continue to next action
-               processActionsSequentially(actions, index + 1, quoteData);
+               processActionsSequentially(actions, index + 1, quoteData, isUpdate);
              },
              function(error) {
                console.error(`Error creating item "${action.itemName}":`, error);
                // Continue even on error
-               processActionsSequentially(actions, index + 1, quoteData);
+               processActionsSequentially(actions, index + 1, quoteData, isUpdate);
              }
            );
            break;
@@ -2045,21 +2088,20 @@
                  console.log(`❌ שגיאה בדחיית המלצה עבור "${action.itemName}"`);
                }
                // Continue to next action
-               processActionsSequentially(actions, index + 1, quoteData);
+               processActionsSequentially(actions, index + 1, quoteData, isUpdate);
              },
              function(error) {
                console.error(`Error rejecting candidate "${action.itemName}":`, error);
                // Continue even on error
-               processActionsSequentially(actions, index + 1, quoteData);
+               processActionsSequentially(actions, index + 1, quoteData, isUpdate);
              }
            );
            break;
            
-         case 'ignore':
          default:
-           // Do nothing, just continue
-           console.log(`⏭️ מתעלם מ-"${action.itemName}"`);
-           processActionsSequentially(actions, index + 1, quoteData);
+           // Unknown action, just continue
+           console.log(`⚠️ פעולה לא מוכרת: ${action.action} עבור "${action.itemName}"`);
+           processActionsSequentially(actions, index + 1, quoteData, isUpdate);
            break;
        }
      }

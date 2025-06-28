@@ -284,6 +284,8 @@ namespace FinalProject.BL
         public List<QuoteItemRequest> Items { get; set; } = new List<QuoteItemRequest>();
     }
 
+
+
     public class QuoteItemRequest
     {
         public int? CalculatorItemID { get; set; }

@@ -4,271 +4,681 @@
   <meta charset="UTF-8">
   <title>יומן התקנות - דוד פרקטים</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="/ajaxCall.js"></script>
   <script src="/api.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#b46a2c',
+            'primary-dark': '#8b5732',
+            'primary-light': '#d4985a'
+          },
+          fontFamily: {
+            'heebo': ['Heebo', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
 
   <style>
-    :root {
-      --main-color: #b46a2c;
-      --light-gray: #f5f5f5;
-      --text-dark: #333;
-      --radius: 12px;
-    }
-
     body {
-      margin: 0;
       font-family: 'Heebo', sans-serif;
-      background-color: #fafafa;
     }
 
-    .container {
-      display: flex;
-      min-height: 100vh;
-    }
-
-    .sidebar {
-      width: 200px;
-      background-color: #fff;
-      padding: 20px;
-      border-left: 1px solid #ddd;
-    }
-
-    .sidebar .logo {
-      text-align: center;
-      margin-bottom: 40px;
-    }
-
-    .sidebar nav a {
-      display: block;
-      padding: 12px;
-      color: var(--text-dark);
-      text-decoration: none;
-      border-radius: 8px;
-      margin-bottom: 8px;
-      transition: background-color 0.3s;
-    }
-
-    .sidebar nav a:hover {
-      background-color: #f0f0f0;
-    }
-
-    .sidebar nav a.active {
-      background-color: #e6f2f2;
-      font-weight: bold;
-    }
-
-    .main {
-      flex: 1;
-      padding: 30px;
-    }
-
-    h1 {
-      text-align: center;
-      color: var(--main-color);
-    }
-
-    #calendar {
-      max-width: 1200px;
-      margin: 40px auto;
-      background-color: white;
-      border-radius: 12px;
-      padding: 20px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.05);
-    }
-
-    .fc-daygrid-event {
-      background-color: #b46a2c !important;
-      border: none !important;
-      color: white !important;
-      border-radius: 6px;
-      padding: 2px 6px;
-    }
-
+    /* Calendar Styles */
     .fc-toolbar-title {
-      font-size: 22px;
-      color: #333;
+      font-size: 1.5rem !important;
+      font-weight: 600 !important;
+      color: #1f2937 !important;
     }
 
     .fc-button {
       background-color: #b46a2c !important;
+      border-color: #b46a2c !important;
+      color: white !important;
+      border-radius: 0.5rem !important;
+      padding: 0.5rem 1rem !important;
+      font-weight: 500 !important;
+    }
+
+    .fc-button:hover {
+      background-color: #8b5732 !important;
+      border-color: #8b5732 !important;
+    }
+
+    .fc-daygrid-event {
+      background-color: #3b82f6 !important;
       border: none !important;
-      border-radius: 6px !important;
+      color: white !important;
+      border-radius: 0.375rem !important;
+      padding: 2px 6px !important;
+      margin: 1px 0 !important;
+      font-size: 0.75rem !important;
+      cursor: pointer !important;
     }
 
-    .fc-button-primary:not(:disabled):active,
-    .fc-button-primary:not(:disabled).fc-button-active {
-      background-color: #8e4e20 !important;
+    .fc-daygrid-event.morning {
+      background-color: #10b981 !important;
     }
 
-    .popup {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.5);
-      display: none;
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
+    .fc-daygrid-event.evening {
+      background-color: #f59e0b !important;
     }
 
-    .popup-content {
-      background: #fff;
-      padding: 20px;
-      border-radius: 8px;
-      text-align: center;
-      max-width: 400px;
-      width: 90%;
+    .fc-day-today {
+      background-color: #fef3c7 !important;
     }
 
-    select, button {
-      padding: 10px;
-      margin-top: 10px;
-      width: 100%;
-      border-radius: 6px;
-      border: 1px solid #ccc;
+    /* Preferred Date Indicators */
+    .fc-daygrid-day.preferred-date {
+      background-color: #fef3c7 !important;
+      border: 2px solid #f59e0b !important;
+      position: relative;
     }
 
-    button.confirm {
-      background-color: #28a745;
+    .fc-daygrid-day.preferred-date.morning {
+      border-color: #10b981 !important;
+      background-color: #f0fdf4 !important;
+    }
+
+    .fc-daygrid-day.preferred-date.evening {
+      border-color: #f59e0b !important;
+      background-color: #fffbeb !important;
+    }
+
+    .preferred-indicator {
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      background-color: rgba(245, 158, 11, 0.9);
       color: white;
+      font-size: 0.6rem;
+      padding: 1px 4px;
+      border-radius: 4px;
+      font-weight: 500;
+      z-index: 10;
+      max-width: calc(100% - 4px);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
-    button.cancel {
-      background-color: #dc3545;
-      color: white;
+    .preferred-indicator.morning {
+      background-color: rgba(16, 185, 129, 0.9);
+    }
+
+    .preferred-indicator.evening {
+      background-color: rgba(245, 158, 11, 0.9);
+    }
+
+
+
+    /* Request Card Styles */
+    .request-card {
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .request-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+
+    .request-card.selected {
+      border-color: #b46a2c;
+      background-color: #fef7ed;
+    }
+
+    /* Drag and Drop */
+    .dragging {
+      opacity: 0.5;
+      transform: rotate(5deg);
+    }
+
+    .drop-zone {
+      border: 2px dashed #b46a2c;
+      background-color: #fef7ed;
     }
   </style>
 </head>
-<body>
-  <div class="container">
-    <aside class="sidebar">
-      <div class="logo">
-        <img src="../picturs/logo.png" alt="לוגו" width="100">
+<body class="bg-gray-50 font-heebo">
+  <div class="flex min-h-screen">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white shadow-lg">
+      <div class="p-6">
+        <div class="text-center mb-8">
+          <img src="../picturs/logo.png" alt="לוגו" class="h-20 mx-auto mb-2" />
+          <h3 class="text-lg font-semibold text-gray-800">דוד פרקטים</h3>
+          <p class="text-sm text-gray-600">מערכת ניהול</p>
+        </div>
+        <nav class="space-y-2">
+          <a href="InstallerDashboard.html" class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors">
+            <svg class="w-5 h-5 ml-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
+            </svg>
+            מסך הבית
+          </a>
+          <a href="InstallerStatusesPage.html" class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors">
+            <svg class="w-5 h-5 ml-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+            </svg>
+            סטטוסים לביצוע
+          </a>
+          <a href="InstallerCustomersPage.html" class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors">
+            <svg class="w-5 h-5 ml-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+            </svg>
+            לקוחות
+          </a>
+          <a href="InstallerSchedule.html" class="flex items-center px-4 py-3 bg-primary text-white rounded-lg">
+            <svg class="w-5 h-5 ml-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+            יומן התקנות
+          </a>
+          <a href="BIpage.html" class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors">
+            <svg class="w-5 h-5 ml-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+            </svg>
+            לוח בקרה - BI
+          </a>
+          <a href="SystemSettingsPage.html" class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors">
+            <svg class="w-5 h-5 ml-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            </svg>
+            הגדרות
+          </a>
+        </nav>
       </div>
-      <nav>
-        <a href="InstallerDashboard.html">מסך הבית</a>
-        <a href="InstallerStatusesPage.html">סטטוסים לביצוע</a>
-        <a href="InstallerCustomersPage.html">לקוחות</a>
-        <a href="#" class="active">יומן התקנות</a>
-        <a href="BIpage.html">לוח בקרה - BI</a>
-        <a href="#">ניהול אתר לקוחות</a>
-        <a href="#">הגדרות</a>
-        <a href="#">התנתקות</a>
-      </nav>
     </aside>
 
-    <main class="main">
-      <h1>יומן התקנות</h1>
-      <div id="calendar"></div>
+    <!-- Main Content -->
+    <main class="flex-1 flex">
+      <!-- Calendar Section -->
+      <div class="flex-1 p-6">
+        <!-- Header -->
+        <div class="mb-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <h1 class="text-2xl font-bold text-gray-900">יומן התקנות</h1>
+              <p class="text-gray-600">גרור קריאות מהרשימה לתאריכים ביומן</p>
+            </div>
+            <div class="flex items-center space-x-3 space-x-reverse">
+              <button onclick="refreshCalendar()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg transition-colors flex items-center">
+                <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                </svg>
+                רענן
+              </button>
+            </div>
+          </div>
+          
+          <!-- Legend -->
+          <div class="grid grid-cols-2 gap-4 mt-4 p-4 bg-white rounded-lg shadow-sm text-sm">
+            <div class="space-y-2">
+              <h4 class="font-medium text-gray-900">התקנות מתוכננות:</h4>
+              <div class="flex items-center space-x-2 space-x-reverse">
+                <div class="w-3 h-3 bg-green-500 rounded"></div>
+                <span class="text-gray-600">בוקר (09:00-13:00)</span>
+              </div>
+              <div class="flex items-center space-x-2 space-x-reverse">
+                <div class="w-3 h-3 bg-yellow-500 rounded"></div>
+                <span class="text-gray-600">ערב (14:00-18:00)</span>
+              </div>
+              <div class="flex items-center space-x-2 space-x-reverse">
+                <div class="w-3 h-3 bg-blue-500 rounded"></div>
+                <span class="text-gray-600">מתוכנן (אחר)</span>
+              </div>
+            </div>
+            <div class="space-y-2">
+              <h4 class="font-medium text-gray-900">תאריכים מועדפים:</h4>
+              <div class="flex items-center space-x-2 space-x-reverse">
+                <div class="w-3 h-3 bg-green-100 border-2 border-green-500 rounded"></div>
+                <span class="text-gray-600">מועדף בוקר</span>
+              </div>
+              <div class="flex items-center space-x-2 space-x-reverse">
+                <div class="w-3 h-3 bg-yellow-100 border-2 border-yellow-500 rounded"></div>
+                <span class="text-gray-600">מועדף ערב</span>
+              </div>
+              <div class="text-xs text-gray-500 mt-1">שם הלקוח מוצג על התאריך המועדף</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Calendar -->
+        <div class="bg-white rounded-xl shadow-sm p-6">
+          <div id="calendar" class="min-h-[600px]"></div>
+        </div>
+      </div>
+
+      <!-- Right Panel - Open Requests -->
+      <div class="w-96 bg-white shadow-lg border-r border-gray-200 p-6">
+        <div class="mb-6">
+          <h2 class="text-lg font-semibold text-gray-900 mb-2">קריאות פתוחות</h2>
+          <p class="text-sm text-gray-600">גרור קריאה לתאריך ביומן לשיבוץ</p>
+        </div>
+
+        <!-- Filter -->
+        <div class="mb-4">
+          <select id="statusFilter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+            <option value="העברת מקדמה">העברת מקדמה</option>
+            <option value="תואמה התקנה">תואמה התקנה</option>
+          </select>
+        </div>
+
+        <!-- Requests List -->
+        <div id="requestsList" class="space-y-3 max-h-[calc(100vh-300px)] overflow-y-auto">
+          <!-- Loading state -->
+          <div class="animate-pulse space-y-3">
+            <div class="bg-gray-200 rounded-lg h-20"></div>
+            <div class="bg-gray-200 rounded-lg h-20"></div>
+            <div class="bg-gray-200 rounded-lg h-20"></div>
+          </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="mt-6 pt-4 border-t border-gray-200">
+          <div class="text-center">
+            <div>
+              <div class="text-2xl font-bold text-primary" id="totalRequests">-</div>
+              <div class="text-xs text-gray-600">סה"כ קריאות</div>
+            </div>
+          </div>
+        </div>
+      </div>
     </main>
   </div>
 
-  <div class="popup" id="assignPopup">
-    <div class="popup-content">
-      <h2>בחר בקשה לשיבוץ</h2>
-      <select id="requestSelector"></select>
-      <button class="confirm" onclick="assign()">שבץ</button>
-      <button class="cancel" onclick="$('#assignPopup').fadeOut()">בטל</button>
+  <!-- Assignment Modal -->
+  <div id="assignModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+    <div class="bg-white rounded-xl shadow-xl max-w-md w-full mx-4">
+      <div class="p-6 border-b border-gray-200">
+        <div class="flex items-center justify-between">
+          <h3 class="text-lg font-semibold text-gray-900">שיבוץ התקנה</h3>
+          <button onclick="closeAssignModal()" class="text-gray-400 hover:text-gray-600">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+      
+      <div class="p-6">
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-2">תאריך נבחר:</label>
+          <p id="selectedDateDisplay" class="text-lg font-semibold text-primary"></p>
+        </div>
+        
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-2">זמן התקנה:</label>
+          <div class="grid grid-cols-2 gap-3">
+            <label class="flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+              <input type="radio" name="timeSlot" value="1" class="text-primary focus:ring-primary" checked>
+              <span class="mr-3 font-medium">בוקר</span>
+              <span class="text-sm text-gray-500">(09:00-13:00)</span>
+            </label>
+            <label class="flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+              <input type="radio" name="timeSlot" value="2" class="text-primary focus:ring-primary">
+              <span class="mr-3 font-medium">ערב</span>
+              <span class="text-sm text-gray-500">(14:00-18:00)</span>
+            </label>
+          </div>
+        </div>
+      </div>
+      
+      <div class="px-6 py-4 bg-gray-50 rounded-b-xl flex justify-end space-x-3 space-x-reverse">
+        <button onclick="closeAssignModal()" class="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+          ביטול
+        </button>
+        <button onclick="confirmAssignment()" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors">
+          שבץ התקנה
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed top-4 right-4 bg-green-500 text-white px-6 py-4 rounded-lg shadow-lg z-50 transform translate-x-full transition-transform duration-300">
+    <div class="flex items-center">
+      <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+      </svg>
+      <span id="toastMessage">הפעולה בוצעה בהצלחה</span>
     </div>
   </div>
 
   <script>
+    let calendar;
     let selectedDate = null;
-    let selectedSlot = null;
+    let selectedRequestId = null;
+    let openRequests = [];
 
+    // Initialize when page loads
     document.addEventListener('DOMContentLoaded', function () {
+      initializeCalendar();
+      loadOpenRequests();
+      setupEventListeners();
+    });
+
+    function initializeCalendar() {
       const calendarEl = document.getElementById('calendar');
-      const calendar = new FullCalendar.Calendar(calendarEl, {
+      calendar = new FullCalendar.Calendar(calendarEl, {
         locale: 'he',
         initialView: 'dayGridMonth',
+        height: 'auto',
         headerToolbar: {
           left: 'prev,next today',
           center: 'title',
           right: 'dayGridWeek,dayGridMonth'
         },
+        buttonText: {
+          today: 'היום',
+          month: 'חודש',
+          week: 'שבוע'
+        },
         dateClick: function (info) {
-          openPopup(info.dateStr);
+          if (selectedRequestId) {
+            openAssignModal(info.dateStr);
+          } else {
+            showToast('בחר קריאה מהרשימה תחילה', 'error');
+          }
         },
         events: function(fetchInfo, successCallback, failureCallback) {
-          loadEvents(fetchInfo.startStr, fetchInfo.endStr, successCallback);
+          loadCalendarEvents(fetchInfo.startStr, fetchInfo.endStr, successCallback, failureCallback);
+        },
+        eventDidMount: function(info) {
+          const slot = info.event.extendedProps.slot;
+          if (slot === 1) {
+            info.el.classList.add('morning');
+          } else if (slot === 2) {
+            info.el.classList.add('evening');
+          }
+        },
+        datesSet: function() {
+          // Add preferred date indicators after calendar is rendered
+          setTimeout(() => {
+            addPreferredDateIndicators();
+          }, 100);
+        },
+        droppable: true,
+        drop: function(info) {
+          if (selectedRequestId) {
+            const timeSlot = confirm('בחר זמן התקנה:\nאישור = בוקר (09:00-13:00)\nביטול = ערב (14:00-18:00)') ? 1 : 2;
+            assignRequestToDate(selectedRequestId, info.dateStr, timeSlot);
+          }
         }
       });
 
       calendar.render();
-    });
+    }
 
-    function openPopup(dateStr) {
-      selectedDate = dateStr;
-      selectedSlot = null;
-      $('#requestSelector').empty();
-      ajaxCall("POST", `${API_BASE_URL}/Dashboard/GetDashboardData`, JSON.stringify({ status: "תיאום התקנה" }),
+    function loadOpenRequests() {
+      const status = document.getElementById('statusFilter').value;
+      
+      ajaxCall("POST", `${API_BASE_URL}/Dashboard/GetDashboardData`, JSON.stringify({ status: status }),
         function (data) {
-          if (!data.length) {
-            $('#requestSelector').append(`<option>אין בקשות זמינות</option>`);
-          } else {
-            data.forEach(req => {
-              $('#requestSelector').append(`<option value="${req.RequestID}">${req.FirstName} ${req.LastName} - ${req.City}</option>`);
-            });
-          }
-          $('#assignPopup').fadeIn();
+          // תיקון סטטוסים ישנים שמגיעים מהשרת
+          openRequests = (data || []).map(request => {
+            if (request.Status === 'תיאום התקנה') {
+              request.Status = 'תואמה התקנה';
+            }
+            return request;
+          });
+          
+          displayOpenRequests(openRequests);
+          updateStats();
+          // Update preferred date indicators when requests change
+          setTimeout(() => {
+            addPreferredDateIndicators();
+          }, 100);
         },
-        function (err) {
-          alert("שגיאה בטעינת הבקשות");
+        function (error) {
+          console.error('Error loading requests:', error);
+          showToast('שגיאה בטעינת הקריאות', 'error');
         }
       );
     }
 
-    function assign() {
-      const requestID = $("#requestSelector").val();
-      if (!requestID) {
-        alert("יש לבחור בקשה");
+    function displayOpenRequests(requests) {
+      const requestsList = document.getElementById('requestsList');
+      
+      if (requests.length === 0) {
+        requestsList.innerHTML = `
+          <div class="text-center py-8">
+            <svg class="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <p class="text-gray-500">אין קריאות פתוחות</p>
+          </div>
+        `;
         return;
       }
 
-      // כברירת מחדל - נשבץ בבוקר (1)
-      const slot = 1;
-
-      ajaxCall("POST", `${API_BASE_URL}/Schedule/AssignRequestToSlot`, JSON.stringify({
-        requestID: parseInt(requestID),
-        date: selectedDate,
-        slot: slot
-      }),
-      function () {
-        alert("השיבוץ בוצע!");
-        $('#assignPopup').fadeOut();
-        location.reload();
-      },
-      function (err) {
-        alert("שגיאה בשיבוץ");
-        console.error(err);
-      });
+      requestsList.innerHTML = requests.map(request => `
+        <div class="request-card bg-white border border-gray-200 rounded-lg p-4 ${selectedRequestId === request.RequestID ? 'selected' : ''}"
+             onclick="selectRequest(${request.RequestID})"
+             draggable="true"
+             ondragstart="dragStart(event, ${request.RequestID})">
+          <div class="flex items-start justify-between">
+            <div class="flex-1">
+              <h3 class="font-medium text-gray-900">${request.FirstName} ${request.LastName}</h3>
+              <p class="text-sm text-gray-600">${request.Phone}</p>
+              <p class="text-sm text-gray-600">${request.Street} ${request.Number}, ${request.City}</p>
+              
+              ${request.PreferredDate ? `
+                <div class="mt-2 flex items-center text-sm text-primary">
+                  <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                  </svg>
+                  מועדף: ${formatDate(request.PreferredDate)} (${request.PreferredSlot === 2 ? 'ערב' : 'בוקר'})
+                </div>
+              ` : ''}
+            </div>
+            
+            <div class="text-left">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                ${request.Status}
+              </span>
+              ${request.CreatedAt ? `
+                <p class="text-xs text-gray-500 mt-1">${formatDate(request.CreatedAt)}</p>
+              ` : ''}
+            </div>
+          </div>
+        </div>
+      `).join('');
     }
 
-    function loadEvents(fromDate, toDate, callback) {
+    function selectRequest(requestId) {
+      selectedRequestId = requestId;
+      displayOpenRequests(openRequests); // Re-render to show selection
+      showToast('קריאה נבחרה - לחץ על תאריך ביומן לשיבוץ');
+    }
+
+    function dragStart(event, requestId) {
+      selectedRequestId = requestId;
+      event.dataTransfer.setData('text/plain', requestId);
+      event.target.classList.add('dragging');
+    }
+
+    function loadCalendarEvents(fromDate, toDate, successCallback, failureCallback) {
       ajaxCall("POST", `${API_BASE_URL}/Dashboard/GetDashboardData`,
         JSON.stringify({ fromDate, toDate, status: null }),
         function (data) {
           const events = [];
           data.forEach(item => {
-            if (item.PlannedDate && item.Status === "יתואם") {
-              const title = `${item.FirstName} ${item.LastName} (${item.PreferredSlot === 2 ? 'ערב' : 'בוקר'})`;
+            // תיקון סטטוסים ישנים שמגיעים מהשרת
+            if (item.Status === 'תיאום התקנה') {
+              item.Status = 'תואמה התקנה';
+            }
+            
+            // תמיכה בכל הסטטוסים של התקנות מתוכננות
+            const isScheduledStatus = item.Status === "תואמה התקנה" || 
+                                    item.Status === "יתואם";
+            
+            if (item.PlannedDate && isScheduledStatus) {
+              const slotText = item.PreferredSlot === 2 ? 'ערב' : 'בוקר';
               events.push({
-                title: title,
+                id: item.RequestID,
+                title: `${item.FirstName} ${item.LastName} (${slotText})`,
                 start: item.PlannedDate,
-                allDay: true
+                allDay: true,
+                extendedProps: {
+                  slot: item.PreferredSlot,
+                  customerName: `${item.FirstName} ${item.LastName}`,
+                  phone: item.Phone
+                }
               });
             }
           });
-          callback(events);
+          successCallback(events);
         },
-        function (err) {
-          alert("שגיאה בטעינת נתוני היומן");
-          console.error(err);
-        });
+        function (error) {
+          console.error('Error loading calendar events:', error);
+          showToast('שגיאה בטעינת אירועי היומן', 'error');
+          failureCallback(error);
+        }
+      );
+    }
+
+    function openAssignModal(dateStr) {
+      selectedDate = dateStr;
+      document.getElementById('selectedDateDisplay').textContent = formatDate(dateStr);
+      document.getElementById('assignModal').classList.remove('hidden');
+    }
+
+    function closeAssignModal() {
+      document.getElementById('assignModal').classList.add('hidden');
+      selectedDate = null;
+    }
+
+    function confirmAssignment() {
+      const timeSlot = document.querySelector('input[name="timeSlot"]:checked').value;
+      assignRequestToDate(selectedRequestId, selectedDate, parseInt(timeSlot));
+      closeAssignModal();
+    }
+
+    function assignRequestToDate(requestId, date, slot) {
+      ajaxCall("POST", `${API_BASE_URL}/Schedule/AssignRequestToSlot`, JSON.stringify({
+        requestID: parseInt(requestId),
+        date: date,
+        slot: slot
+      }),
+      function () {
+        showToast('השיבוץ בוצע בהצלחה!');
+        selectedRequestId = null;
+        refreshCalendar();
+        loadOpenRequests();
+      },
+      function (error) {
+        console.error('Assignment error:', error);
+        showToast('שגיאה בשיבוץ ההתקנה', 'error');
+      });
+    }
+
+    function refreshCalendar() {
+      if (calendar) {
+        calendar.refetchEvents();
+        showToast('היומן עודכן');
+        // Refresh preferred date indicators
+        setTimeout(() => {
+          addPreferredDateIndicators();
+        }, 200);
+      }
+    }
+
+    function addPreferredDateIndicators() {
+      // Clear existing indicators
+      document.querySelectorAll('.preferred-indicator').forEach(el => el.remove());
+      document.querySelectorAll('.fc-daygrid-day.preferred-date').forEach(el => {
+        el.classList.remove('preferred-date', 'morning', 'evening');
+      });
+
+      // Add indicators for open requests with preferred dates
+      openRequests.forEach(request => {
+        if (request.PreferredDate) {
+          const dateStr = request.PreferredDate.split('T')[0]; // Get date part only
+          const dayEl = document.querySelector(`[data-date="${dateStr}"]`);
+          
+          if (dayEl) {
+            // Add preferred date styling
+            dayEl.classList.add('preferred-date');
+            if (request.PreferredSlot === 1) {
+              dayEl.classList.add('morning');
+            } else if (request.PreferredSlot === 2) {
+              dayEl.classList.add('evening');
+            }
+
+            // Add customer name indicator
+            const indicator = document.createElement('div');
+            indicator.className = `preferred-indicator ${request.PreferredSlot === 1 ? 'morning' : 'evening'}`;
+            indicator.textContent = `${request.FirstName} ${request.LastName}`;
+            indicator.title = `מועדף: ${request.FirstName} ${request.LastName} (${request.PreferredSlot === 2 ? 'ערב' : 'בוקר'})`;
+            
+            dayEl.style.position = 'relative';
+            dayEl.appendChild(indicator);
+          }
+        }
+      });
+    }
+
+    function updateStats() {
+      document.getElementById('totalRequests').textContent = openRequests.length;
+    }
+
+    function setupEventListeners() {
+      // Status filter change
+      document.getElementById('statusFilter').addEventListener('change', loadOpenRequests);
+      
+      // Keyboard shortcuts
+      document.addEventListener('keydown', function(e) {
+        if (e.ctrlKey || e.metaKey) {
+          switch(e.key) {
+            case 'r':
+              e.preventDefault();
+              refreshCalendar();
+              loadOpenRequests();
+              break;
+          }
+        }
+        if (e.key === 'Escape') {
+          closeAssignModal();
+          selectedRequestId = null;
+          displayOpenRequests(openRequests);
+        }
+      });
+    }
+
+    function formatDate(dateStr) {
+      const date = new Date(dateStr);
+      return date.toLocaleDateString('he-IL', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        weekday: 'long'
+      });
+    }
+
+    function showToast(message, type = 'success') {
+      const toast = document.getElementById('toast');
+      const toastMessage = document.getElementById('toastMessage');
+      
+      toastMessage.textContent = message;
+      toast.className = `fixed top-4 right-4 px-6 py-4 rounded-lg shadow-lg z-50 transform translate-x-full transition-transform duration-300 ${
+        type === 'error' ? 'bg-red-500' : 'bg-green-500'
+      } text-white`;
+      
+      setTimeout(() => toast.classList.remove('translate-x-full'), 100);
+      setTimeout(() => toast.classList.add('translate-x-full'), 3000);
     }
   </script>
 </body>

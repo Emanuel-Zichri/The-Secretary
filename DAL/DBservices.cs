@@ -806,6 +806,7 @@ public class DBservices
                 con.Close();
         }
     }
+
     //--------------------------------------------------------------------------------------------------
     // This method add quoteitem 
     //--------------------------------------------------------------------------------------------------
@@ -2496,7 +2497,7 @@ public class DBservices
             new WorkRequestStatus { StatusID = 3, StatusName = "טיוטה להצעת מחיר", StatusOrder = 3, IsActive = true, Description = "הכנת הצעת מחיר", CreatedAt = DateTime.Now },
             new WorkRequestStatus { StatusID = 4, StatusName = "שליחת טיוטה ללקוח", StatusOrder = 4, IsActive = true, Description = "שליחת הצעה ללקוח", CreatedAt = DateTime.Now },
             new WorkRequestStatus { StatusID = 5, StatusName = "העברה מקדמה", StatusOrder = 5, IsActive = true, Description = "קבלת מקדמה", CreatedAt = DateTime.Now },
-            new WorkRequestStatus { StatusID = 6, StatusName = "תיאום התקנה", StatusOrder = 6, IsActive = true, Description = "תיאום מועד התקנה", CreatedAt = DateTime.Now },
+                            new WorkRequestStatus { StatusID = 6, StatusName = "תואמה התקנה", StatusOrder = 6, IsActive = true, Description = "תיאום מועד התקנה", CreatedAt = DateTime.Now },
             new WorkRequestStatus { StatusID = 7, StatusName = "יתואם", StatusOrder = 7, IsActive = true, Description = "מועד התקנה נקבע", CreatedAt = DateTime.Now },
             new WorkRequestStatus { StatusID = 8, StatusName = "התקנה בוצעה", StatusOrder = 8, IsActive = true, Description = "התקנה הושלמה", CreatedAt = DateTime.Now },
             new WorkRequestStatus { StatusID = 9, StatusName = "קבלת משוב", StatusOrder = 9, IsActive = true, Description = "איסוף משוב לקוח", CreatedAt = DateTime.Now }

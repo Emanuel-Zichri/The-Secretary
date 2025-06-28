@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>מסך הבית - דוד פרקטים</title>
+  <link rel="icon" href="data:;base64,iVBORw0KGgo=">
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -98,7 +99,7 @@
             </svg>
             לוח בקרה - BI
           </a>
-          <a href="#" class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors">
+          <a href="SystemSettingsPage.html" class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors">
             <svg class="w-5 h-5 ml-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
@@ -175,16 +176,8 @@
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <!-- Calendar Section -->
           <div class="lg:col-span-2 bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 p-6 border border-gray-100">
-            <div class="flex items-center justify-between mb-6">
-              <h3 class="text-xl font-bold text-gray-900">יומן השבוע</h3>
-                              <button onclick="window.location.href='InstallerSchedule.html'" class="group px-4 py-2 bg-primary/10 text-primary hover:bg-primary hover:text-white rounded-lg text-sm font-medium transition-all duration-200 hover:shadow-md" title="עבור ללוח זמנים מלא (Ctrl+S)">
-                <span class="flex items-center">
-                  צפה בכל התאריכים
-                  <svg class="w-4 h-4 mr-2 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                  </svg>
-                </span>
-              </button>
+            <div class="mb-6">
+              <h3 class="text-xl font-bold text-gray-900">יומן חודשי</h3>
             </div>
             
             <!-- Calendar Grid -->
@@ -202,9 +195,36 @@
               <!-- Calendar days will be populated by JavaScript -->
             </div>
             
+            <!-- Calendar Legend -->
+            <div class="mt-6 pt-6 border-t border-gray-200">
+              <div class="grid grid-cols-2 gap-4 mb-6">
+                <div class="space-y-2">
+                  <h5 class="text-sm font-semibold text-gray-700">מקרא יומן:</h5>
+                  <div class="flex items-center space-x-2 space-x-reverse">
+                    <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
+                    <span class="text-xs text-gray-600">התקנות מתוכננות</span>
+                  </div>
+                  <div class="flex items-center space-x-2 space-x-reverse">
+                    <div class="w-3 h-3 bg-orange-500 rounded-full"></div>
+                    <span class="text-xs text-gray-600">ממתינים לתיאום</span>
+                  </div>
+                </div>
+                <div class="space-y-2">
+                  <div class="flex items-center space-x-2 space-x-reverse">
+                    <div class="w-3 h-3 bg-primary rounded-full"></div>
+                    <span class="text-xs text-gray-600">השבוע הנוכחי</span>
+                  </div>
+                  <div class="flex items-center space-x-2 space-x-reverse">
+                    <div class="w-3 h-3 bg-gradient-to-r from-blue-500 to-orange-500 rounded-full"></div>
+                    <span class="text-xs text-gray-600">מתוכנן + ממתין</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <!-- Upcoming appointments -->
             <div class="mt-6 pt-6 border-t border-gray-200">
-              <h4 class="text-lg font-bold text-gray-900 mb-4">התקנות השבוע</h4>
+              <h4 class="text-lg font-bold text-gray-900 mb-4">התקנות קרובות</h4>
               <div class="space-y-3" id="upcomingInstalls">
                 <!-- Loading state -->
                 <div class="animate-pulse space-y-3">
@@ -477,26 +497,80 @@
       const startDate = new Date(firstDay);
       startDate.setDate(startDate.getDate() - firstDay.getDay());
 
-      // קבלת התקנות לחודש הנוכחי
-      ajaxCall('GET', `${API_BASE_URL}/BI/GetUpcomingInstalls?days=30`, null, 
-        function(installs) {
-          generateCalendarWithInstalls(startDate, currentMonth, today, installs || []);
-        },
-        function(error) {
-          generateCalendarWithInstalls(startDate, currentMonth, today, []);
-        }
-      );
+      // קבלת כל הנתונים - התקנות מתוכננות ולקוחות לתיאום
+      Promise.all([
+        new Promise((resolve, reject) => {
+          ajaxCall('GET', `${API_BASE_URL}/BI/GetUpcomingInstalls?days=30`, null, resolve, reject);
+        }),
+        new Promise((resolve, reject) => {
+          ajaxCall('POST', `${API_BASE_URL}/Dashboard/GetDashboardData`, JSON.stringify({}), resolve, reject);
+        })
+      ]).then(([installs, allCustomers]) => {
+        console.log('נתוני התקנות:', installs);
+        console.log('נתוני לקוחות:', allCustomers);
+        generateCalendarWithData(startDate, currentMonth, today, installs || [], allCustomers || []);
+      }).catch(error => {
+        console.error('שגיאה בטעינת נתוני יומן:', error);
+        generateCalendarWithData(startDate, currentMonth, today, [], []);
+      });
     }
 
-    function generateCalendarWithInstalls(startDate, currentMonth, today, installs) {
+    function generateCalendarWithData(startDate, currentMonth, today, installs, allCustomers) {
       const calendarGrid = document.getElementById('calendarGrid');
       
-      // יצירת מפה של התקנות לפי תאריך
+      // יצירת מפה של התקנות מתוכננות לפי תאריך
       const installsByDate = {};
       installs.forEach(install => {
         const dateStr = new Date(install.installDate).toDateString();
-        if (!installsByDate[dateStr]) installsByDate[dateStr] = 0;
-        installsByDate[dateStr]++;
+        if (!installsByDate[dateStr]) installsByDate[dateStr] = { scheduled: 0, pending: 0, details: [] };
+        installsByDate[dateStr].scheduled++;
+        installsByDate[dateStr].details.push({
+          type: 'scheduled',
+          name: install.customerName || 'התקנה מתוכננת',
+          time: install.timeSlot || 'לא צוין'
+        });
+      });
+      
+      // הוספת התקנות מתוכננות מנתוני הלקוחות (עם PlannedDate)
+      allCustomers.forEach(customer => {
+        // תיקון סטטוסים ישנים
+        if (customer.Status === 'תיאום התקנה') {
+          customer.Status = 'תואמה התקנה';
+        }
+        
+        // אם יש תאריך מתוכנן - זו התקנה מתוכננת
+        if (customer.PlannedDate && customer.Status === "תואמה התקנה") {
+          const dateStr = new Date(customer.PlannedDate).toDateString();
+          if (!installsByDate[dateStr]) installsByDate[dateStr] = { scheduled: 0, pending: 0, details: [] };
+          installsByDate[dateStr].scheduled++;
+          installsByDate[dateStr].details.push({
+            type: 'scheduled',
+            name: `${customer.FirstName} ${customer.LastName}`,
+            time: customer.PreferredSlot === 2 ? 'ערב' : 'בוקר'
+          });
+        }
+      });
+
+      // הוספת לקוחות בתואמה התקנה עם תאריך מועדף (רק אם אין PlannedDate)
+      allCustomers.forEach(customer => {
+        // תיקון סטטוסים ישנים שמגיעים מהשרת
+        if (customer.Status === 'תיאום התקנה') {
+          customer.Status = 'תואמה התקנה';
+        }
+        
+        // תמיכה בסטטוסים של התקנות מתוכננות - רק אם אין PlannedDate
+        const isCoordinatedStatus = customer.Status === "תואמה התקנה";
+        if (isCoordinatedStatus && customer.PreferredDate && !customer.PlannedDate) {
+          const dateStr = new Date(customer.PreferredDate).toDateString();
+          if (!installsByDate[dateStr]) installsByDate[dateStr] = { scheduled: 0, pending: 0, details: [] };
+          installsByDate[dateStr].pending++;
+          installsByDate[dateStr].details.push({
+            type: 'pending',
+            name: `${customer.FirstName} ${customer.LastName}`,
+            time: customer.PreferredSlot === 2 ? 'ערב' : 'בוקר',
+            status: 'ממתין לתיאום'
+          });
+        }
       });
 
       // חישוב השבוע הנוכחי
@@ -514,24 +588,50 @@
         const isToday = date.toDateString() === today.toDateString();
         const isCurrentWeek = date >= currentWeekStart && date <= currentWeekEnd && isCurrentMonth;
         const dateStr = date.toDateString();
-        const installCount = installsByDate[dateStr] || 0;
+        const dayData = installsByDate[dateStr];
         
         let dayClass = `text-center py-3 px-2 ${isCurrentMonth ? 'text-gray-900' : 'text-gray-400'} cursor-pointer transition-all duration-200 relative rounded-lg`;
+        let tooltip = '';
+        let indicators = '';
         
         if (isToday) {
           dayClass += ' bg-primary text-white font-bold shadow-md transform scale-105';
         } else if (isCurrentWeek) {
           dayClass += ' bg-primary/10 border border-primary/20 font-medium';
-        } else if (installCount > 0) {
-          dayClass += ' bg-blue-50 hover:bg-blue-100 border border-blue-200';
+        } else if (dayData) {
+          if (dayData.scheduled > 0 && dayData.pending > 0) {
+            dayClass += ' bg-gradient-to-br from-blue-50 to-orange-50 hover:from-blue-100 hover:to-orange-100 border border-blue-200';
+          } else if (dayData.scheduled > 0) {
+            dayClass += ' bg-blue-50 hover:bg-blue-100 border border-blue-200';
+          } else if (dayData.pending > 0) {
+            dayClass += ' bg-orange-50 hover:bg-orange-100 border border-orange-200';
+          }
+          
+          // יצירת tooltip
+          const details = dayData.details.map(d => 
+            `${d.name} (${d.time}${d.status ? ' - ' + d.status : ''})`
+          ).join('\n');
+          tooltip = details;
+          
+          // יצירת אינדיקטורים
+          if (dayData.scheduled > 0) {
+            indicators += `<div class="absolute -top-1 -right-1 w-4 h-4 bg-blue-500 text-white text-xs rounded-full flex items-center justify-center shadow-sm">${dayData.scheduled}</div>`;
+          }
+          if (dayData.pending > 0) {
+            indicators += `<div class="absolute -top-1 ${dayData.scheduled > 0 ? '-left-1' : '-right-1'} w-4 h-4 bg-orange-500 text-white text-xs rounded-full flex items-center justify-center shadow-sm">${dayData.pending}</div>`;
+          }
         } else if (isCurrentMonth) {
           dayClass += ' hover:bg-gray-100';
         }
         
+        if (isCurrentWeek && !isToday && !dayData) {
+          tooltip = 'השבוע הנוכחי';
+        }
+        
         calendarHTML += `
-          <div class="${dayClass}" title="${installCount > 0 ? `${installCount} התקנות` : (isCurrentWeek && !isToday ? 'השבוע הנוכחי' : '')}">
+          <div class="${dayClass}" title="${tooltip}">
             ${date.getDate()}
-            ${installCount > 0 ? `<div class="absolute -top-1 -right-1 w-4 h-4 bg-blue-500 text-white text-xs rounded-full flex items-center justify-center shadow-sm">${installCount}</div>` : ''}
+            ${indicators}
           </div>
         `;
       }
@@ -623,34 +723,175 @@
     }
 
     function loadUpcomingInstalls() {
-      ajaxCall('GET', `${API_BASE_URL}/BI/GetUpcomingInstalls?days=7`, null, 
-        function(installs) {
-          const upcomingInstalls = document.getElementById('upcomingInstalls');
-          if (installs && installs.length > 0) {
-            upcomingInstalls.innerHTML = installs.map(install => `
-              <div class="flex items-center justify-between p-3 bg-${install.statusColor}-50 rounded-lg">
-                <div class="flex items-center space-x-3 space-x-reverse">
-                  <div class="w-3 h-3 bg-${install.statusColor}-500 rounded-full"></div>
-                  <div>
-                    <p class="text-sm font-medium text-gray-900">${install.customerName}</p>
-                    <p class="text-xs text-gray-600">${install.location}</p>
-                  </div>
-                </div>
-                <span class="text-xs font-medium text-${install.statusColor}-600">${install.formattedDate}</span>
-              </div>
-            `).join('');
-          } else {
-            upcomingInstalls.innerHTML = `
-              <div class="text-center py-4">
-                <p class="text-gray-500 text-sm">אין התקנות מתוכננות השבוע</p>
-              </div>
-            `;
-          }
-        },
-        function(error) {
-          loadMockUpcomingInstalls();
+      // טוען התקנות מתוכננות ולקוחות בתואמה התקנה
+      Promise.all([
+        new Promise((resolve, reject) => {
+          ajaxCall('GET', `${API_BASE_URL}/BI/GetUpcomingInstalls?days=7`, null, resolve, reject);
+        }),
+        new Promise((resolve, reject) => {
+          ajaxCall('POST', `${API_BASE_URL}/Dashboard/GetDashboardData`, JSON.stringify({}), resolve, reject);
+        })
+      ]).then(([installs, allCustomers]) => {
+        console.log('נתוני התקנות השבוע:', installs);
+        console.log('נתוני לקוחות השבוע:', allCustomers);
+        
+        // בדיקה מפורטת של כל לקוח
+        allCustomers.forEach((customer, index) => {
+          console.log(`לקוח ${index + 1}:`, {
+            שם: `${customer.FirstName} ${customer.LastName}`,
+            סטטוס: customer.Status,
+            תאריךמועדף: customer.PreferredDate,
+            תאריךמתוכנן: customer.PlannedDate,
+            סלוט: customer.PreferredSlot
+          });
+        });
+        const upcomingInstalls = document.getElementById('upcomingInstalls');
+        const allUpcoming = [];
+        
+        // הוספת התקנות מתוכננות מה-API
+        if (installs && installs.length > 0) {
+          installs.forEach(install => {
+            const installDate = new Date(install.installDate);
+            if (isWithinWeek(installDate)) {
+              allUpcoming.push({
+                name: install.customerName || 'התקנה מתוכננת',
+                location: install.location || '',
+                date: installDate,
+                time: install.timeSlot || 'לא צוין',
+                type: 'scheduled',
+                statusColor: 'blue'
+              });
+            }
+          });
         }
-      );
+        
+        // הוספת התקנות מתוכננות מנתוני הלקוחות (עם PlannedDate)
+        if (allCustomers && allCustomers.length > 0) {
+          allCustomers.forEach(customer => {
+            // תיקון סטטוסים ישנים
+            if (customer.Status === 'תיאום התקנה') {
+              customer.Status = 'תואמה התקנה';
+            }
+            
+            // אם יש תאריך מתוכנן (PlannedDate) - זו התקנה מתוכננת
+            if (customer.PlannedDate && customer.Status === "תואמה התקנה") {
+              const plannedDate = new Date(customer.PlannedDate);
+              if (isWithinWeek(plannedDate)) {
+                allUpcoming.push({
+                  name: `${customer.FirstName} ${customer.LastName}`,
+                  location: customer.City || '',
+                  date: plannedDate,
+                  time: customer.PreferredSlot === 2 ? 'ערב (14:00-18:00)' : 'בוקר (09:00-13:00)',
+                  type: 'scheduled',
+                  statusColor: 'blue'
+                });
+              }
+            }
+          });
+        }
+        
+        // הוספת לקוחות בתואמה התקנה עם תאריך מועדף השבוע (רק אם אין PlannedDate)
+        if (allCustomers && allCustomers.length > 0) {
+          allCustomers.forEach(customer => {
+            // תיקון סטטוסים ישנים שמגיעים מהשרת
+            if (customer.Status === 'תיאום התקנה') {
+              customer.Status = 'תואמה התקנה';
+            }
+            
+            const isCoordinatedStatus = customer.Status === "תואמה התקנה";
+            // רק אם אין תאריך מתוכנן (PlannedDate) - כלומר עדיין ממתין לתיאום
+            if (isCoordinatedStatus && customer.PreferredDate && !customer.PlannedDate) {
+              const preferredDate = new Date(customer.PreferredDate);
+              if (isWithinWeek(preferredDate)) {
+                allUpcoming.push({
+                  name: `${customer.FirstName} ${customer.LastName}`,
+                  location: customer.City || '',
+                  date: preferredDate,
+                  time: customer.PreferredSlot === 2 ? 'ערב (14:00-18:00)' : 'בוקר (09:00-13:00)',
+                  type: 'pending',
+                  statusColor: 'orange'
+                });
+              }
+            }
+          });
+        }
+        
+        // מיון לפי תאריך
+        allUpcoming.sort((a, b) => a.date - b.date);
+        
+        console.log('סה"כ התקנות השבוע:', allUpcoming);
+        
+        if (allUpcoming.length > 0) {
+          upcomingInstalls.innerHTML = allUpcoming.map(item => `
+            <div class="flex items-center justify-between p-3 bg-${item.statusColor}-50 rounded-lg hover:bg-${item.statusColor}-100 transition-colors">
+              <div class="flex items-center space-x-3 space-x-reverse">
+                <div class="w-3 h-3 bg-${item.statusColor}-500 rounded-full ${item.type === 'pending' ? 'animate-pulse' : ''}"></div>
+                <div>
+                  <p class="text-sm font-medium text-gray-900">${item.name}</p>
+                  <p class="text-xs text-gray-600">${item.location}</p>
+                  <p class="text-xs text-${item.statusColor}-600 font-medium">${item.type === 'pending' ? 'ממתין לתיאום' : 'מתוכנן'}</p>
+                </div>
+              </div>
+              <div class="text-left">
+                <span class="text-xs font-medium text-${item.statusColor}-700 block">${formatDateForDisplay(item.date)}</span>
+                <span class="text-xs text-gray-500">${item.time}</span>
+              </div>
+            </div>
+          `).join('');
+        } else {
+          upcomingInstalls.innerHTML = `
+            <div class="text-center py-6">
+              <svg class="w-12 h-12 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+              </svg>
+              <p class="text-gray-500 text-sm">אין התקנות מתוכננות בטווח הקרוב</p>
+              <p class="text-gray-400 text-xs mt-1">התקנות חדשות יופיעו כאן</p>
+            </div>
+          `;
+        }
+      }).catch(error => {
+        console.error('Error loading upcoming installs:', error);
+        loadMockUpcomingInstalls();
+      });
+    }
+    
+    // פונקציית עזר לבדיקה אם תאריך הוא בטווח השבועיים הקרובים
+    function isWithinWeek(date) {
+      const today = new Date();
+      const weekStart = new Date(today);
+      const dayOfWeek = weekStart.getDay();
+      weekStart.setDate(today.getDate() - dayOfWeek);
+      weekStart.setHours(0, 0, 0, 0);
+      
+      // הרחבת הטווח ל-14 יום (שבועיים) כדי לכלול גם תאריכים קרובים
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekStart.getDate() + 13); // 2 שבועות
+      weekEnd.setHours(23, 59, 59, 999);
+      
+      console.log('בדיקת שבועיים קרובים:', {
+        תאריךבדיקה: date,
+        תחילתטווח: weekStart,
+        סוףטווח: weekEnd,
+        בטווח: date >= weekStart && date <= weekEnd
+      });
+      
+      return date >= weekStart && date <= weekEnd;
+    }
+    
+    // פונקציית עזר לעיצוב תאריך לתצוגה
+    function formatDateForDisplay(date) {
+      const today = new Date();
+      const tomorrow = new Date(today);
+      tomorrow.setDate(today.getDate() + 1);
+      
+      if (date.toDateString() === today.toDateString()) {
+        return 'היום';
+      } else if (date.toDateString() === tomorrow.toDateString()) {
+        return 'מחר';
+      } else {
+        const days = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
+        return `יום ${days[date.getDay()]}`;
+      }
     }
 
     function loadMockUpcomingInstalls() {

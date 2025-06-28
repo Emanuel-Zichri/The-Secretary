@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>לקוחות - דוד פרקטים</title>
+  <link rel="icon" href="data:;base64,iVBORw0KGgo=">
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -79,7 +80,7 @@
             </svg>
             לוח בקרה - BI
           </a>
-          <a href="#" class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors">
+          <a href="SystemSettingsPage.html" class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors">
             <svg class="w-5 h-5 ml-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
@@ -334,8 +335,8 @@
       'צפייה בסרטון לקוח',
       'טיוטה להצעת מחיר',
       'שליחת טיוטה ללקוח',
-      'העברה מקדמה',
-      'תיאום התקנה',
+      'העברת מקדמה',
+      'תואמה התקנה',
       'התקנה בוצעה',
       'קבלת משוב'
     ];
@@ -346,8 +347,8 @@
       'צפייה בסרטון לקוח',
       'טיוטה להצעת מחיר',
       'שליחת טיוטה ללקוח',
-      'העברה מקדמה',
-      'תיאום התקנה'
+      'העברת מקדמה',
+      'תואמה התקנה'
     ];
 
     const completedStatuses = [
@@ -618,9 +619,9 @@
       
       if (currentView === 'open') {
         const pendingQuotes = filteredData.filter(c => ["טיוטה", "צפייה בסרטון לקוח", "טיוטה להצעת מחיר", "שליחת טיוטה ללקוח"].includes(c.Status)).length;
-        const pendingInstalls = filteredData.filter(c => c.Status === "תיאום התקנה").length;
+        const pendingInstalls = filteredData.filter(c => c.Status === "תואמה התקנה").length;
         const awaitingApproval = filteredData.filter(c => c.Status === "העברה מקדמה").length;
-        const inProgress = filteredData.filter(c => ["תיאום התקנה", "העברה מקדמה"].includes(c.Status)).length;
+        const inProgress = filteredData.filter(c => ["תואמה התקנה", "העברת מקדמה"].includes(c.Status)).length;
 
         document.getElementById('totalCustomers').textContent = totalInView;
         document.getElementById('activeRequests').textContent = pendingQuotes;
@@ -630,7 +631,7 @@
         // Update labels for open view
         document.querySelector('#totalCustomers').nextElementSibling.textContent = 'פניות פתוחות';
         document.querySelector('#activeRequests').nextElementSibling.textContent = 'ממתינות להצעה';
-        document.querySelector('#completedInstalls').nextElementSibling.textContent = 'לתיאום התקנה';
+        document.querySelector('#completedInstalls').nextElementSibling.textContent = 'לתואמה התקנה';
         document.querySelector('#pendingInstalls').nextElementSibling.textContent = 'בתהליך';
       } else {
         const thisWeek = new Date();
@@ -658,8 +659,8 @@
         'צפייה בסרטון לקוח': 'bg-blue-100 text-blue-800',
         'טיוטה להצעת מחיר': 'bg-yellow-100 text-yellow-800',
         'שליחת טיוטה ללקוח': 'bg-orange-100 text-orange-800',
-        'העברה מקדמה': 'bg-purple-100 text-purple-800',
-        'תיאום התקנה': 'bg-indigo-100 text-indigo-800',
+        'העברת מקדמה': 'bg-purple-100 text-purple-800',
+        'תואמה התקנה': 'bg-indigo-100 text-indigo-800',
         'התקנה בוצעה': 'bg-green-100 text-green-800',
         'קבלת משוב': 'bg-emerald-100 text-emerald-800'
       };
