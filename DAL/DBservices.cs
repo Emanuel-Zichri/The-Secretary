@@ -2436,6 +2436,308 @@ public class DBservices
         return UpdateSystemSetting(setting);
     }
 
+    //--------------------------------------------------------------------------------------------------
+    // פונקציות לניהול משתמשים ופרטי עסק
+    //--------------------------------------------------------------------------------------------------
+
+    /// <summary>
+    /// קבלת כל המשתמשים
+    /// </summary>
+    public List<FinalProject.BL.User> GetAllUsers()
+    {
+        SqlConnection con;
+        SqlCommand cmd;
+        List<FinalProject.BL.User> users = new List<FinalProject.BL.User>();
+
+        try
+        {
+            con = connect("myProjDB");
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+
+        try
+        {
+            cmd = new SqlCommand("SELECT * FROM Users ORDER BY CreatedAt DESC", con);
+            SqlDataReader reader = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+
+            while (reader.Read())
+            {
+                FinalProject.BL.User user = new FinalProject.BL.User
+                {
+                    UserID = (int)reader["UserID"],
+                    Username = reader["Username"].ToString(),
+                    Password = reader["Password"].ToString(),
+                    BusinessName = reader["BusinessName"].ToString(),
+                    BusinessPhone = reader["BusinessPhone"]?.ToString(),
+                    BusinessEmail = reader["BusinessEmail"]?.ToString(),
+                    WorkingHours = reader["WorkingHours"]?.ToString(),
+                    AboutUs = reader["AboutUs"]?.ToString(),
+                    BusinessLogo = reader["BusinessLogo"]?.ToString(),
+                    IntroVideoURL = reader["IntroVideoURL"]?.ToString(),
+                    IsActive = (bool)reader["IsActive"],
+                    CreatedAt = (DateTime)reader["CreatedAt"],
+                    UpdatedAt = (DateTime)reader["UpdatedAt"],
+                    LastLogin = reader["LastLogin"] != DBNull.Value ? (DateTime?)reader["LastLogin"] : null
+                };
+                users.Add(user);
+            }
+            reader.Close();
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+        finally
+        {
+            if (con != null)
+                con.Close();
+        }
+
+        return users;
+    }
+
+    /// <summary>
+    /// קבלת משתמש לפי ID
+    /// </summary>
+    public FinalProject.BL.User GetUserById(int userId)
+    {
+        SqlConnection con;
+        SqlCommand cmd;
+
+        try
+        {
+            con = connect("myProjDB");
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+
+        try
+        {
+            cmd = new SqlCommand("SELECT * FROM Users WHERE UserID = @UserID", con);
+            cmd.Parameters.AddWithValue("@UserID", userId);
+            
+            SqlDataReader reader = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+
+            if (reader.Read())
+            {
+                FinalProject.BL.User user = new FinalProject.BL.User
+                {
+                    UserID = (int)reader["UserID"],
+                    Username = reader["Username"].ToString(),
+                    Password = reader["Password"].ToString(),
+                    BusinessName = reader["BusinessName"].ToString(),
+                    BusinessPhone = reader["BusinessPhone"]?.ToString(),
+                    BusinessEmail = reader["BusinessEmail"]?.ToString(),
+                    WorkingHours = reader["WorkingHours"]?.ToString(),
+                    AboutUs = reader["AboutUs"]?.ToString(),
+                    BusinessLogo = reader["BusinessLogo"]?.ToString(),
+                    IntroVideoURL = reader["IntroVideoURL"]?.ToString(),
+                    IsActive = (bool)reader["IsActive"],
+                    CreatedAt = (DateTime)reader["CreatedAt"],
+                    UpdatedAt = (DateTime)reader["UpdatedAt"],
+                    LastLogin = reader["LastLogin"] != DBNull.Value ? (DateTime?)reader["LastLogin"] : null
+                };
+                reader.Close();
+                return user;
+            }
+            
+            reader.Close();
+            return null;
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+        finally
+        {
+            if (con != null)
+                con.Close();
+        }
+    }
+
+    /// <summary>
+    /// קבלת משתמש לפי שם משתמש
+    /// </summary>
+    public FinalProject.BL.User GetUserByUsername(string username)
+    {
+        SqlConnection con;
+        SqlCommand cmd;
+
+        try
+        {
+            con = connect("myProjDB");
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+
+        try
+        {
+            cmd = new SqlCommand("SELECT * FROM Users WHERE Username = @Username", con);
+            cmd.Parameters.AddWithValue("@Username", username);
+            
+            SqlDataReader reader = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+
+            if (reader.Read())
+            {
+                FinalProject.BL.User user = new FinalProject.BL.User
+                {
+                    UserID = (int)reader["UserID"],
+                    Username = reader["Username"].ToString(),
+                    Password = reader["Password"].ToString(),
+                    BusinessName = reader["BusinessName"].ToString(),
+                    BusinessPhone = reader["BusinessPhone"]?.ToString(),
+                    BusinessEmail = reader["BusinessEmail"]?.ToString(),
+                    WorkingHours = reader["WorkingHours"]?.ToString(),
+                    AboutUs = reader["AboutUs"]?.ToString(),
+                    BusinessLogo = reader["BusinessLogo"]?.ToString(),
+                    IntroVideoURL = reader["IntroVideoURL"]?.ToString(),
+                    IsActive = (bool)reader["IsActive"],
+                    CreatedAt = (DateTime)reader["CreatedAt"],
+                    UpdatedAt = (DateTime)reader["UpdatedAt"],
+                    LastLogin = reader["LastLogin"] != DBNull.Value ? (DateTime?)reader["LastLogin"] : null
+                };
+                reader.Close();
+                return user;
+            }
+            
+            reader.Close();
+            return null;
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+        finally
+        {
+            if (con != null)
+                con.Close();
+        }
+    }
+
+    /// <summary>
+    /// הוספת משתמש חדש
+    /// </summary>
+    public int AddUser(FinalProject.BL.User user)
+    {
+        SqlConnection con;
+        SqlCommand cmd;
+
+        try
+        {
+            con = connect("myProjDB");
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+
+        try
+        {
+            string sql = @"
+                INSERT INTO Users (Username, Password, BusinessName, BusinessPhone, BusinessEmail, 
+                                  WorkingHours, AboutUs, BusinessLogo, IntroVideoURL, IsActive, CreatedAt, UpdatedAt)
+                VALUES (@Username, @Password, @BusinessName, @BusinessPhone, @BusinessEmail,
+                       @WorkingHours, @AboutUs, @BusinessLogo, @IntroVideoURL, @IsActive, @CreatedAt, @UpdatedAt);
+                SELECT SCOPE_IDENTITY();";
+
+            cmd = new SqlCommand(sql, con);
+            cmd.Parameters.AddWithValue("@Username", user.Username);
+            cmd.Parameters.AddWithValue("@Password", user.Password);
+            cmd.Parameters.AddWithValue("@BusinessName", user.BusinessName);
+            cmd.Parameters.AddWithValue("@BusinessPhone", (object)user.BusinessPhone ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@BusinessEmail", (object)user.BusinessEmail ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@WorkingHours", (object)user.WorkingHours ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@AboutUs", (object)user.AboutUs ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@BusinessLogo", (object)user.BusinessLogo ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@IntroVideoURL", (object)user.IntroVideoURL ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@IsActive", user.IsActive);
+            cmd.Parameters.AddWithValue("@CreatedAt", user.CreatedAt);
+            cmd.Parameters.AddWithValue("@UpdatedAt", user.UpdatedAt);
+
+            object result = cmd.ExecuteScalar();
+            return Convert.ToInt32(result);
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+        finally
+        {
+            if (con != null)
+                con.Close();
+        }
+    }
+
+    /// <summary>
+    /// עדכון פרטי משתמש
+    /// </summary>
+    public bool UpdateUser(FinalProject.BL.User user)
+    {
+        SqlConnection con;
+        SqlCommand cmd;
+
+        try
+        {
+            con = connect("myProjDB");
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+
+        try
+        {
+            string sql = @"
+                UPDATE Users SET 
+                    Username = @Username,
+                    Password = @Password,
+                    BusinessName = @BusinessName,
+                    BusinessPhone = @BusinessPhone,
+                    BusinessEmail = @BusinessEmail,
+                    WorkingHours = @WorkingHours,
+                    AboutUs = @AboutUs,
+                    BusinessLogo = @BusinessLogo,
+                    IntroVideoURL = @IntroVideoURL,
+                    IsActive = @IsActive,
+                    UpdatedAt = @UpdatedAt,
+                    LastLogin = @LastLogin
+                WHERE UserID = @UserID";
+
+            cmd = new SqlCommand(sql, con);
+            cmd.Parameters.AddWithValue("@UserID", user.UserID);
+            cmd.Parameters.AddWithValue("@Username", user.Username);
+            cmd.Parameters.AddWithValue("@Password", user.Password);
+            cmd.Parameters.AddWithValue("@BusinessName", user.BusinessName);
+            cmd.Parameters.AddWithValue("@BusinessPhone", (object)user.BusinessPhone ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@BusinessEmail", (object)user.BusinessEmail ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@WorkingHours", (object)user.WorkingHours ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@AboutUs", (object)user.AboutUs ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@BusinessLogo", (object)user.BusinessLogo ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@IntroVideoURL", (object)user.IntroVideoURL ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@IsActive", user.IsActive);
+            cmd.Parameters.AddWithValue("@UpdatedAt", user.UpdatedAt);
+            cmd.Parameters.AddWithValue("@LastLogin", (object)user.LastLogin ?? DBNull.Value);
+
+            int rowsAffected = cmd.ExecuteNonQuery();
+            return rowsAffected > 0;
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+        finally
+        {
+            if (con != null)
+                con.Close();
+        }
+    }
 
 }
 
@@ -2492,6 +2794,8 @@ public class PriceEstimateCalculation
     public int EstimatedMaxDays { get; set; }
     public decimal ComplexityMultiplier { get; set; }
 }
+
+
 
 
 

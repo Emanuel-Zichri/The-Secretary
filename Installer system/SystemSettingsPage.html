@@ -118,36 +118,192 @@
 
       <!-- Settings Grid -->
       <div id="settingsContent" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <!-- Parquet Prices Card -->
-        <div class="bg-white rounded-xl shadow-sm p-6 card-hover">
-          <div class="flex items-center justify-between mb-6">
-            <h3 class="text-lg font-semibold text-gray-900">מחירי פרקט ברירת מחדל</h3>
-            <div class="p-2 bg-primary/10 rounded-lg">
-              <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
-              </svg>
+        <!-- Parquet Catalog Management -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 col-span-2">
+          <div class="p-6 border-b border-gray-200">
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center">
+                <div class="p-2 bg-primary/10 rounded-lg ml-3">
+                  <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="text-xl font-semibold text-gray-900">ניהול קטלוג פרקטים</h3>
+                  <p class="text-sm text-gray-600">ניהול מלא של סוגי הפרקט במערכת</p>
+                </div>
+              </div>
+              <div class="flex items-center space-x-3 space-x-reverse">
+                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800" id="catalogStats">
+                  📦 0 פרקטים
+                </span>
+                <button onclick="openAddParquetModal()" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors font-medium">
+                  <span class="flex items-center">
+                    <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    הוסף פרקט
+                  </span>
+                </button>
+              </div>
+            </div>
+            
+            <!-- Search and Filter -->
+            <div class="flex items-center space-x-4 space-x-reverse">
+              <div class="flex-1 relative">
+                <input type="text" id="searchParquet" placeholder="חפש פרקט..." onkeyup="filterParquets()" 
+                       class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                <svg class="absolute left-3 top-2.5 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+              </div>
+              <select id="filterStatus" onchange="filterParquets()" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                <option value="">כל הסטטוסים</option>
+                <option value="active">פעיל</option>
+                <option value="inactive">לא פעיל</option>
+              </select>
+              <select id="filterType" onchange="filterParquets()" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                <option value="">כל הסוגים</option>
+                <option value="עץ">עץ מלא</option>
+                <option value="למינציה">למינציה</option>
+                <option value="פישבון">פישבון</option>
+                <option value="SPC">SPC</option>
+              </select>
             </div>
           </div>
           
-          <div class="space-y-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">מחיר SPC/למינציה (ש"ח למ"ר)</label>
-              <input type="number" id="spcPrice" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="60" />
+          <!-- Parquet Table -->
+          <div class="overflow-hidden">
+            <div id="parquetTableContainer" class="overflow-x-auto max-h-96">
+              <table class="w-full">
+                <thead class="bg-gray-50 border-b border-gray-200 sticky top-0">
+                  <tr>
+                    <th class="text-right px-4 py-3 text-sm font-semibold text-gray-700">תמונה</th>
+                    <th class="text-right px-4 py-3 text-sm font-semibold text-gray-700">שם הפרקט</th>
+                    <th class="text-right px-4 py-3 text-sm font-semibold text-gray-700">סוג</th>
+                    <th class="text-right px-4 py-3 text-sm font-semibold text-gray-700">מחיר למ"ר</th>
+                    <th class="text-right px-4 py-3 text-sm font-semibold text-gray-700">סטטוס</th>
+                    <th class="text-center px-4 py-3 text-sm font-semibold text-gray-700">פעולות</th>
+                  </tr>
+                </thead>
+                <tbody id="parquetTableBody" class="divide-y divide-gray-200">
+                  <!-- Loading state -->
+                  <tr>
+                    <td colspan="6" class="px-4 py-8 text-center">
+                      <div class="flex items-center justify-center space-x-2 space-x-reverse">
+                        <div class="w-4 h-4 bg-primary rounded-full animate-bounce"></div>
+                        <div class="w-4 h-4 bg-primary rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                        <div class="w-4 h-4 bg-primary rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                        <span class="text-gray-600 mr-3">טוען קטלוג פרקטים...</span>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Calculator Items Management -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 col-span-2">
+          <div class="p-6 border-b border-gray-200">
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center">
+                <div class="p-2 bg-blue-100 rounded-lg ml-3">
+                  <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="text-xl font-semibold text-gray-900">ניהול רכיבי המחשבון החכם</h3>
+                  <p class="text-sm text-gray-600">ניהול פריטים קבועים במחשבון ומועמדים להוספה</p>
+                </div>
+              </div>
+              <div class="flex items-center space-x-3 space-x-reverse">
+                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800" id="calculatorStats">
+                  🧮 0 פריטים
+                </span>
+                <button onclick="openAddCalculatorItemModal()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                  <span class="flex items-center">
+                    <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    הוסף רכיב
+                  </span>
+                </button>
+              </div>
             </div>
             
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">מחיר עץ (ש"ח למ"ר)</label>
-              <input type="number" id="woodPrice" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="85" />
+            <!-- Tabs for Items and Candidates -->
+            <div class="mb-4">
+              <div class="flex bg-gray-100 rounded-lg p-1">
+                <button id="itemsTab" onclick="switchCalculatorTab('items')" class="flex-1 py-2 px-4 text-sm font-medium rounded-md bg-white text-blue-600 shadow-sm transition-all">
+                  📦 פריטים קבועים
+                </button>
+                <button id="candidatesTab" onclick="switchCalculatorTab('candidates')" class="flex-1 py-2 px-4 text-sm font-medium rounded-md text-gray-600 hover:text-gray-900 transition-all">
+                  💡 המלצות
+                </button>
+              </div>
             </div>
             
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">מחיר פישבון (ש"ח למ"ר)</label>
-              <input type="number" id="fishbonePrice" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="150" />
+            <!-- Search and Filter (for items only) -->
+            <div id="calculatorSearchFilters" class="flex items-center space-x-4 space-x-reverse">
+              <div class="flex-1 relative">
+                <input type="text" id="searchCalculatorItem" placeholder="חפש רכיב..." onkeyup="filterCalculatorItems()" 
+                       class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <svg class="absolute left-3 top-2.5 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+              </div>
+              <select id="filterCalculatorStatus" onchange="filterCalculatorItems()" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <option value="">כל הסטטוסים</option>
+                <option value="active">פעיל</option>
+                <option value="inactive">לא פעיל</option>
+              </select>
             </div>
-            
-            <button onclick="updateParquetPrices()" class="w-full bg-primary hover:bg-primary-dark text-white font-medium py-2 px-4 rounded-lg transition-colors">
-              עדכן מחירים
-            </button>
+          </div>
+          
+          <!-- Calculator Items Table -->
+          <div id="calculatorItemsSection" class="overflow-hidden">
+            <div id="calculatorItemsTableContainer" class="overflow-x-auto max-h-96">
+              <table class="w-full">
+                <thead class="bg-gray-50 border-b border-gray-200 sticky top-0">
+                  <tr>
+                    <th class="text-right px-4 py-3 text-sm font-semibold text-gray-700">שם הרכיב</th>
+                    <th class="text-right px-4 py-3 text-sm font-semibold text-gray-700">תיאור</th>
+                    <th class="text-right px-4 py-3 text-sm font-semibold text-gray-700">מחיר (₪)</th>
+                    <th class="text-right px-4 py-3 text-sm font-semibold text-gray-700">סטטוס</th>
+                    <th class="text-center px-4 py-3 text-sm font-semibold text-gray-700">פעולות</th>
+                  </tr>
+                </thead>
+                <tbody id="calculatorItemsTableBody" class="divide-y divide-gray-200">
+                  <!-- Loading state -->
+                  <tr>
+                    <td colspan="5" class="px-4 py-8 text-center">
+                      <div class="flex items-center justify-center space-x-2 space-x-reverse">
+                        <div class="w-4 h-4 bg-blue-600 rounded-full animate-bounce"></div>
+                        <div class="w-4 h-4 bg-blue-600 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                        <div class="w-4 h-4 bg-blue-600 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                        <span class="text-gray-600 mr-3">טוען רכיבי מחשבון...</span>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Candidates Section (hidden by default) -->
+          <div id="candidatesSection" class="hidden overflow-hidden">
+            <div class="p-6 border-t border-gray-200">
+              <div class="text-center mb-4">
+                <h4 class="text-lg font-medium text-gray-900 mb-2">💡 המלצות על רכיבים חדשים</h4>
+                <p class="text-sm text-gray-600">פריטים שהוקלדו ידנית על ידי לקוחות ומוצעים להפיכה לרכיבים קבועים</p>
+              </div>
+              <div id="candidatesContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Candidates will be loaded here -->
+              </div>
+            </div>
           </div>
         </div>
 
@@ -179,8 +335,23 @@
             </div>
             
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">אחוז מע"מ</label>
-                              <input type="number" id="vatPercentage" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="18" />
+              <label class="block text-sm font-medium text-gray-700 mb-2">אודות העסק</label>
+              <textarea id="aboutUs" rows="4" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent resize-none" placeholder="תיאור על העסק והשירותים שהוא מספק..."></textarea>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">שם העסק</label>
+              <input type="text" id="businessName" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="דוד פרקטים" />
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">לוגו העסק</label>
+              <input type="text" id="businessLogo" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="../picturs/logo.png" />
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">קישור לסרטון הכירות</label>
+              <input type="url" id="introVideoURL" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="https://www.youtube.com/..." />
             </div>
             
             <button onclick="updateBusinessInfo()" class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
@@ -189,80 +360,165 @@
           </div>
         </div>
 
-        <!-- System Status Card -->
-        <div class="bg-white rounded-xl shadow-sm p-6 card-hover">
-          <div class="flex items-center justify-between mb-6">
-            <h3 class="text-lg font-semibold text-gray-900">סטטוס מערכת</h3>
-            <div class="p-2 bg-blue-100 rounded-lg">
-              <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-              </svg>
-            </div>
-          </div>
-          
-          <div class="space-y-4">
-            <div class="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-              <span class="text-sm font-medium text-gray-700">חיבור למסד נתונים</span>
-              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                <span class="w-2 h-2 bg-green-400 rounded-full ml-1"></span>
-                פעיל
-              </span>
-            </div>
-            
-            <div class="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-              <span class="text-sm font-medium text-gray-700">שרת API</span>
-              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                <span class="w-2 h-2 bg-green-400 rounded-full ml-1"></span>
-                פעיל
-              </span>
-            </div>
-            
-            <div class="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
-              <span class="text-sm font-medium text-gray-700">גרסת מערכת</span>
-              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                v1.0.0
-              </span>
-            </div>
-            
-            <button onclick="checkSystemHealth()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
-              בדוק סטטוס מערכת
-            </button>
-          </div>
-        </div>
-
-        <!-- Backup & Maintenance Card -->
-        <div class="bg-white rounded-xl shadow-sm p-6 card-hover">
-          <div class="flex items-center justify-between mb-6">
-            <h3 class="text-lg font-semibold text-gray-900">גיבוי ותחזוקה</h3>
-            <div class="p-2 bg-purple-100 rounded-lg">
-              <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-              </svg>
-            </div>
-          </div>
-          
-          <div class="space-y-4">
-            <div class="p-3 bg-gray-50 rounded-lg">
-              <div class="flex items-center justify-between mb-2">
-                <span class="text-sm font-medium text-gray-700">גיבוי אחרון</span>
-                <span class="text-sm text-gray-500" id="lastBackup">טוען...</span>
-              </div>
-              <div class="w-full bg-gray-200 rounded-full h-2">
-                <div class="bg-green-600 h-2 rounded-full" style="width: 100%"></div>
-              </div>
-            </div>
-            
-            <button onclick="createBackup()" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
-              צור גיבוי חדש
-            </button>
-            
-            <button onclick="cleanupDatabase()" class="w-full bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
-              נקה מסד נתונים
-            </button>
-          </div>
-        </div>
       </div>
     </main>
+  </div>
+
+  <!-- Add/Edit Parquet Modal -->
+  <div id="parquetModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-screen overflow-y-auto">
+      <div class="p-6 border-b border-gray-200">
+        <div class="flex items-center justify-between">
+          <h2 id="modalTitle" class="text-xl font-semibold text-gray-900">הוסף פרקט חדש</h2>
+          <button onclick="closeParquetModal()" class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div class="p-6">
+        <form id="parquetForm" class="space-y-6">
+          <input type="hidden" id="parquetId" value="">
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Basic Info -->
+            <div class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">שם הפרקט *</label>
+                <input type="text" id="parquetName" required 
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                       placeholder="עץ מלא אלון טבעי">
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">סוג הפרקט *</label>
+                <select id="parquetType" required 
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                  <option value="">בחר סוג</option>
+                  <option value="עץ מלא">עץ מלא</option>
+                  <option value="למינציה">למינציה</option>
+                  <option value="פישבון">פישבון</option>
+                  <option value="SPC">SPC</option>
+                  <option value="הנדסי">הנדסי</option>
+                  <option value="ויניל">ויניל</option>
+                </select>
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">מחיר למ"ר (₪) *</label>
+                <input type="number" id="parquetPrice" required min="0" step="0.01"
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                       placeholder="85.00">
+              </div>
+              
+              <div>
+                <label class="flex items-center">
+                  <input type="checkbox" id="parquetActive" checked 
+                         class="w-4 h-4 text-primary bg-gray-100 border-gray-300 rounded focus:ring-primary focus:ring-2">
+                  <span class="mr-2 text-sm font-medium text-gray-700">פעיל במערכת</span>
+                </label>
+              </div>
+            </div>
+            
+            <!-- Image Section -->
+            <div class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">כתובת תמונה</label>
+                <input type="url" id="parquetImageURL" 
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                       placeholder="https://example.com/image.jpg או שם קובץ">
+                <p class="text-xs text-gray-500 mt-1">ניתן להכניס URL מלא או שם קובץ מהתיקייה picturs/parquetsTypes/</p>
+              </div>
+              
+              <!-- Image Preview -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">תצוגה מקדימה</label>
+                <div class="w-full h-32 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center bg-gray-50">
+                  <img id="imagePreview" class="hidden max-w-full max-h-full object-cover rounded-lg" alt="תצוגה מקדימה">
+                  <div id="imagePlaceholder" class="text-center text-gray-400">
+                    <svg class="w-8 h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                    <p class="text-sm">תצוגה מקדימה של התמונה</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Action Buttons -->
+          <div class="flex justify-center gap-3 pt-4 border-t border-gray-200">
+            <button type="submit" id="saveButton" class="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors font-medium shadow-md">
+              💾 שמור פרקט
+            </button>
+            <button type="button" onclick="closeParquetModal()" class="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium">
+              ביטול
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add/Edit Calculator Item Modal -->
+  <div id="calculatorItemModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-xl max-w-lg w-full max-h-screen overflow-y-auto">
+      <div class="p-6 border-b border-gray-200">
+        <div class="flex items-center justify-between">
+          <h2 id="calculatorModalTitle" class="text-xl font-semibold text-gray-900">הוסף רכיב חדש למחשבון</h2>
+          <button onclick="closeCalculatorItemModal()" class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div class="p-6">
+        <form id="calculatorItemForm" class="space-y-4">
+          <input type="hidden" id="calculatorItemId" value="">
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">שם הרכיב *</label>
+            <input type="text" id="calculatorItemName" required 
+                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                   placeholder="למינציה איכותית">
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">תיאור</label>
+            <textarea id="calculatorItemDescription" rows="3"
+                      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                      placeholder="תיאור קצר על הרכיב וייעודו..."></textarea>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">מחיר (₪) *</label>
+            <input type="number" id="calculatorItemPrice" required min="0" step="0.01"
+                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                   placeholder="120.00">
+          </div>
+          
+          <div>
+            <label class="flex items-center">
+              <input type="checkbox" id="calculatorItemActive" checked 
+                     class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
+              <span class="mr-2 text-sm font-medium text-gray-700">פעיל במערכת</span>
+            </label>
+          </div>
+          
+          <!-- Action Buttons -->
+          <div class="flex justify-center gap-3 pt-4 border-t border-gray-200">
+            <button type="submit" id="calculatorSaveButton" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-md">
+              💾 שמור רכיב
+            </button>
+            <button type="button" onclick="closeCalculatorItemModal()" class="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium">
+              ביטול
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -294,138 +550,925 @@
       document.getElementById('settingsContent').classList.remove('hidden');
     }
 
+    // Global variables for parquet catalog
+    let allParquets = [];
+    let filteredParquets = [];
+    let currentEditingParquet = null;
+
     function loadSettings() {
       showLoading();
       
-      // Load parquet prices
-      ajaxCall('GET', `${API_BASE_URL}/SystemSettings/GetParquetPrices`, null,
-        function(prices) {
-          document.getElementById('spcPrice').value = prices.SPC || '60';
-          document.getElementById('woodPrice').value = prices.Wood || '85';
-          document.getElementById('fishbonePrice').value = prices.Fishbone || '150';
-        },
-        function(error) {
-          console.error('Error loading parquet prices:', error);
-          showToast('שגיאה בטעינת מחירי פרקט', 'error');
-        }
-      );
+      // Load parquet catalog
+      loadParquetCatalog();
 
-      // Load business info
-      ajaxCall('GET', `${API_BASE_URL}/SystemSettings/GetBusinessInfo`, null,
-        function(info) {
-          document.getElementById('businessPhone').value = info.Phone || '';
-          document.getElementById('businessEmail').value = info.Email || '';
-          document.getElementById('workingHours').value = info.WorkingHours || '';
-                      document.getElementById('vatPercentage').value = info.VATPercentage || '18';
-        },
-        function(error) {
-          console.error('Error loading business info:', error);
-          showToast('שגיאה בטעינת פרטי עסק', 'error');
-        }
-      );
+      // Load calculator items
+      loadCalculatorItems();
 
-      // Set last backup time
-      document.getElementById('lastBackup').textContent = new Date().toLocaleDateString('he-IL');
-      
+              // Load business info from new Users API
+        ajaxCall('GET', `${API_BASE_URL}/User/GetBusinessInfo`, null,
+          function(info) {
+            document.getElementById('businessName').value = info.businessName || '';
+            document.getElementById('businessPhone').value = info.businessPhone || '';
+            document.getElementById('businessEmail').value = info.businessEmail || '';
+            document.getElementById('workingHours').value = info.workingHours || '';
+            document.getElementById('aboutUs').value = info.aboutUs || '';
+            document.getElementById('businessLogo').value = info.businessLogo || '';
+            document.getElementById('introVideoURL').value = info.introVideoURL || '';
+            showToast('פרטי העסק נטענו בהצלחה');
+          },
+          function(error) {
+            console.error('Error loading business info:', error);
+            showToast('שגיאה בטעינת פרטי עסק - נטען מנתונים דיפולטיים', 'error');
+            // Load default values
+            document.getElementById('businessName').value = 'דוד פרקטים';
+            document.getElementById('businessPhone').value = '050-1234567';
+            document.getElementById('businessEmail').value = 'info@davidparquet.co.il';
+            document.getElementById('workingHours').value = 'א׳-ה׳: 8:00-18:00 | ו׳: 8:00-14:00';
+            document.getElementById('aboutUs').value = 'אנחנו דוד פרקטים - חברה מובילה בתחום התקנת פרקט עם יותר מ-15 שנות ניסיון.';
+            document.getElementById('businessLogo').value = '../picturs/logo.png';
+          }
+        );
+
       hideLoading();
-      showToast('הגדרות נטענו בהצלחה');
     }
 
-    function updateParquetPrices() {
-      const spcPrice = parseFloat(document.getElementById('spcPrice').value);
-      const woodPrice = parseFloat(document.getElementById('woodPrice').value);
-      const fishbonePrice = parseFloat(document.getElementById('fishbonePrice').value);
-
-      if (!spcPrice || !woodPrice || !fishbonePrice) {
-        showToast('נא למלא את כל המחירים', 'error');
-        return;
-      }
-
-      const request = {
-        SPCPrice: spcPrice,
-        WoodPrice: woodPrice,
-        FishbonePrice: fishbonePrice
-      };
-
-      ajaxCall('POST', `${API_BASE_URL}/SystemSettings/UpdateParquetPrices`, JSON.stringify(request),
-        function(response) {
-          showToast('מחירי פרקט עודכנו בהצלחה');
+    // ===== PARQUET CATALOG MANAGEMENT =====
+    
+    // Load parquet catalog from API
+    function loadParquetCatalog() {
+      console.log('🏗️ טוען קטלוג פרקטים...');
+      
+      ajaxCall('GET', `${API_BASE_URL}/ParquetType/GetAll`, null,
+        function(parquets) {
+          console.log('✅ נטען קטלוג פרקטים:', parquets);
+          allParquets = parquets || [];
+          filteredParquets = [...allParquets];
+          renderParquetTable();
+          updateCatalogStats();
+          showToast('קטלוג פרקטים נטען בהצלחה');
         },
         function(error) {
-          console.error('Error updating parquet prices:', error);
-          showToast('שגיאה בעדכון מחירי פרקט', 'error');
+          console.error('❌ שגיאה בטעינת קטלוג פרקטים:', error);
+          allParquets = [];
+          filteredParquets = [];
+          renderEmptyTable('שגיאה בטעינת הקטלוג מהשרת');
+          showToast('שגיאה בטעינת קטלוג הפרקטים', 'error');
         }
       );
+    }
+
+    // Render parquet table
+    function renderParquetTable() {
+      const tbody = document.getElementById('parquetTableBody');
+      
+      if (filteredParquets.length === 0) {
+        renderEmptyTable('לא נמצאו פרקטים המתאימים לחיפוש');
+        return;
+      }
+      
+      tbody.innerHTML = filteredParquets.map(parquet => `
+        <tr class="hover:bg-gray-50 transition-colors">
+          <td class="px-4 py-3">
+            <div class="w-16 h-12 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
+              <img src="${getParquetImagePath(parquet.imageURL, parquet.typeName)}" 
+                   alt="${parquet.typeName}"
+                   class="w-full h-full object-cover"
+                   onerror="this.src='../picturs/logo.png'; this.className='w-8 h-8 object-contain';">
+            </div>
+          </td>
+          <td class="px-4 py-3">
+            <div class="font-medium text-gray-900">${parquet.typeName || 'ללא שם'}</div>
+          </td>
+          <td class="px-4 py-3">
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getTypeColor(parquet.type)}">
+              ${parquet.type || 'ללא סוג'}
+            </span>
+          </td>
+          <td class="px-4 py-3">
+            <span class="font-semibold text-primary">₪${parseFloat(parquet.pricePerUnit || 0).toFixed(2)}</span>
+          </td>
+          <td class="px-4 py-3">
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+              parquet.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+            }">
+              <span class="w-2 h-2 ${parquet.isActive ? 'bg-green-400' : 'bg-red-400'} rounded-full ml-1"></span>
+              ${parquet.isActive ? 'פעיל' : 'לא פעיל'}
+            </span>
+          </td>
+          <td class="px-4 py-3 text-center">
+            <div class="flex items-center justify-center space-x-2 space-x-reverse">
+              <button onclick="editParquet(${parquet.parquetTypeID})" 
+                      class="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors" 
+                      title="ערוך">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                </svg>
+              </button>
+              <button onclick="toggleParquetStatus(${parquet.parquetTypeID}, ${!parquet.isActive})" 
+                      class="p-2 ${parquet.isActive ? 'text-orange-600 hover:bg-orange-100' : 'text-green-600 hover:bg-green-100'} rounded-lg transition-colors" 
+                      title="${parquet.isActive ? 'השבת' : 'הפעל'}">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  ${parquet.isActive 
+                    ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L18.364 5.636M5.636 18.364l12.728-12.728"></path>'
+                    : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>'
+                  }
+                </svg>
+              </button>
+              <button onclick="deleteParquet(${parquet.parquetTypeID}, '${parquet.typeName.replace(/'/g, "\\'")}')" 
+                      class="p-2 text-red-600 hover:bg-red-100 rounded-lg transition-colors" 
+                      title="מחק">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                </svg>
+              </button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // Render empty table state
+    function renderEmptyTable(message = 'לא נמצאו פרקטים') {
+      const tbody = document.getElementById('parquetTableBody');
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="6" class="px-4 py-12 text-center">
+            <div class="text-gray-400 mb-4">
+              <svg class="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2-2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2M4 13h2m13-8V4a1 1 0 00-1-1H7a1 1 0 00-1 1v1m8 0V4a1 1 0 00-1-1H9a1 1 0 00-1 1v1m4 0h1m-5 0h1m5 0v1H8V5"></path>
+              </svg>
+            </div>
+            <p class="text-gray-600 font-medium">${message}</p>
+          </td>
+        </tr>
+      `;
+    }
+
+    // Update catalog statistics
+    function updateCatalogStats() {
+      const activeCount = allParquets.filter(p => p.isActive).length;
+      const totalCount = allParquets.length;
+      document.getElementById('catalogStats').innerHTML = `📦 ${totalCount} פרקטים (${activeCount} פעילים)`;
+    }
+
+    // Get parquet image path
+    function getParquetImagePath(imageURL, typeName) {
+      if (!imageURL || imageURL === 'null' || imageURL === '' || imageURL === 'string' || imageURL.includes('example.com')) {
+        return getImageByTypeName(typeName);
+      }
+      
+      if (imageURL.includes('http') || imageURL.includes('/')) {
+        return imageURL;
+      }
+      
+      return `../picturs/parquetsTypes/${imageURL}`;
+    }
+
+    // Get image by type name mapping
+    function getImageByTypeName(typeName) {
+      if (!typeName) return '../picturs/logo.png';
+      
+      const lowerName = typeName.toLowerCase();
+      const imageMap = {
+        'אלון': 'etzMaleAlonTivi.jpg',
+        'אגוז': 'etzMaleEgozTivi.jpg', 
+        'אורן': 'etzMalegoshniTivi.jpg'
+      };
+      
+      for (const [key, filename] of Object.entries(imageMap)) {
+        if (lowerName.includes(key.toLowerCase())) {
+          return `../picturs/parquetsTypes/${filename}`;
+        }
+      }
+      
+      if (lowerName.includes('עץ') || lowerName.includes('אלון')) {
+        return '../picturs/parquetsTypes/etzMaleAlonTivi.jpg';
+      }
+      
+      return '../picturs/logo.png';
+    }
+
+    // Get type color for badges
+    function getTypeColor(type) {
+      if (!type) return 'bg-gray-100 text-gray-800';
+      
+      const colorMap = {
+        'עץ מלא': 'bg-green-100 text-green-800',
+        'עץ': 'bg-green-100 text-green-800',
+        'למינציה': 'bg-blue-100 text-blue-800',
+        'פישבון': 'bg-purple-100 text-purple-800',
+        'SPC': 'bg-orange-100 text-orange-800',
+        'הנדסי': 'bg-yellow-100 text-yellow-800',
+        'ויניל': 'bg-pink-100 text-pink-800'
+      };
+      
+      return colorMap[type] || 'bg-gray-100 text-gray-800';
+    }
+
+    // ===== MODAL MANAGEMENT =====
+    
+    // Open add parquet modal
+    function openAddParquetModal() {
+      currentEditingParquet = null;
+      document.getElementById('modalTitle').textContent = 'הוסף פרקט חדש';
+      document.getElementById('saveButton').innerHTML = '💾 שמור פרקט';
+      clearParquetForm();
+      document.getElementById('parquetModal').classList.remove('hidden');
+    }
+
+    // Open edit parquet modal
+    function editParquet(parquetId) {
+      const parquet = allParquets.find(p => p.parquetTypeID === parquetId);
+      if (!parquet) {
+        showToast('לא נמצא פרקט לעריכה', 'error');
+        return;
+      }
+      
+      currentEditingParquet = parquet;
+      document.getElementById('modalTitle').textContent = 'ערוך פרקט';
+      document.getElementById('saveButton').innerHTML = '✏️ עדכן פרקט';
+      
+      // Fill form with parquet data
+      document.getElementById('parquetId').value = parquet.parquetTypeID;
+      document.getElementById('parquetName').value = parquet.typeName || '';
+      document.getElementById('parquetType').value = parquet.type || '';
+      document.getElementById('parquetPrice').value = parquet.pricePerUnit || '';
+      document.getElementById('parquetActive').checked = parquet.isActive;
+      document.getElementById('parquetImageURL').value = parquet.imageURL || '';
+      
+      // Update image preview
+      updateImagePreview();
+      
+      document.getElementById('parquetModal').classList.remove('hidden');
+    }
+
+    // Close parquet modal
+    function closeParquetModal() {
+      document.getElementById('parquetModal').classList.add('hidden');
+      clearParquetForm();
+      currentEditingParquet = null;
+    }
+
+    // Clear parquet form
+    function clearParquetForm() {
+      document.getElementById('parquetForm').reset();
+      document.getElementById('parquetId').value = '';
+      document.getElementById('parquetActive').checked = true;
+      hideImagePreview();
+    }
+
+    // ===== CRUD OPERATIONS =====
+    
+    // Handle form submission
+    document.getElementById('parquetForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const formData = {
+        TypeName: document.getElementById('parquetName').value.trim(),
+        Type: document.getElementById('parquetType').value,
+        PricePerUnit: parseFloat(document.getElementById('parquetPrice').value),
+        ImageURL: document.getElementById('parquetImageURL').value.trim() || null,
+        IsActive: document.getElementById('parquetActive').checked
+      };
+      
+      // Validation
+      if (!formData.TypeName || !formData.Type || !formData.PricePerUnit) {
+        showToast('נא למלא את כל השדות הנדרשים', 'error');
+        return;
+      }
+      
+      if (currentEditingParquet) {
+        formData.ParquetTypeID = currentEditingParquet.parquetTypeID;
+        updateParquet(formData);
+      } else {
+        addParquet(formData);
+      }
+    });
+
+    // Add new parquet
+    function addParquet(parquetData) {
+      console.log('🔨 מוסיף פרקט חדש:', parquetData);
+      
+      ajaxCall('POST', `${API_BASE_URL}/ParquetType/Add`, JSON.stringify(parquetData),
+        function(result) {
+          console.log('✅ פרקט נוסף בהצלחה:', result);
+          showToast('פרקט נוסף בהצלחה');
+          closeParquetModal();
+          loadParquetCatalog(); // Refresh catalog
+        },
+        function(error) {
+          console.error('❌ שגיאה בהוספת פרקט:', error);
+          showToast('שגיאה בהוספת הפרקט', 'error');
+        }
+      );
+    }
+
+    // Update existing parquet
+    function updateParquet(parquetData) {
+      console.log('🔧 מעדכן פרקט:', parquetData);
+      
+      ajaxCall('PUT', `${API_BASE_URL}/ParquetType/Update`, JSON.stringify(parquetData),
+        function(result) {
+          console.log('✅ פרקט עודכן בהצלחה:', result);
+          showToast('פרקט עודכן בהצלחה');
+          closeParquetModal();
+          loadParquetCatalog(); // Refresh catalog
+        },
+        function(error) {
+          console.error('❌ שגיאה בעדכון פרקט:', error);
+          showToast('שגיאה בעדכון הפרקט', 'error');
+        }
+      );
+    }
+
+    // Toggle parquet status
+    function toggleParquetStatus(parquetId, newStatus) {
+      const parquet = allParquets.find(p => p.parquetTypeID === parquetId);
+      if (!parquet) return;
+      
+      const updatedParquet = {
+        ParquetTypeID: parquet.parquetTypeID,
+        TypeName: parquet.typeName,
+        Type: parquet.type,
+        PricePerUnit: parquet.pricePerUnit,
+        ImageURL: parquet.imageURL,
+        IsActive: newStatus
+      };
+      
+      console.log(`🔄 ${newStatus ? 'מפעיל' : 'משבית'} פרקט:`, parquet.typeName);
+      
+      ajaxCall('PUT', `${API_BASE_URL}/ParquetType/Update`, JSON.stringify(updatedParquet),
+        function(result) {
+          showToast(`פרקט ${newStatus ? 'הופעל' : 'הושבת'} בהצלחה`);
+          loadParquetCatalog(); // Refresh catalog
+        },
+        function(error) {
+          console.error('❌ שגיאה בעדכון סטטוס פרקט:', error);
+          showToast('שגיאה בעדכון סטטוס הפרקט', 'error');
+        }
+      );
+    }
+
+    // Delete parquet
+    function deleteParquet(parquetId, parquetName) {
+      if (!confirm(`האם אתה בטוח שברצונך למחוק את הפרקט "${parquetName}"?\n\nפעולה זו אינה ניתנת לביטול.`)) {
+        return;
+      }
+      
+      console.log('🗑️ מוחק פרקט:', parquetName);
+      
+      ajaxCall('DELETE', `${API_BASE_URL}/ParquetType/Delete?id=${parquetId}`, null,
+        function(result) {
+          console.log('✅ פרקט נמחק בהצלחה');
+          showToast('פרקט נמחק בהצלחה');
+          loadParquetCatalog(); // Refresh catalog
+        },
+        function(error) {
+          console.error('❌ שגיאה במחיקת פרקט:', error);
+          showToast('שגיאה במחיקת הפרקט', 'error');
+        }
+      );
+    }
+
+    // ===== FILTER & SEARCH =====
+    
+    // Filter parquets based on search and filters
+    function filterParquets() {
+      const searchTerm = document.getElementById('searchParquet').value.toLowerCase();
+      const statusFilter = document.getElementById('filterStatus').value;
+      const typeFilter = document.getElementById('filterType').value;
+      
+      filteredParquets = allParquets.filter(parquet => {
+        // Search in name and type
+        const matchesSearch = !searchTerm || 
+          parquet.typeName.toLowerCase().includes(searchTerm) ||
+          (parquet.type && parquet.type.toLowerCase().includes(searchTerm));
+        
+        // Status filter
+        const matchesStatus = !statusFilter || 
+          (statusFilter === 'active' && parquet.isActive) ||
+          (statusFilter === 'inactive' && !parquet.isActive);
+        
+        // Type filter
+        const matchesType = !typeFilter || 
+          (parquet.type && parquet.type.includes(typeFilter));
+        
+        return matchesSearch && matchesStatus && matchesType;
+      });
+      
+      renderParquetTable();
+    }
+
+    // ===== IMAGE HANDLING =====
+    
+    // Update image preview when URL changes
+    document.getElementById('parquetImageURL').addEventListener('input', updateImagePreview);
+
+    function updateImagePreview() {
+      const imageUrl = document.getElementById('parquetImageURL').value.trim();
+      const preview = document.getElementById('imagePreview');
+      const placeholder = document.getElementById('imagePlaceholder');
+      
+      if (!imageUrl) {
+        hideImagePreview();
+        return;
+      }
+      
+      // Show preview
+      const finalUrl = imageUrl.includes('http') || imageUrl.includes('/') ? 
+        imageUrl : `../picturs/parquetsTypes/${imageUrl}`;
+      
+      preview.src = finalUrl;
+      preview.onload = function() {
+        preview.classList.remove('hidden');
+        placeholder.classList.add('hidden');
+      };
+      preview.onerror = function() {
+        hideImagePreview();
+      };
+    }
+
+    function hideImagePreview() {
+      document.getElementById('imagePreview').classList.add('hidden');
+      document.getElementById('imagePlaceholder').classList.remove('hidden');
     }
 
     function updateBusinessInfo() {
+      const businessName = document.getElementById('businessName').value;
       const phone = document.getElementById('businessPhone').value;
       const email = document.getElementById('businessEmail').value;
       const workingHours = document.getElementById('workingHours').value;
-      const vatPercentage = document.getElementById('vatPercentage').value;
+      const aboutUs = document.getElementById('aboutUs').value;
+      const businessLogo = document.getElementById('businessLogo').value;
+      const introVideoURL = document.getElementById('introVideoURL').value;
 
-      // Update each setting individually
-      const settings = [
-        { key: 'BUSINESS_PHONE', value: phone, description: 'מספר טלפון העסק' },
-        { key: 'BUSINESS_EMAIL', value: email, description: 'כתובת אימייל העסק' },
-        { key: 'WORKING_HOURS', value: workingHours, description: 'שעות פעילות העסק' },
-        { key: 'VAT_PERCENTAGE', value: vatPercentage, description: 'אחוז מע"מ' }
-      ];
+      // Prepare data for the new Users API
+      const businessInfo = {
+        BusinessName: businessName,
+        BusinessPhone: phone,
+        BusinessEmail: email,
+        WorkingHours: workingHours,
+        AboutUs: aboutUs,
+        BusinessLogo: businessLogo,
+        IntroVideoURL: introVideoURL
+      };
 
-      let completed = 0;
-      settings.forEach(setting => {
-        if (setting.value) {
-          ajaxCall('POST', `${API_BASE_URL}/SystemSettings/UpdateSetting`, JSON.stringify({
-            SettingKey: setting.key,
-            SettingValue: setting.value,
-            SettingType: 'STRING',
-            Description: setting.description
-          }),
-          function(response) {
-            completed++;
-            if (completed === settings.filter(s => s.value).length) {
-              showToast('פרטי העסק עודכנו בהצלחה');
-            }
-          },
-          function(error) {
-            console.error(`Error updating ${setting.key}:`, error);
-            showToast(`שגיאה בעדכון ${setting.description}`, 'error');
-          });
+      console.log('🔄 Updating business info:', businessInfo);
+
+      ajaxCall('POST', `${API_BASE_URL}/User/UpdateBusinessInfo`, JSON.stringify(businessInfo),
+        function(response) {
+          console.log('✅ Business info updated successfully:', response);
+          showToast('פרטי העסק עודכנו בהצלחה');
+        },
+        function(error) {
+          console.error('❌ Error updating business info:', error);
+          showToast('שגיאה בעדכון פרטי העסק', 'error');
         }
+      );
+    }
+
+    // ===== CALCULATOR ITEMS MANAGEMENT =====
+    
+    // Global variables for calculator items
+    let allCalculatorItems = [];
+    let filteredCalculatorItems = [];
+    let allCandidates = [];
+    let currentEditingCalculatorItem = null;
+    let currentCalculatorTab = 'items';
+
+    // Load calculator items from API
+    function loadCalculatorItems() {
+      console.log('🧮 טוען רכיבי מחשבון...');
+      
+      ajaxCall('GET', `${API_BASE_URL}/PriceCalculatorItem/GetCalculatorItems`, null,
+        function(items) {
+          console.log('✅ נטענו רכיבי מחשבון:', items);
+          allCalculatorItems = items || [];
+          filteredCalculatorItems = [...allCalculatorItems];
+          renderCalculatorItemsTable();
+          updateCalculatorStats();
+        },
+        function(error) {
+          console.error('❌ שגיאה בטעינת רכיבי מחשבון:', error);
+          allCalculatorItems = [];
+          filteredCalculatorItems = [];
+          renderEmptyCalculatorTable('שגיאה בטעינת רכיבי המחשבון מהשרת');
+          showToast('שגיאה בטעינת רכיבי המחשבון', 'error');
+        }
+      );
+    }
+
+    // Load candidates from API
+    function loadCandidates() {
+      console.log('💡 טוען מועמדים...');
+      
+      ajaxCall('GET', `${API_BASE_URL}/PriceCalculatorItem/GetPopularCandidates`, null,
+        function(candidates) {
+          console.log('✅ נטענו מועמדים:', candidates);
+          allCandidates = candidates || [];
+          renderCandidates();
+        },
+        function(error) {
+          console.error('❌ שגיאה בטעינת מועמדים:', error);
+          allCandidates = [];
+          renderEmptyCandidates('שגיאה בטעינת המועמדים מהשרת');
+        }
+      );
+    }
+
+    // Switch between items and candidates tabs
+    function switchCalculatorTab(tab) {
+      currentCalculatorTab = tab;
+      
+      // Update tab styles
+      document.getElementById('itemsTab').className = tab === 'items' 
+        ? 'flex-1 py-2 px-4 text-sm font-medium rounded-md bg-white text-blue-600 shadow-sm transition-all'
+        : 'flex-1 py-2 px-4 text-sm font-medium rounded-md text-gray-600 hover:text-gray-900 transition-all';
+      
+      document.getElementById('candidatesTab').className = tab === 'candidates'
+        ? 'flex-1 py-2 px-4 text-sm font-medium rounded-md bg-white text-blue-600 shadow-sm transition-all'
+        : 'flex-1 py-2 px-4 text-sm font-medium rounded-md text-gray-600 hover:text-gray-900 transition-all';
+      
+      // Show/hide sections
+      if (tab === 'items') {
+        document.getElementById('calculatorItemsSection').classList.remove('hidden');
+        document.getElementById('candidatesSection').classList.add('hidden');
+        document.getElementById('calculatorSearchFilters').classList.remove('hidden');
+      } else {
+        document.getElementById('calculatorItemsSection').classList.add('hidden');
+        document.getElementById('candidatesSection').classList.remove('hidden');
+        document.getElementById('calculatorSearchFilters').classList.add('hidden');
+        loadCandidates(); // Load candidates when switching to that tab
+      }
+    }
+
+    // Render calculator items table
+    function renderCalculatorItemsTable() {
+      const tbody = document.getElementById('calculatorItemsTableBody');
+      
+      if (filteredCalculatorItems.length === 0) {
+        renderEmptyCalculatorTable('לא נמצאו רכיבים המתאימים לחיפוש');
+        return;
+      }
+      
+      tbody.innerHTML = filteredCalculatorItems.map(item => `
+        <tr class="hover:bg-gray-50 transition-colors">
+          <td class="px-4 py-3">
+            <div class="font-medium text-gray-900">${item.itemName || 'ללא שם'}</div>
+          </td>
+          <td class="px-4 py-3">
+            <div class="text-sm text-gray-600">${item.description || 'ללא תיאור'}</div>
+          </td>
+          <td class="px-4 py-3">
+            <span class="font-semibold text-blue-600">₪${parseFloat(item.price || 0).toFixed(2)}</span>
+          </td>
+          <td class="px-4 py-3">
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+              item.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+            }">
+              <span class="w-2 h-2 ${item.isActive ? 'bg-green-400' : 'bg-red-400'} rounded-full ml-1"></span>
+              ${item.isActive ? 'פעיל' : 'לא פעיל'}
+            </span>
+          </td>
+          <td class="px-4 py-3 text-center">
+            <div class="flex items-center justify-center space-x-2 space-x-reverse">
+              <button onclick="editCalculatorItem(${item.calculatorItemID})" 
+                      class="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors" 
+                      title="ערוך">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                </svg>
+              </button>
+              <button onclick="toggleCalculatorItemStatus(${item.calculatorItemID}, ${!item.isActive})" 
+                      class="p-2 ${item.isActive ? 'text-orange-600 hover:bg-orange-100' : 'text-green-600 hover:bg-green-100'} rounded-lg transition-colors" 
+                      title="${item.isActive ? 'השבת' : 'הפעל'}">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  ${item.isActive 
+                    ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L18.364 5.636M5.636 18.364l12.728-12.728"></path>'
+                    : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>'
+                  }
+                </svg>
+              </button>
+              <button onclick="deleteCalculatorItem(${item.calculatorItemID}, '${item.itemName.replace(/'/g, "\\'")}')" 
+                      class="p-2 text-red-600 hover:bg-red-100 rounded-lg transition-colors" 
+                      title="מחק (מחיקה רכה)">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                </svg>
+              </button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // Render empty calculator items table
+    function renderEmptyCalculatorTable(message = 'לא נמצאו רכיבי מחשבון') {
+      const tbody = document.getElementById('calculatorItemsTableBody');
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="5" class="px-4 py-12 text-center">
+            <div class="text-gray-400 mb-4">
+              <svg class="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+              </svg>
+            </div>
+            <p class="text-gray-600 font-medium">${message}</p>
+          </td>
+        </tr>
+      `;
+    }
+
+    // Render candidates
+    function renderCandidates() {
+      const container = document.getElementById('candidatesContainer');
+      
+      if (allCandidates.length === 0) {
+        renderEmptyCandidates('אין מועמדים זמינים כרגע');
+        return;
+      }
+      
+      container.innerHTML = allCandidates.map(candidate => `
+        <div class="bg-gradient-to-br from-yellow-50 to-orange-50 border border-yellow-200 rounded-lg p-4 hover:shadow-md transition-all">
+          <div class="flex items-start justify-between mb-3">
+            <div class="flex-1">
+              <h5 class="font-medium text-gray-900 mb-1">${candidate.customItemName}</h5>
+              <p class="text-sm text-gray-600 mb-2">${candidate.suggestedDescription || 'ללא תיאור'}</p>
+              <div class="flex items-center space-x-4 space-x-reverse text-xs text-gray-500">
+                <span>💰 מחיר מוצע: ₪${candidate.suggestedPrice}</span>
+                <span>📊 ${candidate.occurrences} שימושים</span>
+              </div>
+            </div>
+          </div>
+          <div class="flex gap-2">
+            <button onclick="createFromCandidate('${candidate.customItemName.replace(/'/g, "\\'")}')" 
+                    class="flex-1 px-3 py-2 bg-gradient-to-r from-green-600 to-green-700 text-white text-xs rounded-lg hover:from-green-700 hover:to-green-800 transition-all duration-200 shadow-sm font-medium">
+              ✓ צור רכיב קבוע
+            </button>
+            <button onclick="rejectCandidate('${candidate.customItemName.replace(/'/g, "\\'")}')" 
+                    class="px-3 py-2 bg-gradient-to-r from-gray-200 to-gray-300 text-gray-700 text-xs rounded-lg hover:from-gray-300 hover:to-gray-400 transition-all duration-200 shadow-sm">
+              ✗ דחה
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Render empty candidates
+    function renderEmptyCandidates(message = 'אין מועמדים זמינים') {
+      const container = document.getElementById('candidatesContainer');
+      container.innerHTML = `
+        <div class="col-span-2 text-center py-12">
+          <div class="text-gray-400 mb-4">
+            <svg class="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+            </svg>
+          </div>
+          <p class="text-gray-600 font-medium">${message}</p>
+          <p class="text-sm text-gray-500 mt-2">המועמדים נוצרים אוטומטית כשלקוחות מוסיפים פריטים חדשים</p>
+        </div>
+      `;
+    }
+
+    // Update calculator statistics
+    function updateCalculatorStats() {
+      const activeCount = allCalculatorItems.filter(item => item.isActive).length;
+      const totalCount = allCalculatorItems.length;
+      document.getElementById('calculatorStats').innerHTML = `🧮 ${totalCount} רכיבים (${activeCount} פעילים)`;
+    }
+
+    // Filter calculator items
+    function filterCalculatorItems() {
+      const searchTerm = document.getElementById('searchCalculatorItem').value.toLowerCase();
+      const statusFilter = document.getElementById('filterCalculatorStatus').value;
+      
+      filteredCalculatorItems = allCalculatorItems.filter(item => {
+        // Search in name and description
+        const matchesSearch = !searchTerm || 
+          item.itemName.toLowerCase().includes(searchTerm) ||
+          (item.description && item.description.toLowerCase().includes(searchTerm));
+        
+        // Status filter
+        const matchesStatus = !statusFilter || 
+          (statusFilter === 'active' && item.isActive) ||
+          (statusFilter === 'inactive' && !item.isActive);
+        
+        return matchesSearch && matchesStatus;
       });
+      
+      renderCalculatorItemsTable();
     }
 
-    function checkSystemHealth() {
-      showToast('בודק סטטוס מערכת...', 'info');
-      
-      // Simulate system health check
-      setTimeout(() => {
-        showToast('כל המערכות פועלות תקין');
-      }, 2000);
+    // ===== MODAL MANAGEMENT =====
+    
+    // Open add calculator item modal
+    function openAddCalculatorItemModal() {
+      currentEditingCalculatorItem = null;
+      document.getElementById('calculatorModalTitle').textContent = 'הוסף רכיב חדש למחשבון';
+      document.getElementById('calculatorSaveButton').innerHTML = '💾 שמור רכיב';
+      clearCalculatorItemForm();
+      document.getElementById('calculatorItemModal').classList.remove('hidden');
     }
 
-    function createBackup() {
-      if (!confirm('האם אתה בטוח שברצונך ליצור גיבוי חדש?')) return;
+    // Open edit calculator item modal
+    function editCalculatorItem(itemId) {
+      const item = allCalculatorItems.find(i => i.calculatorItemID === itemId);
+      if (!item) {
+        showToast('לא נמצא רכיב לעריכה', 'error');
+        return;
+      }
       
-      showToast('יוצר גיבוי...', 'info');
+      currentEditingCalculatorItem = item;
+      document.getElementById('calculatorModalTitle').textContent = 'ערוך רכיב מחשבון';
+      document.getElementById('calculatorSaveButton').innerHTML = '✏️ עדכן רכיב';
       
-      // Simulate backup creation
-      setTimeout(() => {
-        document.getElementById('lastBackup').textContent = new Date().toLocaleDateString('he-IL');
-        showToast('גיבוי נוצר בהצלחה');
-      }, 3000);
+      // Fill form with item data
+      document.getElementById('calculatorItemId').value = item.calculatorItemID;
+      document.getElementById('calculatorItemName').value = item.itemName || '';
+      document.getElementById('calculatorItemDescription').value = item.description || '';
+      document.getElementById('calculatorItemPrice').value = item.price || '';
+      document.getElementById('calculatorItemActive').checked = item.isActive;
+      
+      document.getElementById('calculatorItemModal').classList.remove('hidden');
     }
 
-    function cleanupDatabase() {
-      if (!confirm('האם אתה בטוח שברצונך לנקות את מסד הנתונים? פעולה זו תמחק נתונים ישנים.')) return;
-      
-      showToast('מנקה מסד נתונים...', 'info');
-      
-      // Simulate database cleanup
-      setTimeout(() => {
-        showToast('מסד הנתונים נוקה בהצלחה');
-      }, 4000);
+    // Close calculator item modal
+    function closeCalculatorItemModal() {
+      document.getElementById('calculatorItemModal').classList.add('hidden');
+      clearCalculatorItemForm();
+      currentEditingCalculatorItem = null;
     }
+
+    // Clear calculator item form
+    function clearCalculatorItemForm() {
+      document.getElementById('calculatorItemForm').reset();
+      document.getElementById('calculatorItemId').value = '';
+      document.getElementById('calculatorItemActive').checked = true;
+    }
+
+    // ===== CRUD OPERATIONS =====
+    
+    // Handle calculator item form submission
+    document.getElementById('calculatorItemForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const formData = {
+        ItemName: document.getElementById('calculatorItemName').value.trim(),
+        Description: document.getElementById('calculatorItemDescription').value.trim() || null,
+        Price: parseFloat(document.getElementById('calculatorItemPrice').value),
+        IsActive: document.getElementById('calculatorItemActive').checked
+      };
+      
+      // Validation
+      if (!formData.ItemName || !formData.Price) {
+        showToast('נא למלא את השם והמחיר', 'error');
+        return;
+      }
+      
+      if (currentEditingCalculatorItem) {
+        formData.CalculatorItemID = currentEditingCalculatorItem.calculatorItemID;
+        updateCalculatorItem(formData);
+      } else {
+        addCalculatorItem(formData);
+      }
+    });
+
+    // Add new calculator item
+    function addCalculatorItem(itemData) {
+      console.log('🔨 מוסיף רכיב חדש למחשבון:', itemData);
+      
+      ajaxCall('POST', `${API_BASE_URL}/PriceCalculatorItem/AddNewCalculatorItem`, JSON.stringify(itemData),
+        function(result) {
+          console.log('✅ רכיב נוסף בהצלחה:', result);
+          showToast('רכיב נוסף בהצלחה למחשבון');
+          closeCalculatorItemModal();
+          loadCalculatorItems(); // Refresh items
+        },
+        function(error) {
+          console.error('❌ שגיאה בהוספת רכיב:', error);
+          showToast('שגיאה בהוספת הרכיב', 'error');
+        }
+      );
+    }
+
+    // Update existing calculator item
+    function updateCalculatorItem(itemData) {
+      console.log('🔧 מעדכן רכיב מחשבון:', itemData);
+      
+      ajaxCall('POST', `${API_BASE_URL}/PriceCalculatorItem/updateCalculatorItem`, JSON.stringify(itemData),
+        function(result) {
+          console.log('✅ רכיב עודכן בהצלחה:', result);
+          showToast('רכיב עודכן בהצלחה');
+          closeCalculatorItemModal();
+          loadCalculatorItems(); // Refresh items
+        },
+        function(error) {
+          console.error('❌ שגיאה בעדכון רכיב:', error);
+          showToast('שגיאה בעדכון הרכיב', 'error');
+        }
+      );
+    }
+
+    // Toggle calculator item status (soft delete)
+    function toggleCalculatorItemStatus(itemId, newStatus) {
+      const item = allCalculatorItems.find(i => i.calculatorItemID === itemId);
+      if (!item) return;
+      
+      const updatedItem = {
+        CalculatorItemID: item.calculatorItemID,
+        ItemName: item.itemName,
+        Description: item.description,
+        Price: item.price,
+        IsActive: newStatus
+      };
+      
+      console.log(`🔄 ${newStatus ? 'מפעיל' : 'משבית'} רכיב:`, item.itemName);
+      
+      ajaxCall('POST', `${API_BASE_URL}/PriceCalculatorItem/updateCalculatorItem`, JSON.stringify(updatedItem),
+        function(result) {
+          showToast(`רכיב ${newStatus ? 'הופעל' : 'הושבת'} בהצלחה`);
+          loadCalculatorItems(); // Refresh items
+        },
+        function(error) {
+          console.error('❌ שגיאה בעדכון סטטוס רכיב:', error);
+          showToast('שגיאה בעדכון סטטוס הרכיב', 'error');
+        }
+      );
+    }
+
+    // Delete calculator item (soft delete)
+    function deleteCalculatorItem(itemId, itemName) {
+      if (!confirm(`האם אתה בטוח שברצונך למחוק את הרכיב "${itemName}"?\n\nהמחיקה היא "רכה" - הרכיב יושבת אך לא יימחק לגמרי כדי לא לפגוע בהצעות מחיר קיימות.`)) {
+        return;
+      }
+      
+      // Use the delete endpoint which should set IsActive = false
+      const itemToDelete = {
+        CalculatorItemID: itemId
+      };
+      
+      console.log('🗑️ מבצע מחיקה רכה לרכיב:', itemName);
+      
+      ajaxCall('DELETE', `${API_BASE_URL}/PriceCalculatorItem/DeleteCalculatorItem`, JSON.stringify(itemToDelete),
+        function(result) {
+          console.log('✅ רכיב הושבת בהצלחה (מחיקה רכה)');
+          showToast('רכיב הושבת בהצלחה (מחיקה רכה)');
+          loadCalculatorItems(); // Refresh items
+        },
+        function(error) {
+          console.error('❌ שגיאה במחיקה רכה של רכיב:', error);
+          showToast('שגיאה במחיקת הרכיב', 'error');
+        }
+      );
+    }
+
+    // ===== CANDIDATES MANAGEMENT =====
+    
+    // Create calculator item from candidate
+    function createFromCandidate(itemName) {
+      if (!confirm(`האם אתה בטוח שברצונך ליצור רכיב קבוע במחשבון עבור "${itemName}"?\n\nהרכיב יתווסף לרשימת רכיבי המחשבון הקבועים ויהיה זמין בכל ההצעות עתידיות.`)) {
+        return;
+      }
+
+      console.log('🔨 יוצר רכיב קבוע ממועמד:', itemName);
+      
+      ajaxCall('POST', `${API_BASE_URL}/PriceCalculatorItem/CreateFromCandidate`, JSON.stringify(itemName),
+        function(result) {
+          if (result && result > 0) {
+            showToast(`רכיב "${itemName}" נוצר בהצלחה במחשבון!`);
+            loadCandidates(); // Refresh candidates
+            loadCalculatorItems(); // Refresh items if in items tab
+          } else {
+            showToast('שגיאה ביצירת הרכיב - ייתכן שהוא כבר קיים', 'error');
+          }
+        },
+        function(error) {
+          console.error('❌ שגיאה ביצירת רכיב ממועמד:', error);
+          showToast('שגיאה ביצירת הרכיב', 'error');
+        }
+      );
+    }
+
+    // Reject candidate
+    function rejectCandidate(itemName) {
+      if (!confirm(`האם אתה בטוח שברצונך לדחות את המועמד "${itemName}"?\n\nהמועמד יוסר מהרשימה ולא יוצג שוב.`)) {
+        return;
+      }
+
+      console.log('🚫 דוחה מועמד:', itemName);
+      
+      ajaxCall('POST', `${API_BASE_URL}/PriceCalculatorItem/RejectCandidate`, JSON.stringify(itemName),
+        function(result) {
+          showToast(`מועמד "${itemName}" נדחה בהצלחה`);
+          loadCandidates(); // Refresh candidates
+        },
+        function(error) {
+          console.error('❌ שגיאה בדחיית מועמד:', error);
+          showToast('שגיאה בדחיית המועמד', 'error');
+        }
+      );
+    }
+
 
     // Initialize when page loads
     document.addEventListener('DOMContentLoaded', function() {

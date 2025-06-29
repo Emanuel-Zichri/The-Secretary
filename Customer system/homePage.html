@@ -68,7 +68,7 @@
       <div class="relative z-10 pt-8 pb-4">
         <div class="max-w-md mx-auto px-6">
           <div class="text-center">
-            <img src="../picturs/logo.png" alt="דוד פרקטים" class="h-20 mx-auto mb-4 drop-shadow-lg" />
+            <img src="../picturs/logo.png" alt="דוד פרקטים" class="h-20 mx-auto mb-4 drop-shadow-lg" data-business-logo />
           </div>
         </div>
       </div>
@@ -76,7 +76,7 @@
       <!-- Hero Content -->
       <div class="relative z-10 flex-1 flex items-center justify-center px-6 pb-20">
         <div class="max-w-md mx-auto text-center text-white">
-          <h1 class="text-4xl font-bold mb-4 slide-in">דוד פרקטים</h1>
+          <h1 class="text-4xl font-bold mb-4 slide-in" data-business-name>דוד פרקטים</h1>
           <p class="text-xl mb-2 slide-in opacity-90" style="animation-delay: 0.2s;">מומחים בהתקנת פרקטים</p>
           <p class="text-lg mb-8 slide-in opacity-80" style="animation-delay: 0.4s;">שירות מקצועי ואמין לבית ולעסק</p>
           
@@ -116,20 +116,22 @@
       <div class="max-w-md mx-auto px-6">
         <div class="text-center mb-12">
           <h2 class="text-3xl font-bold text-gray-800 mb-4">אודותינו</h2>
-          <p class="text-gray-600 leading-relaxed">
+          <p class="text-gray-600 leading-relaxed" data-about-us>
             אנחנו דוד פרקטים - חברה מובילה בתחום התקנת פרקטים עם יותר מ-15 שנות ניסיון. 
             אנו מתמחים בהתקנה מקצועית של כל סוגי הפרקטים תוך מתן שירות אישי ואמין.
           </p>
         </div>
         
         <!-- Video Section -->
-        <div class="bg-gray-100 rounded-2xl p-6 text-center">
-          <div class="bg-primary/10 rounded-xl p-8 mb-4">
-            <svg class="w-16 h-16 text-primary mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h8m2-10v.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-            </svg>
-            <h3 class="text-xl font-semibold text-gray-800 mb-2">סרטון הכירות</h3>
-            <p class="text-gray-600 text-sm">באו להכיר אותנו ואת העבודה המקצועית שלנו</p>
+        <div data-intro-video>
+          <div class="bg-gray-100 rounded-2xl p-6 text-center">
+            <div class="bg-primary/10 rounded-xl p-8 mb-4">
+              <svg class="w-16 h-16 text-primary mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h8m2-10v.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+              </svg>
+              <h3 class="text-xl font-semibold text-gray-800 mb-2">סרטון הכירות</h3>
+              <p class="text-gray-600 text-sm">באו להכיר אותנו ואת העבודה המקצועית שלנו</p>
+            </div>
           </div>
         </div>
       </div>
@@ -298,15 +300,15 @@
         </div>
         
         <div class="space-y-4">
-          <a href="tel:0501234567" class="flex items-center p-4 bg-gray-50 rounded-2xl hover:bg-gray-100 transition-colors">
+          <a href="tel:0501234567" class="flex items-center p-4 bg-gray-50 rounded-2xl hover:bg-gray-100 transition-colors" data-business-phone>
             <div class="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center ml-4">
               <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
               </svg>
             </div>
             <div>
-              <div class="font-semibold text-gray-800">דוד פרקטים</div>
-              <div class="text-primary font-semibold">050-1234567</div>
+              <div class="font-semibold text-gray-800" data-business-name>דוד פרקטים</div>
+              <div class="text-primary font-semibold" data-business-phone>050-1234567</div>
             </div>
           </a>
           
@@ -318,7 +320,7 @@
             </div>
             <div>
               <div class="font-semibold text-gray-800">שעות פעילות</div>
-              <div class="text-gray-600 text-sm">א׳-ה׳: 8:00-18:00 | ו׳: 8:00-14:00</div>
+              <div class="text-gray-600 text-sm" data-working-hours>א׳-ה׳: 8:00-18:00 | ו׳: 8:00-14:00</div>
             </div>
           </div>
         </div>
@@ -344,9 +346,9 @@
     <!-- Footer -->
     <footer class="bg-gray-800 text-white py-8">
       <div class="max-w-md mx-auto px-6 text-center">
-        <img src="../picturs/logo.png" alt="דוד פרקטים" class="h-12 mx-auto mb-4 opacity-80" />
-        <p class="text-gray-400 text-sm mb-4">דוד פרקטים - מומחים בהתקנת פרקטים מאז 2008</p>
-        <p class="text-gray-500 text-xs">© 2024 דוד פרקטים. כל הזכויות שמורות.</p>
+        <img src="../picturs/logo.png" alt="דוד פרקטים" class="h-12 mx-auto mb-4 opacity-80" data-business-logo />
+        <p class="text-gray-400 text-sm mb-4"><span data-business-name>דוד פרקטים</span> - מומחים בהתקנת פרקטים מאז 2008</p>
+        <p class="text-gray-500 text-xs">© 2024 <span data-business-name>דוד פרקטים</span>. כל הזכויות שמורות.</p>
       </div>
     </footer>
   </body>

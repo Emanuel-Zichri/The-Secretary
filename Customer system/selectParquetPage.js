@@ -36,17 +36,56 @@ function fetchParquetTypes() {
           imageURL: (type.imageURL && type.imageURL !== 'string' && !type.imageURL.includes('example.com')) ? type.imageURL : null
         };
         
-        const typeName = cleanType.typeName.toLowerCase();
-        if (typeName.includes("עץ") || typeName.includes("אלון") || typeName.includes("אגוז") || typeName.includes("אורן")) {
+        // חלוקה לקטגוריות על בסיס השדה 'type' מהשרת
+        const typeCategory = (cleanType.type || "").toLowerCase();
+        const typeName = (cleanType.typeName || "").toLowerCase();
+        
+        console.log(`🔍 מחלק פרקט: "${cleanType.typeName}" | סוג: "${cleanType.type}"`);
+        
+        // בדיקה על בסיס השדה type תחילה, ואח"כ על בסיס השם
+        if (typeCategory.includes("עץ מלא") || typeCategory.includes("עץ") || 
+            typeName.includes("עץ מלא") || typeName.includes("אלון") || typeName.includes("אגוז") || typeName.includes("אורן")) {
           parquetData.solid.push(cleanType);
-        } else if (typeName.includes("למינציה") || typeName.includes("למינט")) {
+          console.log(`✅ נוסף לעץ מלא: ${cleanType.typeName}`);
+        } else if (typeCategory.includes("למינציה") || typeCategory.includes("spc") || 
+                   typeName.includes("למינציה") || typeName.includes("למינט") || typeName.includes("spc")) {
           parquetData.laminate.push(cleanType);
-        } else if (typeName.includes("פישבון") || typeName.includes("הרינגבון")) {
+          console.log(`✅ נוסף ללמינציה: ${cleanType.typeName}`);
+        } else if (typeCategory.includes("פישבון") || typeCategory.includes("הרינגבון") || 
+                   typeName.includes("פישבון") || typeName.includes("הרינגבון")) {
           parquetData.fishbone.push(cleanType);
+          console.log(`✅ נוסף לפישבון: ${cleanType.typeName}`);
+        } else if (typeCategory.includes("הנדסי") || typeName.includes("הנדסי")) {
+          parquetData.solid.push(cleanType); // הנדסי נכנס לעץ מלא
+          console.log(`✅ נוסף לעץ מלא (הנדסי): ${cleanType.typeName}`);
+        } else if (typeCategory.includes("ויניל") || typeName.includes("ויניל")) {
+          parquetData.laminate.push(cleanType); // ויניל נכנס ללמינציה
+          console.log(`✅ נוסף ללמינציה (ויניל): ${cleanType.typeName}`);
         } else {
-          parquetData.solid.push(cleanType);
+          // במקום לשים הכל בעץ מלא, בואו נחלק לפי הכללים הבאים:
+          if (cleanType.pricePerUnit <= 50) {
+            parquetData.laminate.push(cleanType); // מחיר נמוך = למינציה
+            console.log(`💡 נוסף ללמינציה (מחיר נמוך): ${cleanType.typeName}`);
+          } else if (cleanType.pricePerUnit >= 100) {
+            parquetData.fishbone.push(cleanType); // מחיר גבוה = פישבון
+            console.log(`💡 נוסף לפישבון (מחיר גבוה): ${cleanType.typeName}`);
+          } else {
+            parquetData.solid.push(cleanType); // בינוני = עץ מלא
+            console.log(`💡 נוסף לעץ מלא (ברירת מחדל): ${cleanType.typeName}`);
+          }
         }
       });
+
+      // הצגת סיכום החלוקה
+      console.log(`📊 סיכום חלוקת פרקטים:`);
+      console.log(`🌳 עץ מלא: ${parquetData.solid.length} פרקטים`);
+      console.log(`🏗️ למינציה: ${parquetData.laminate.length} פרקטים`);
+      console.log(`🔶 פישבון: ${parquetData.fishbone.length} פרקטים`);
+      
+      console.log('\n📝 פירוט פרקטים לפי קטגוריות:');
+      console.log('עץ מלא:', parquetData.solid.map(p => p.typeName));
+      console.log('למינציה:', parquetData.laminate.map(p => p.typeName));
+      console.log('פישבון:', parquetData.fishbone.map(p => p.typeName));
 
       loadParquetItems('solid');
     },
