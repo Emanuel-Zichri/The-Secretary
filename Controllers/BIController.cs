@@ -1,6 +1,7 @@
 using FinalProject.BL;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System;
 
 namespace FinalProject.Controllers
 {
@@ -8,22 +9,35 @@ namespace FinalProject.Controllers
     [ApiController]
     public class BIController : ControllerBase
     {
+        private readonly BIBL _biBL;
+
+        public BIController()
+        {
+            _biBL = new BIBL();
+        }
+
         /// <summary>
         /// קבלת סטטיסטיקות BI מתקדמות
         /// </summary>
         [HttpPost("GetStatistics")]
-        public ActionResult<List<BIStatistic>> GetStatistics([FromBody] BIFilterRequest request)
+        public ActionResult<object> GetStatistics([FromBody] object request)
         {
             try
             {
-                var db = new DBservices();
-                var statistics = db.GetBIStatisticsSafe(request?.FromDate, request?.ToDate);
+                // פרסי פרמטרי תאריך אם הם קיימים
+                DateTime? fromDate = null;
+                DateTime? toDate = null;
+
+                Console.WriteLine("GetStatistics called");
+                var statistics = _biBL.GetBIStatistics(fromDate, toDate);
+                Console.WriteLine($"Statistics returned: {statistics?.Count} items");
+                
                 return Ok(statistics);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error getting BI statistics: {ex.Message}");
-                return StatusCode(500, "שגיאה בקבלת סטטיסטיקות");
+                Console.WriteLine($"Error in GetStatistics: {ex.Message}");
+                return BadRequest($"Error: {ex.Message}");
             }
         }
 
@@ -31,18 +45,25 @@ namespace FinalProject.Controllers
         /// קבלת סיכום דשבורד למנהלים
         /// </summary>
         [HttpGet("GetDashboardSummary")]
-        public ActionResult<DashboardSummary> GetDashboardSummary()
+        public ActionResult<object> GetDashboardSummary()
         {
             try
             {
-                var db = new DBservices();
-                var summary = db.GetDashboardSummarySafe();
+                Console.WriteLine("GetDashboardSummary called");
+                var summary = _biBL.GetDashboardSummary();
+                Console.WriteLine($"Summary returned: {summary != null}");
+                
+                if (summary != null)
+                {
+                    Console.WriteLine($"Values: WaitingForDate={summary.WaitingForDate}, PendingInstalls={summary.PendingInstalls}");
+                }
+                
                 return Ok(summary);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error getting dashboard summary: {ex.Message}");
-                return StatusCode(500, "שגיאה בקבלת סיכום דשבורד");
+                Console.WriteLine($"Error in GetDashboardSummary: {ex.Message}");
+                return BadRequest($"Error: {ex.Message}");
             }
         }
 
@@ -54,33 +75,7 @@ namespace FinalProject.Controllers
         {
             try
             {
-                var db = new DBservices();
-                var statistics = db.GetBIStatisticsSafe(request?.FromDate, request?.ToDate);
-
-                // עיבוד נתונים לפורמט גרפים
-                var chartData = new
-                {
-                    StatusChart = statistics
-                        .Where(s => s.StatType == "StatusCount")
-                        .Select(s => new { Label = s.StatText, Value = s.StatCount })
-                        .ToList(),
-
-                    CityDistribution = statistics
-                        .Where(s => s.StatType == "CityDistribution")
-                        .Select(s => new { Label = s.StatText, Value = s.StatCount })
-                        .ToList(),
-
-                    ParquetTypeDistribution = statistics
-                        .Where(s => s.StatType == "ParquetTypeDistribution")
-                        .Select(s => new { Label = s.StatText, Value = s.StatCount })
-                        .ToList(),
-
-                    TotalQuotes = statistics.FirstOrDefault(s => s.StatType == "TotalQuotes")?.StatValue ?? 0,
-                    TotalCustomers = statistics.FirstOrDefault(s => s.StatType == "TotalCustomers")?.StatCount ?? 0,
-                    CompletedInstalls = statistics.FirstOrDefault(s => s.StatType == "CompletedInstalls")?.StatCount ?? 0,
-                    TotalArea = statistics.FirstOrDefault(s => s.StatType == "TotalArea")?.StatValue ?? 0
-                };
-
+                var chartData = _biBL.GetChartData(request?.FromDate, request?.ToDate);
                 return Ok(chartData);
             }
             catch (Exception ex)
@@ -94,18 +89,41 @@ namespace FinalProject.Controllers
         /// קבלת דוח מכירות חודשי
         /// </summary>
         [HttpGet("GetMonthlySalesReport")]
-        public ActionResult<object> GetMonthlySalesReport()
+        public ActionResult<object> GetMonthlySalesReport([FromQuery] DateTime? fromDate = null, [FromQuery] DateTime? toDate = null)
         {
             try
             {
-                var db = new DBservices();
-                var monthlyData = db.GetMonthlySalesReportSafe(12);
+                Console.WriteLine($"GetMonthlySalesReport called with dates: {fromDate} - {toDate}");
+                var monthlyData = _biBL.GetMonthlySalesReport(12, fromDate, toDate);
+                Console.WriteLine($"Monthly sales data returned: {monthlyData?.Count} items");
+                
                 return Ok(monthlyData);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error getting monthly sales report: {ex.Message}");
-                return StatusCode(500, "שגיאה בקבלת דוח מכירות חודשי");
+                Console.WriteLine($"Error in GetMonthlySalesReport: {ex.Message}");
+                return BadRequest($"Error: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// קבלת דוח פניות לקוחות לפי חודשים
+        /// </summary>
+        [HttpGet("GetMonthlyRequestsReport")]
+        public ActionResult<object> GetMonthlyRequestsReport([FromQuery] DateTime? fromDate = null, [FromQuery] DateTime? toDate = null)
+        {
+            try
+            {
+                Console.WriteLine($"GetMonthlyRequestsReport called with dates: {fromDate} - {toDate}");
+                var monthlyData = _biBL.GetMonthlyRequestsReport(12, fromDate, toDate);
+                Console.WriteLine($"Monthly requests data returned: {monthlyData?.Count} items");
+                
+                return Ok(monthlyData);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in GetMonthlyRequestsReport: {ex.Message}");
+                return BadRequest($"Error: {ex.Message}");
             }
         }
 
@@ -117,14 +135,30 @@ namespace FinalProject.Controllers
         {
             try
             {
-                var db = new DBservices();
-                var statuses = db.GetWorkRequestStatusesSafe();
+                var statuses = _biBL.GetWorkRequestStatuses();
                 return Ok(statuses);
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error getting work request statuses: {ex.Message}");
                 return StatusCode(500, new { success = false, message = "שגיאה בקבלת סטטוסי בקשות" });
+            }
+        }
+
+        /// <summary>
+        /// בדיקת תקינות נתוני המערכת
+        /// </summary>
+        [HttpGet("GetHealthCheck")]
+        public ActionResult<object> GetHealthCheck()
+        {
+            try
+            {
+                var healthCheck = _biBL.GetDataHealthCheck();
+                return Ok(healthCheck);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error: {ex.Message}");
             }
         }
 

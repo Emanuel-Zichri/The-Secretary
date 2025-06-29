@@ -172,10 +172,10 @@
           <canvas id="monthlySalesChart" class="w-full h-80"></canvas>
         </div>
 
-        <!-- Status Distribution Chart -->
+        <!-- Monthly Requests Chart -->
         <div class="bg-white rounded-xl shadow-sm p-6">
-          <h3 class="text-lg font-semibold text-gray-900 mb-4">פילוח סטטוסי בקשות</h3>
-          <canvas id="statusChart" class="w-full h-80"></canvas>
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">פניות לקוחות לפי חודשים</h3>
+          <canvas id="monthlyRequestsChart" class="w-full h-80"></canvas>
         </div>
       </div>
 
@@ -208,7 +208,7 @@
   </div>
 
   <script>
-    let monthlySalesChart, statusChart;
+    let monthlySalesChart, monthlyRequestsChart;
     let dashboardData = {};
 
     // Toast notification function
@@ -228,6 +228,8 @@
     }
 
     function setDateRange(type) {
+      console.log('setDateRange called with type:', type);
+      
       const now = new Date();
       let from = "", to = "";
       
@@ -240,22 +242,29 @@
       switch(type) {
         case "year":
           from = new Date(now.getFullYear(), 0, 1).toISOString().split("T")[0];
+          console.log('Year filter: from', from);
           break;
         case "quarter":
           const quarter = Math.floor(now.getMonth() / 3);
           from = new Date(now.getFullYear(), quarter * 3, 1).toISOString().split("T")[0];
+          console.log('Quarter filter: from', from);
           break;
         case "month":
           from = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split("T")[0];
+          console.log('Month filter: from', from);
           break;
         case "all":
           from = "";
           to = "";
+          console.log('All filter: no dates');
           break;
       }
       
       document.getElementById("fromDate").value = from;
       document.getElementById("toDate").value = to;
+      
+      console.log('Final dates set:', { fromDate: from, toDate: to });
+      
       loadBI();
     }
 
@@ -272,14 +281,29 @@
     }
 
     function loadDashboardSummary() {
+      console.log('Loading dashboard summary...');
       ajaxCall("GET", `${API_BASE_URL}/BI/GetDashboardSummary`, "", function(data) {
+        console.log('Dashboard summary data received:', data);
+        console.log('Data type:', typeof data);
+        console.log('Is data empty?', !data || Object.keys(data).length === 0);
+        
+        if (data) {
+          console.log('Individual values:', {
+            waitingForDate: data.waitingForDate,
+            pendingInstalls: data.pendingInstalls,
+            pendingQuotes: data.pendingQuotes,
+            completedInstalls: data.completedInstalls,
+            totalActiveCustomers: data.totalActiveCustomers
+          });
+        }
+        
         const summaryContainer = document.getElementById('dashboardSummary');
         summaryContainer.innerHTML = `
           <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl shadow-sm p-6 text-white card-hover">
             <div class="flex items-center justify-between">
               <div>
                 <p class="text-blue-100 text-sm font-medium">ממתינים לתאריך</p>
-                <p class="text-3xl font-bold">${data.waitingForDate}</p>
+                <p class="text-3xl font-bold">${data.waitingForDate || 0}</p>
               </div>
               <div class="bg-blue-400 rounded-full p-3">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -293,7 +317,7 @@
             <div class="flex items-center justify-between">
               <div>
                 <p class="text-orange-100 text-sm font-medium">התקנות בהמתנה</p>
-                <p class="text-3xl font-bold">${data.pendingInstalls}</p>
+                <p class="text-3xl font-bold">${data.pendingInstalls || 0}</p>
               </div>
               <div class="bg-orange-400 rounded-full p-3">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -307,7 +331,7 @@
             <div class="flex items-center justify-between">
               <div>
                 <p class="text-purple-100 text-sm font-medium">הצעות בהמתנה</p>
-                <p class="text-3xl font-bold">${data.pendingQuotes}</p>
+                <p class="text-3xl font-bold">${data.pendingQuotes || 0}</p>
               </div>
               <div class="bg-purple-400 rounded-full p-3">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -321,7 +345,7 @@
             <div class="flex items-center justify-between">
               <div>
                 <p class="text-green-100 text-sm font-medium">התקנות שהושלמו</p>
-                <p class="text-3xl font-bold">${data.completedInstalls}</p>
+                <p class="text-3xl font-bold">${data.completedInstalls || 0}</p>
               </div>
               <div class="bg-green-400 rounded-full p-3">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -335,7 +359,7 @@
             <div class="flex items-center justify-between">
               <div>
                 <p class="text-indigo-100 text-sm font-medium">סה"כ לקוחות פעילים</p>
-                <p class="text-3xl font-bold">${data.totalActiveCustomers}</p>
+                <p class="text-3xl font-bold">${data.totalActiveCustomers || 0}</p>
               </div>
               <div class="bg-indigo-400 rounded-full p-3">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -346,7 +370,19 @@
           </div>
         `;
       }, function(error) {
+        console.error('Error loading dashboard summary:', error);
         showToast('שגיאה בטעינת נתוני הדשבורד', 'error');
+        
+        // הצגת הודעת שגיאה ברורה
+        const summaryContainer = document.getElementById('dashboardSummary');
+        summaryContainer.innerHTML = `
+          <div class="col-span-full bg-red-50 border border-red-200 rounded-xl shadow-sm p-6">
+            <div class="text-center text-red-600">
+              <p class="font-medium">שגיאה בטעינת נתוני הסיכום</p>
+              <p class="text-sm mt-1">יש לבדוק את חיבור בסיס הנתונים</p>
+            </div>
+          </div>
+        `;
       });
     }
 
@@ -354,32 +390,42 @@
       const fromDate = document.getElementById("fromDate").value;
       const toDate = document.getElementById("toDate").value;
       
+      console.log('Loading statistics with dates:', fromDate, toDate);
+      
       const requestData = {
-        fromDate: fromDate || new Date(2020, 0, 1).toISOString(),
-        toDate: toDate || new Date().toISOString(),
+        fromDate: fromDate || null,
+        toDate: toDate || null,
         filterType: "all"
       };
 
       ajaxCall("POST", `${API_BASE_URL}/BI/GetStatistics`, JSON.stringify(requestData), function(data) {
+        console.log('Statistics data received:', data);
+        console.log('Data length:', data ? data.length : 'null');
+        
         const statsContainer = document.getElementById('statisticsCards');
         let totalQuotes = 0, totalCustomers = 0, completedInstalls = 0, totalArea = 0;
         
-        data.forEach(stat => {
-          switch(stat.statType) {
-            case 'TotalQuotes':
-              totalQuotes = stat.statValue;
-              break;
-            case 'TotalCustomers':
-              totalCustomers = stat.statValue;
-              break;
-            case 'CompletedInstalls':
-              completedInstalls = stat.statValue;
-              break;
-            case 'TotalArea':
-              totalArea = stat.statValue;
-              break;
-          }
-        });
+        if (data && data.length > 0) {
+          data.forEach((stat, index) => {
+            console.log(`Stat ${index}:`, stat);
+            switch(stat.statType) {
+              case 'TotalQuotes':
+                totalQuotes = stat.statValue || 0;
+                break;
+              case 'TotalCustomers':
+                totalCustomers = stat.statCount || 0;
+                break;
+              case 'CompletedInstalls':
+                completedInstalls = stat.statCount || 0;
+                break;
+              case 'TotalArea':
+                totalArea = stat.statValue || 0;
+                break;
+            }
+          });
+        }
+
+        console.log('Final values:', { totalQuotes, totalCustomers, completedInstalls, totalArea });
 
         statsContainer.innerHTML = `
           <div class="bg-white rounded-xl shadow-sm p-6 card-hover">
@@ -439,43 +485,116 @@
           </div>
         `;
       }, function(error) {
+        console.error('Error loading statistics:', error);
         showToast('שגיאה בטעינת הסטטיסטיקות', 'error');
+        
+        // הצגת הודעת שגיאה ברורה
+        const statsContainer = document.getElementById('statisticsCards');
+        statsContainer.innerHTML = `
+          <div class="col-span-full bg-red-50 border border-red-200 rounded-xl shadow-sm p-6 card-hover">
+            <div class="text-center text-red-600">
+              <p class="font-medium">שגיאה בטעינת הסטטיסטיקות</p>
+              <p class="text-sm mt-1">יש לבדוק את חיבור בסיס הנתונים</p>
+            </div>
+          </div>
+        `;
       });
     }
 
     function loadMonthlySalesReport() {
-      ajaxCall("GET", `${API_BASE_URL}/BI/GetMonthlySalesReport`, "", function(data) {
+      const fromDate = document.getElementById("fromDate").value;
+      const toDate = document.getElementById("toDate").value;
+      
+      console.log('Loading monthly sales with dates:', fromDate, toDate);
+      
+      let url = `${API_BASE_URL}/BI/GetMonthlySalesReport`;
+      if (fromDate || toDate) {
+        const params = new URLSearchParams();
+        if (fromDate) params.append('fromDate', fromDate);
+        if (toDate) params.append('toDate', toDate);
+        url += '?' + params.toString();
+      }
+      
+      ajaxCall("GET", url, "", function(data) {
+        console.log('Monthly sales data received:', data);
+        
         if (monthlySalesChart) {
           monthlySalesChart.destroy();
         }
 
+        // וודא שיש נתונים וערכים תקינים
+        if (!data || data.length === 0) {
+          document.getElementById('monthlySalesChart').innerHTML = '<p class="text-center text-gray-500 py-8">אין נתונים להצגה</p>';
+          return;
+        }
+
         const ctx = document.getElementById('monthlySalesChart').getContext('2d');
+        
+        // הגבלת נתונים ל-12 חודשים אחרונים (מחק חודש נוכחי או ראשון)
+        let limitedData = data.slice(-12);
+        
+        // אם יש 13 חודשים, הסר את החודש הנוכחי (האחרון)
+        if (data.length > 12) {
+          limitedData = data.slice(1, 13); // לקח חודשים 1-12 (מחק את הראשון והאחרון)
+        }
+
+        // פורמט חודשים בעברית
+        const monthNames = ['ינואר', 'פברואר', 'מרץ', 'אפריל', 'מאי', 'יוני', 
+                           'יולי', 'אוגוסט', 'ספטמבר', 'אוקטובר', 'נובמבר', 'דצמבר'];
+        
+        const processedData = limitedData.map(item => {
+          let monthName = 'חודש';
+          
+          // המרה לעברית מהפורמט yyyy-MM
+          if (item.month && item.month.includes('-')) {
+            const [year, month] = item.month.split('-');
+            const monthIndex = parseInt(month) - 1;
+            if (monthIndex >= 0 && monthIndex < 12) {
+              monthName = monthNames[monthIndex] + ' ' + year;
+            }
+          }
+          
+          return {
+            ...item,
+            displayName: monthName,
+            TotalQuotes: parseFloat(item.totalQuotes || 0),
+            TotalCustomers: parseInt(item.totalCustomers || 0)
+          };
+        });
+
+        console.log('Processed data:', processedData);
+
         monthlySalesChart = new Chart(ctx, {
           type: 'line',
           data: {
-            labels: data.map(item => item.monthName),
+            labels: processedData.map(item => item.displayName),
             datasets: [{
               label: 'הצעות מחיר (₪)',
-              data: data.map(item => item.totalQuotes),
+              data: processedData.map(item => Math.max(0, item.TotalQuotes || 0)),
               borderColor: '#b46a2c',
               backgroundColor: 'rgba(180, 106, 44, 0.1)',
               borderWidth: 3,
               fill: true,
-              tension: 0.4
+              tension: 0.4,
+              pointRadius: 4,
+              pointHoverRadius: 8
             }, {
               label: 'לקוחות',
-              data: data.map(item => item.totalCustomers),
+              data: processedData.map(item => Math.max(0, item.TotalCustomers || 0)),
               borderColor: '#059669',
               backgroundColor: 'rgba(5, 150, 105, 0.1)',
               borderWidth: 3,
               fill: false,
               tension: 0.4,
-              yAxisID: 'y1'
+              yAxisID: 'y1',
+              pointRadius: 4,
+              pointHoverRadius: 8
             }]
           },
           options: {
             responsive: true,
-            maintainAspectRatio: false,
+            maintainAspectRatio: true,
+            aspectRatio: 2,
             plugins: {
               legend: {
                 position: 'top',
@@ -492,6 +611,12 @@
                 title: {
                   display: true,
                   text: 'הצעות מחיר (₪)'
+                },
+                beginAtZero: true,
+                max: function(context) {
+                  const values = context.chart.data.datasets[0].data;
+                  const maxValue = Math.max(...values);
+                  return maxValue > 0 ? maxValue * 1.1 : 1000; // 10% מרווח עליון
                 }
               },
               y1: {
@@ -502,6 +627,12 @@
                   display: true,
                   text: 'מספר לקוחות'
                 },
+                beginAtZero: true,
+                max: function(context) {
+                  const values = context.chart.data.datasets[1].data;
+                  const maxValue = Math.max(...values);
+                  return maxValue > 0 ? maxValue * 1.2 : 10; // 20% מרווח עליון
+                },
                 grid: {
                   drawOnChartArea: false,
                 },
@@ -510,54 +641,143 @@
           }
         });
       }, function(error) {
+        console.error('Error loading monthly sales report:', error);
         showToast('שגיאה בטעינת דוח המכירות החודשי', 'error');
+        document.querySelector('#monthlySalesChart').innerHTML = '<div class="text-center text-red-600 py-8"><p class="font-medium">שגיאה בטעינת נתוני המכירות</p><p class="text-sm mt-1">יש לבדוק את חיבור בסיס הנתונים</p></div>';
       });
     }
 
-    function loadWorkRequestStatuses() {
-      ajaxCall("GET", `${API_BASE_URL}/BI/GetWorkRequestStatuses`, "", function(data) {
-        if (statusChart) {
-          statusChart.destroy();
+    function loadMonthlyRequestsChart() {
+      const fromDate = document.getElementById("fromDate").value;
+      const toDate = document.getElementById("toDate").value;
+      
+      console.log('Loading monthly requests with dates:', fromDate, toDate);
+      
+      let url = `${API_BASE_URL}/BI/GetMonthlyRequestsReport`;
+      if (fromDate || toDate) {
+        const params = new URLSearchParams();
+        if (fromDate) params.append('fromDate', fromDate);
+        if (toDate) params.append('toDate', toDate);
+        url += '?' + params.toString();
+      }
+      
+      ajaxCall("GET", url, "", function(data) {
+        console.log('Monthly requests data received:', data);
+        
+        if (monthlyRequestsChart) {
+          monthlyRequestsChart.destroy();
         }
 
-        // For demo purposes, let's create some sample data based on the statuses
-        const statusData = data.map(status => ({
-          name: status.statusName,
-          count: Math.floor(Math.random() * 20) + 1 // Random data for demo
-        }));
+        // בדיקה שיש נתונים תקינים
+        if (!data || data.length === 0) {
+          document.querySelector('#monthlyRequestsChart').innerHTML = '<p class="text-center text-gray-500 py-8">אין נתונים להצגה</p>';
+          return;
+        }
 
-        const ctx = document.getElementById('statusChart').getContext('2d');
-        statusChart = new Chart(ctx, {
-          type: 'doughnut',
+        // הגבלת נתונים ל-12 חודשים אחרונים (מחק חודש נוכחי או ראשון)
+        let limitedData = data.slice(-12);
+        
+        // אם יש 13 חודשים, הסר את החודש הנוכחי (האחרון)
+        if (data.length > 12) {
+          limitedData = data.slice(1, 13); // לקח חודשים 1-12 (מחק את הראשון והאחרון)
+        }
+
+        // פורמט חודשים בעברית
+        const monthNames = ['ינואר', 'פברואר', 'מרץ', 'אפריל', 'מאי', 'יוני', 
+                           'יולי', 'אוגוסט', 'ספטמבר', 'אוקטובר', 'נובמבר', 'דצמבר'];
+        
+        const processedData = limitedData.map(item => {
+          let monthName = 'חודש';
+          
+          // המרה לעברית מהפורמט yyyy-MM
+          if (item.month && item.month.includes('-')) {
+            const [year, month] = item.month.split('-');
+            const monthIndex = parseInt(month) - 1;
+            if (monthIndex >= 0 && monthIndex < 12) {
+              monthName = monthNames[monthIndex] + ' ' + year;
+            }
+          }
+          
+          return {
+            ...item,
+            displayName: monthName,
+            NewRequests: parseInt(item.newRequests || 0),
+            NewCustomers: parseInt(item.newCustomers || 0)
+          };
+        });
+
+        console.log('Processed requests data:', processedData);
+
+        const ctx = document.getElementById('monthlyRequestsChart').getContext('2d');
+        monthlyRequestsChart = new Chart(ctx, {
+          type: 'bar',
           data: {
-            labels: statusData.map(item => item.name),
+            labels: processedData.map(item => item.displayName),
             datasets: [{
-              data: statusData.map(item => item.count),
-              backgroundColor: [
-                '#3B82F6', // Blue
-                '#10B981', // Green
-                '#F59E0B', // Yellow
-                '#EF4444', // Red
-                '#8B5CF6', // Purple
-                '#F97316', // Orange
-                '#06B6D4'  // Cyan
-              ],
+              label: 'פניות חדשות',
+              data: processedData.map(item => Math.max(0, item.NewRequests || 0)),
+              backgroundColor: 'rgba(180, 106, 44, 0.8)',
+              borderColor: '#b46a2c',
               borderWidth: 2,
-              borderColor: '#ffffff'
+              borderRadius: 6,
+              borderSkipped: false,
+            }, {
+              label: 'לקוחות חדשים',
+              data: processedData.map(item => Math.max(0, item.NewCustomers || 0)),
+              backgroundColor: 'rgba(5, 150, 105, 0.8)',
+              borderColor: '#059669',
+              borderWidth: 2,
+              borderRadius: 6,
+              borderSkipped: false,
             }]
           },
           options: {
             responsive: true,
-            maintainAspectRatio: false,
+            maintainAspectRatio: true,
+            aspectRatio: 2,
             plugins: {
               legend: {
-                position: 'bottom',
+                position: 'top',
+                labels: {
+                  padding: 20,
+                  font: {
+                    size: 12
+                  }
+                }
+              },
+              title: {
+                display: false
               }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                title: {
+                  display: true,
+                  text: 'מספר פניות/לקוחות'
+                },
+                ticks: {
+                  stepSize: 1
+                }
+              },
+              x: {
+                title: {
+                  display: true,
+                  text: 'חודש'
+                }
+              }
+            },
+            interaction: {
+              intersect: false,
+              mode: 'index'
             }
           }
         });
+        
       }, function(error) {
-        showToast('שגיאה בטעינת נתוני הסטטוסים', 'error');
+        console.error('Error loading monthly requests chart:', error);
+        showToast('שגיאה בטעינת נתוני פניות חודשיות', 'error');
+        document.querySelector('#monthlyRequestsChart').innerHTML = '<div class="text-center text-red-600 py-8"><p class="font-medium">שגיאה בטעינת נתוני הפניות</p><p class="text-sm mt-1">יש לבדוק את חיבור בסיס הנתונים</p></div>';
       });
     }
 
@@ -569,7 +789,7 @@
         new Promise(resolve => loadDashboardSummary() || resolve()),
         new Promise(resolve => loadStatistics() || resolve()),
         new Promise(resolve => loadMonthlySalesReport() || resolve()),
-        new Promise(resolve => loadWorkRequestStatuses() || resolve()),
+        new Promise(resolve => loadMonthlyRequestsChart() || resolve()),
         new Promise(resolve => loadBIItemCandidates() || resolve())
       ]).finally(() => {
         hideLoading();

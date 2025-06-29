@@ -2118,7 +2118,7 @@ public class DBservices
     //--------------------------------------------------------------------------------------------------
     // This method gets monthly sales report data
     //--------------------------------------------------------------------------------------------------
-    public List<MonthlySalesData> GetMonthlySalesReport(int monthsBack = 12)
+    public List<FinalProject.BL.MonthlySalesData> GetMonthlySalesReport(int monthsBack = 12, DateTime? fromDate = null, DateTime? toDate = null)
     {
         SqlConnection con;
         SqlCommand cmd;
@@ -2131,10 +2131,18 @@ public class DBservices
             throw ex;
         }
 
-        List<MonthlySalesData> salesData = new List<MonthlySalesData>();
+        List<FinalProject.BL.MonthlySalesData> salesData = new List<FinalProject.BL.MonthlySalesData>();
 
         try
         {
+            // חישוב monthsBack על בסיס תאריכים אם ניתנו
+            if (fromDate.HasValue)
+            {
+                var monthsDiff = ((DateTime.Now.Year - fromDate.Value.Year) * 12) + DateTime.Now.Month - fromDate.Value.Month + 1;
+                monthsBack = Math.Max(1, Math.Min(monthsDiff, 120)); // מגביל בין 1 ל-120 חודשים
+                Console.WriteLine($"Calculated monthsBack from fromDate: {monthsBack}");
+            }
+            
             Dictionary<string, object> paramDic = new Dictionary<string, object>
             {
                 { "@MonthsBack", monthsBack }
@@ -2145,7 +2153,7 @@ public class DBservices
 
             while (reader.Read())
             {
-                MonthlySalesData data = new MonthlySalesData
+                FinalProject.BL.MonthlySalesData data = new FinalProject.BL.MonthlySalesData
                 {
                     Month = reader["Month"].ToString(),
                     MonthName = reader["MonthName"].ToString(),
@@ -2177,85 +2185,116 @@ public class DBservices
     //--------------------------------------------------------------------------------------------------
 
     //--------------------------------------------------------------------------------------------------
-    // This method gets BI statistics with mock data if procedure doesn't exist
+    // This method gets BI statistics - NO MOCK DATA
     //--------------------------------------------------------------------------------------------------
     public List<BIStatistic> GetBIStatisticsSafe(DateTime? fromDate = null, DateTime? toDate = null)
     {
-        try
-        {
-            return GetBIStatistics(fromDate, toDate);
-        }
-        catch (Exception ex)
-        {
-            // If stored procedure doesn't exist, return mock data
-            Console.WriteLine($"Using mock BI data: {ex.Message}");
-            return GetMockBIStatistics();
-        }
+        return GetBIStatistics(fromDate, toDate);
     }
 
     //--------------------------------------------------------------------------------------------------
-    // This method gets dashboard summary with mock data if procedure doesn't exist
+    // This method gets dashboard summary - NO MOCK DATA
     //--------------------------------------------------------------------------------------------------
     public DashboardSummary GetDashboardSummarySafe()
     {
-        try
-        {
-            return GetDashboardSummary();
-        }
-        catch (Exception ex)
-        {
-            // If stored procedure doesn't exist, return mock data
-            Console.WriteLine($"Using mock dashboard data: {ex.Message}");
-            return GetMockDashboardSummary();
-        }
+        return GetDashboardSummary();
     }
 
     //--------------------------------------------------------------------------------------------------
-    // This method gets monthly sales report with mock data if procedure doesn't exist
+    // This method gets monthly sales report - NO MOCK DATA
     //--------------------------------------------------------------------------------------------------
-    public List<MonthlySalesData> GetMonthlySalesReportSafe(int monthsBack = 12)
+    public List<FinalProject.BL.MonthlySalesData> GetMonthlySalesReportSafe(int monthsBack = 12, DateTime? fromDate = null, DateTime? toDate = null)
     {
-        try
-        {
-            return GetMonthlySalesReport(monthsBack);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Using mock monthly sales data: {ex.Message}");
-            return GetMockMonthlySalesData(monthsBack);
-        }
+        return GetMonthlySalesReport(monthsBack, fromDate, toDate);
     }
 
     //--------------------------------------------------------------------------------------------------
-    // This method gets work request statuses with default data if procedure doesn't exist
+    // This method gets monthly requests report
+    //--------------------------------------------------------------------------------------------------
+    public List<FinalProject.BL.MonthlyRequestsData> GetMonthlyRequestsReport(int monthsBack = 12, DateTime? fromDate = null, DateTime? toDate = null)
+    {
+        SqlConnection con;
+        SqlCommand cmd;
+        try
+        {
+            con = connect("myProjDB");
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+
+        List<FinalProject.BL.MonthlyRequestsData> requestsData = new List<FinalProject.BL.MonthlyRequestsData>();
+
+        try
+        {
+            // חישוב monthsBack על בסיס תאריכים אם ניתנו
+            if (fromDate.HasValue)
+            {
+                var monthsDiff = ((DateTime.Now.Year - fromDate.Value.Year) * 12) + DateTime.Now.Month - fromDate.Value.Month + 1;
+                monthsBack = Math.Max(1, Math.Min(monthsDiff, 120)); // מגביל בין 1 ל-120 חודשים
+                Console.WriteLine($"Calculated monthsBack from fromDate: {monthsBack}");
+            }
+            
+            Dictionary<string, object> paramDic = new Dictionary<string, object>
+            {
+                { "@MonthsBack", monthsBack }
+            };
+
+            cmd = CreateCommandWithStoredProcedureGeneral("GetMonthlyRequestsReport", con, paramDic);
+            SqlDataReader reader = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+
+            while (reader.Read())
+            {
+                FinalProject.BL.MonthlyRequestsData data = new FinalProject.BL.MonthlyRequestsData
+                {
+                    Month = reader["Month"].ToString(),
+                    MonthName = reader["MonthName"].ToString(),
+                    NewRequests = reader["NewRequests"] != DBNull.Value ? Convert.ToInt32(reader["NewRequests"]) : 0,
+                    NewCustomers = reader["NewCustomers"] != DBNull.Value ? Convert.ToInt32(reader["NewCustomers"]) : 0,
+                    CompletedRequests = reader["CompletedRequests"] != DBNull.Value ? Convert.ToInt32(reader["CompletedRequests"]) : 0,
+                    TotalArea = reader["TotalArea"] != DBNull.Value ? Convert.ToDecimal(reader["TotalArea"]) : 0
+                };
+
+                requestsData.Add(data);
+            }
+            reader.Close();
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+        finally
+        {
+            if (con != null)
+                con.Close();
+        }
+
+        return requestsData;
+    }
+
+    //--------------------------------------------------------------------------------------------------
+    // This method gets monthly requests report - NO MOCK DATA
+    //--------------------------------------------------------------------------------------------------
+    public List<FinalProject.BL.MonthlyRequestsData> GetMonthlyRequestsReportSafe(int monthsBack = 12, DateTime? fromDate = null, DateTime? toDate = null)
+    {
+        return GetMonthlyRequestsReport(monthsBack, fromDate, toDate);
+    }
+
+    //--------------------------------------------------------------------------------------------------
+    // This method gets work request statuses - NO MOCK DATA
     //--------------------------------------------------------------------------------------------------
     public List<WorkRequestStatus> GetWorkRequestStatusesSafe()
     {
-        try
-        {
-            return GetWorkRequestStatuses();
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Using default work request statuses: {ex.Message}");
-            return GetDefaultWorkRequestStatuses();
-        }
+        return GetWorkRequestStatuses();
     }
 
     //--------------------------------------------------------------------------------------------------
-    // This method gets system settings with defaults if procedure doesn't exist
+    // This method gets system settings - NO MOCK DATA
     //--------------------------------------------------------------------------------------------------
     public List<SystemSetting> GetSystemSettingsSafe(string settingKey = null)
     {
-        try
-        {
-            return GetSystemSettings(settingKey);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Using default system settings: {ex.Message}");
-            return GetDefaultSystemSettings(settingKey);
-        }
+        return GetSystemSettings(settingKey);
     }
 
     //--------------------------------------------------------------------------------------------------
@@ -2377,276 +2416,27 @@ public class DBservices
     }
 
     //--------------------------------------------------------------------------------------------------
-    // Safe methods with mock data
+    // Safe methods - NO MOCK DATA
     //--------------------------------------------------------------------------------------------------
     public List<RecentActivity> GetRecentActivitySafe(int limit = 10)
     {
-        try
-        {
-            return GetRecentActivity(limit);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Using mock recent activity data: {ex.Message}");
-            return GetMockRecentActivity();
-        }
+        return GetRecentActivity(limit);
     }
 
     public List<UpcomingInstall> GetUpcomingInstallsSafe(int days = 7)
     {
-        try
-        {
-            return GetUpcomingInstalls(days);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Using mock upcoming installs data: {ex.Message}");
-            return GetMockUpcomingInstalls();
-        }
+        return GetUpcomingInstalls(days);
     }
 
     //--------------------------------------------------------------------------------------------------
-    // This method safely updates system setting
+    // This method updates system setting - NO MOCK DATA
     //--------------------------------------------------------------------------------------------------
     public int UpdateSystemSettingSafe(SystemSetting setting)
     {
-        try
-        {
-            return UpdateSystemSetting(setting);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error updating system setting: {ex.Message}");
-            // For demo purposes, return success
-            return 1;
-        }
+        return UpdateSystemSetting(setting);
     }
 
-    //--------------------------------------------------------------------------------------------------
-    // MOCK DATA METHODS FOR DEVELOPMENT
-    //--------------------------------------------------------------------------------------------------
-    private List<BIStatistic> GetMockBIStatistics()
-    {
-        var random = new Random();
-        return new List<BIStatistic>
-        {
-            new BIStatistic { StatType = "TotalQuotes", StatValue = random.Next(50000, 200000), StatCount = 0, StatText = "סה\"כ הצעות מחיר" },
-            new BIStatistic { StatType = "TotalCustomers", StatValue = 0, StatCount = random.Next(80, 150), StatText = "סה\"כ לקוחות" },
-            new BIStatistic { StatType = "CompletedInstalls", StatValue = 0, StatCount = random.Next(40, 80), StatText = "התקנות שהושלמו" },
-            new BIStatistic { StatType = "TotalArea", StatValue = random.Next(2000, 5000), StatCount = 0, StatText = "סה\"כ שטח (מ\"ר)" },
-            new BIStatistic { StatType = "StatusCount", StatValue = 0, StatCount = random.Next(5, 15), StatText = "ממתין לתאריך" },
-            new BIStatistic { StatType = "StatusCount", StatValue = 0, StatCount = random.Next(8, 20), StatText = "בתהליך התקנה" },
-            new BIStatistic { StatType = "StatusCount", StatValue = 0, StatCount = random.Next(3, 10), StatText = "ממתין לאישור" },
-            new BIStatistic { StatType = "CityDistribution", StatValue = 0, StatCount = random.Next(15, 30), StatText = "תל אביב" },
-            new BIStatistic { StatType = "CityDistribution", StatValue = 0, StatCount = random.Next(10, 25), StatText = "ירושלים" },
-            new BIStatistic { StatType = "CityDistribution", StatValue = 0, StatCount = random.Next(8, 20), StatText = "חיפה" },
-            new BIStatistic { StatType = "ParquetTypeDistribution", StatValue = 0, StatCount = random.Next(20, 40), StatText = "SPC/למינציה" },
-            new BIStatistic { StatType = "ParquetTypeDistribution", StatValue = 0, StatCount = random.Next(15, 30), StatText = "עץ" },
-            new BIStatistic { StatType = "ParquetTypeDistribution", StatValue = 0, StatCount = random.Next(5, 15), StatText = "פישבון" }
-        };
-    }
 
-    private DashboardSummary GetMockDashboardSummary()
-    {
-        var random = new Random();
-        return new DashboardSummary
-        {
-            WaitingForDate = random.Next(5, 15),
-            PendingInstalls = random.Next(8, 20),
-            PendingQuotes = random.Next(10, 25),
-            PendingApproval = random.Next(3, 10),
-            WaitingForVideo = random.Next(2, 8),
-            CompletedInstalls = random.Next(40, 80),
-            TotalActiveCustomers = random.Next(80, 150),
-            TotalActiveRequests = random.Next(50, 100),
-            ThisWeekInstalls = random.Next(5, 15),
-            ThisMonthInstalls = random.Next(20, 40)
-        };
-    }
-
-    private List<MonthlySalesData> GetMockMonthlySalesData(int monthsBack)
-    {
-        var random = new Random();
-        var data = new List<MonthlySalesData>();
-        var currentDate = DateTime.Now;
-
-        for (int i = monthsBack - 1; i >= 0; i--)
-        {
-            var monthStart = new DateTime(currentDate.Year, currentDate.Month, 1).AddMonths(-i);
-            
-            data.Add(new MonthlySalesData
-            {
-                Month = monthStart.ToString("yyyy-MM"),
-                MonthName = monthStart.ToString("MMMM yyyy", new System.Globalization.CultureInfo("he-IL")),
-                TotalQuotes = random.Next(30000, 80000),
-                TotalCustomers = random.Next(10, 30),
-                CompletedInstalls = random.Next(5, 20),
-                TotalArea = random.Next(200, 800)
-            });
-        }
-
-        return data;
-    }
-
-    private List<WorkRequestStatus> GetDefaultWorkRequestStatuses()
-    {
-        return new List<WorkRequestStatus>
-        {
-            new WorkRequestStatus { StatusID = 1, StatusName = "טיוטה", StatusOrder = 1, IsActive = true, Description = "בקשה חדשה", CreatedAt = DateTime.Now },
-            new WorkRequestStatus { StatusID = 2, StatusName = "צפייה בסרטון לקוח", StatusOrder = 2, IsActive = true, Description = "הלקוח צופה בסרטון", CreatedAt = DateTime.Now },
-            new WorkRequestStatus { StatusID = 3, StatusName = "טיוטה להצעת מחיר", StatusOrder = 3, IsActive = true, Description = "הכנת הצעת מחיר", CreatedAt = DateTime.Now },
-            new WorkRequestStatus { StatusID = 4, StatusName = "שליחת טיוטה ללקוח", StatusOrder = 4, IsActive = true, Description = "שליחת הצעה ללקוח", CreatedAt = DateTime.Now },
-            new WorkRequestStatus { StatusID = 5, StatusName = "העברה מקדמה", StatusOrder = 5, IsActive = true, Description = "קבלת מקדמה", CreatedAt = DateTime.Now },
-                            new WorkRequestStatus { StatusID = 6, StatusName = "תואמה התקנה", StatusOrder = 6, IsActive = true, Description = "תיאום מועד התקנה", CreatedAt = DateTime.Now },
-            new WorkRequestStatus { StatusID = 7, StatusName = "יתואם", StatusOrder = 7, IsActive = true, Description = "מועד התקנה נקבע", CreatedAt = DateTime.Now },
-            new WorkRequestStatus { StatusID = 8, StatusName = "התקנה בוצעה", StatusOrder = 8, IsActive = true, Description = "התקנה הושלמה", CreatedAt = DateTime.Now },
-            new WorkRequestStatus { StatusID = 9, StatusName = "קבלת משוב", StatusOrder = 9, IsActive = true, Description = "איסוף משוב לקוח", CreatedAt = DateTime.Now }
-        };
-    }
-
-    private List<SystemSetting> GetDefaultSystemSettings(string settingKey = null)
-    {
-        var defaultSettings = new List<SystemSetting>
-        {
-            new SystemSetting { SettingID = 1, SettingKey = "SPC_PRICE", SettingValue = "60", SettingType = "DECIMAL", Description = "מחיר SPC/למינציה למ\"ר", UpdatedAt = DateTime.Now },
-            new SystemSetting { SettingID = 2, SettingKey = "WOOD_PRICE", SettingValue = "85", SettingType = "DECIMAL", Description = "מחיר עץ למ\"ר", UpdatedAt = DateTime.Now },
-            new SystemSetting { SettingID = 3, SettingKey = "FISHBONE_PRICE", SettingValue = "150", SettingType = "DECIMAL", Description = "מחיר פישבון למ\"ר", UpdatedAt = DateTime.Now },
-            new SystemSetting { SettingID = 4, SettingKey = "BUSINESS_PHONE", SettingValue = "050-1234567", SettingType = "STRING", Description = "מספר טלפון העסק", UpdatedAt = DateTime.Now },
-            new SystemSetting { SettingID = 5, SettingKey = "BUSINESS_EMAIL", SettingValue = "info@davidparquet.co.il", SettingType = "STRING", Description = "כתובת אימייל העסק", UpdatedAt = DateTime.Now },
-            new SystemSetting { SettingID = 6, SettingKey = "WORKING_HOURS", SettingValue = "א'-ה': 8:00-18:00 | ו': 8:00-14:00", SettingType = "STRING", Description = "שעות פעילות העסק", UpdatedAt = DateTime.Now },
-                            new SystemSetting { SettingID = 7, SettingKey = "VAT_PERCENTAGE", SettingValue = "18", SettingType = "DECIMAL", Description = "אחוז מע\"מ", UpdatedAt = DateTime.Now }
-        };
-
-        if (!string.IsNullOrEmpty(settingKey))
-        {
-            return defaultSettings.FindAll(s => s.SettingKey == settingKey);
-        }
-
-        return defaultSettings;
-    }
-
-    private List<RecentActivity> GetMockRecentActivity()
-    {
-        var activities = new List<RecentActivity>();
-        var now = DateTime.Now;
-
-        activities.AddRange(new[]
-        {
-            new RecentActivity
-            {
-                ActivityType = "INSTALL_COMPLETED",
-                Description = "התקנה הושלמה",
-                CustomerName = "רחל כהן",
-                Location = "תל אביב",
-                ActivityDate = now.AddHours(-2),
-                RelativeTime = "לפני 2 שעות",
-                IconType = "check",
-                ColorClass = "green"
-            },
-            new RecentActivity
-            {
-                ActivityType = "NEW_CUSTOMER",
-                Description = "לקוח חדש נרשם",
-                CustomerName = "משה לוי",
-                Location = "רמת גן",
-                ActivityDate = now.AddHours(-4),
-                RelativeTime = "לפני 4 שעות",
-                IconType = "user-plus",
-                ColorClass = "blue"
-            },
-            new RecentActivity
-            {
-                ActivityType = "QUOTE_SENT",
-                Description = "הצעת מחיר נשלחה",
-                CustomerName = "שרה אברהם",
-                Location = "פתח תקווה",
-                ActivityDate = now.AddDays(-1),
-                RelativeTime = "אתמול",
-                IconType = "file-text",
-                ColorClass = "yellow"
-            },
-            new RecentActivity
-            {
-                ActivityType = "QUOTE_APPROVED",
-                Description = "הצעת מחיר אושרה",
-                CustomerName = "דוד דוידוביץ'",
-                Location = "הרצליה",
-                ActivityDate = now.AddDays(-1).AddHours(-5),
-                RelativeTime = "אתמול",
-                IconType = "check-circle",
-                ColorClass = "green"
-            },
-            new RecentActivity
-            {
-                ActivityType = "SCHEDULE_SET",
-                Description = "תאריך התקנה נקבע",
-                CustomerName = "מירי חן",
-                Location = "רעננה",
-                ActivityDate = now.AddDays(-2),
-                RelativeTime = "לפני יומיים",
-                IconType = "calendar",
-                ColorClass = "purple"
-            }
-        });
-
-        return activities.Take(10).ToList();
-    }
-
-    private List<UpcomingInstall> GetMockUpcomingInstalls()
-    {
-        var installs = new List<UpcomingInstall>();
-        var now = DateTime.Now;
-
-        installs.AddRange(new[]
-        {
-            new UpcomingInstall
-            {
-                RequestID = 1,
-                CustomerName = "דוד כהן",
-                Location = "רמת השרון",
-                InstallDate = now.AddDays(1).Date.AddHours(10),
-                TimeSlot = "10:00",
-                Status = "מתוכנן",
-                StatusColor = "blue",
-                FormattedDate = "מחר 10:00"
-            },
-            new UpcomingInstall
-            {
-                RequestID = 2,
-                CustomerName = "מרים לוי",
-                Location = "תל אביב",
-                InstallDate = now.AddDays(2).Date.AddHours(14),
-                TimeSlot = "14:00",
-                Status = "מאושר",
-                StatusColor = "green",
-                FormattedDate = "יום ג' 14:00"
-            },
-            new UpcomingInstall
-            {
-                RequestID = 3,
-                CustomerName = "יוסי אברהם",
-                Location = "הרצליה",
-                InstallDate = now.AddDays(4).Date.AddHours(9),
-                TimeSlot = "09:00",
-                Status = "דחוף",
-                StatusColor = "orange",
-                FormattedDate = "יום ה' 09:00"
-            },
-            new UpcomingInstall
-            {
-                RequestID = 4,
-                CustomerName = "שרה דוד",
-                Location = "פתח תקווה",
-                InstallDate = now.AddDays(5).Date.AddHours(11),
-                TimeSlot = "11:00",
-                Status = "מתוכנן",
-                StatusColor = "blue",
-                FormattedDate = "יום ו' 11:00"
-            }
-        });
-
-        return installs;
-    }
 }
 
 // מחלקות עזר חדשות
@@ -2703,15 +2493,6 @@ public class PriceEstimateCalculation
     public decimal ComplexityMultiplier { get; set; }
 }
 
-public class MonthlySalesData
-{
-    public string Month { get; set; }
-    public string MonthName { get; set; }
-    public decimal TotalQuotes { get; set; }
-    public int TotalCustomers { get; set; }
-    public int CompletedInstalls { get; set; }
-    public decimal TotalArea { get; set; }
-}
 
 
 
