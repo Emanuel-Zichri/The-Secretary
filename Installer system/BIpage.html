@@ -179,31 +179,7 @@
         </div>
       </div>
 
-      <!-- Item Candidates Section -->
-      <div class="bg-white rounded-xl shadow-sm p-6">
-        <div class="flex items-center justify-between mb-6">
-          <div>
-            <h3 class="text-xl font-semibold text-gray-900">המלצות פריטים למחשבון</h3>
-            <p class="text-gray-600 text-sm mt-1">פריטים מותאמים אישית שהוזמנו מספר פעמים ומומלצים להפיכה לפריטים קבועים</p>
-          </div>
-          <div class="flex items-center gap-3">
-            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800" id="biCandidatesCount">
-              🎯 0 המלצות
-            </span>
-            <button onclick="refreshBICandidates()" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors">
-              רענן
-            </button>
-          </div>
-        </div>
-        
-        <div id="biItemCandidates" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          <!-- Candidates will be populated by JavaScript -->
-          <div class="text-center text-gray-500 py-8 col-span-full">
-            <div class="mb-3">💡</div>
-            <div>טוען המלצות...</div>
-          </div>
-        </div>
-      </div>
+
     </main>
   </div>
 
@@ -789,146 +765,14 @@
         new Promise(resolve => loadDashboardSummary() || resolve()),
         new Promise(resolve => loadStatistics() || resolve()),
         new Promise(resolve => loadMonthlySalesReport() || resolve()),
-        new Promise(resolve => loadMonthlyRequestsChart() || resolve()),
-        new Promise(resolve => loadBIItemCandidates() || resolve())
+        new Promise(resolve => loadMonthlyRequestsChart() || resolve())
       ]).finally(() => {
         hideLoading();
         showToast('הנתונים נטענו בהצלחה');
       });
     }
 
-    // === BI ITEM CANDIDATES FUNCTIONS === //
-    
-    // Load item candidates for BI page
-    function loadBIItemCandidates() {
-      ajaxCall('GET', `${API_BASE_URL}/PriceCalculatorItem/GetPopularCandidates`, null,
-        function(candidates) {
-          console.log('📈 טוען מועמדים לBI:', candidates);
-          renderBIItemCandidates(candidates || []);
-        },
-        function(error) {
-          console.error('Error loading BI candidates:', error);
-          renderBIItemCandidates([]);
-        }
-      );
-    }
 
-    // Render item candidates for BI page
-    function renderBIItemCandidates(candidates) {
-      const container = document.getElementById('biItemCandidates');
-      const countElement = document.getElementById('biCandidatesCount');
-      
-      countElement.innerHTML = `🎯 ${candidates.length} המלצות`;
-      
-      if (candidates.length === 0) {
-        container.innerHTML = `
-          <div class="text-center text-gray-500 py-12 col-span-full">
-            <div class="mb-4">🎯</div>
-            <div class="text-lg font-medium mb-2">לא נמצאו המלצות כרגע</div>
-            <div class="text-sm text-gray-400">המלצות יופיעו לאחר שימוש חוזר בפריטים מותאמים אישית בהצעות מחיר</div>
-          </div>
-        `;
-        return;
-      }
-
-      container.innerHTML = candidates.map(candidate => `
-        <div class="border border-yellow-200 bg-gradient-to-br from-yellow-50 to-orange-50 rounded-xl p-5 hover:shadow-lg transition-all duration-300 card-hover">
-          <div class="flex items-start justify-between mb-3">
-            <div class="flex-1">
-              <h4 class="font-semibold text-gray-900 text-sm leading-tight mb-1">${candidate.customItemName}</h4>
-              <p class="text-xs text-gray-600">${candidate.suggestedDescription || candidate.customItemName}</p>
-            </div>
-            <div class="flex flex-col items-end gap-1">
-              <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-bold bg-yellow-200 text-yellow-900">
-                ${candidate.occurrences} פעמים
-              </span>
-              <span class="text-xs text-gray-500">נוצר</span>
-            </div>
-          </div>
-          
-          <div class="mb-4">
-            <div class="flex items-center justify-between mb-2">
-              <span class="text-xs text-gray-600">מחיר מוצע:</span>
-              <span class="text-sm font-bold text-primary">₪${candidate.suggestedPrice.toFixed(2)}</span>
-            </div>
-            <div class="w-full bg-gray-200 rounded-full h-2">
-              <div class="bg-gradient-to-r from-yellow-400 to-orange-500 h-2 rounded-full transition-all duration-300" 
-                   style="width: ${Math.min((candidate.occurrences / 10) * 100, 100)}%"></div>
-            </div>
-            <div class="text-xs text-gray-500 mt-1">פופולאריות: ${Math.min((candidate.occurrences / 10) * 100, 100).toFixed(0)}%</div>
-          </div>
-          
-          <div class="flex gap-2">
-            <button onclick="createBICalculatorItemFromCandidate('${candidate.customItemName}')" 
-                    class="flex-1 px-3 py-2 bg-gradient-to-r from-green-600 to-green-700 text-white text-xs rounded-lg hover:from-green-700 hover:to-green-800 transition-all duration-200 shadow-sm font-medium">
-              ✓ אשר ליצירה
-            </button>
-            <button onclick="rejectBICandidate('${candidate.customItemName}')" 
-                    class="px-3 py-2 bg-gradient-to-r from-gray-200 to-gray-300 text-gray-700 text-xs rounded-lg hover:from-gray-300 hover:to-gray-400 transition-all duration-200 shadow-sm">
-              ✗ דחה
-            </button>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    // Create calculator item from candidate (BI version)
-    function createBICalculatorItemFromCandidate(itemName) {
-      if (!confirm(`האם אתה בטוח שברצונך ליצור פריט קבוע במחשבון עבור "${itemName}"?\n\nהפריט יתווסף לרשימת פריטי המחשבון הקבועים ויהיה זמין בכל ההצעות עתידיות.`)) {
-        return;
-      }
-
-      ajaxCall('POST', `${API_BASE_URL}/PriceCalculatorItem/CreateFromCandidate`, JSON.stringify(itemName),
-        function(result) {
-          if (result && result > 0) {
-            showToast(`פריט "${itemName}" נוצר בהצלחה במחשבון!`);
-            refreshBICandidates();
-          } else {
-            showToast('שגיאה ביצירת הפריט - ייתכן שהוא כבר קיים', 'error');
-          }
-        },
-        function(error) {
-          console.error('Error creating item from candidate:', error);
-          showToast('שגיאה ביצירת הפריט', 'error');
-        }
-      );
-    }
-
-    // Reject candidate (BI version)
-    function rejectBICandidate(itemName) {
-      if (!confirm(`האם אתה בטוח שברצונך לדחות את ההמלצה עבור "${itemName}"?\n\nההמלצה תוסר מהרשימה ולא תופיע עוד.`)) {
-        return;
-      }
-
-      ajaxCall('POST', `${API_BASE_URL}/PriceCalculatorItem/RejectCandidate`, JSON.stringify(itemName),
-        function(result) {
-          if (result && result > 0) {
-            showToast(`ההמלצה עבור "${itemName}" נדחתה`);
-            refreshBICandidates();
-          } else {
-            showToast('שגיאה בדחיית ההמלצה', 'error');
-          }
-        },
-        function(error) {
-          console.error('Error rejecting candidate:', error);
-          showToast('שגיאה בדחיית ההמלצה', 'error');
-        }
-      );
-    }
-
-    // Refresh candidates (BI version)
-    function refreshBICandidates() {
-      const container = document.getElementById('biItemCandidates');
-      container.innerHTML = `
-        <div class="text-center text-gray-500 py-8 col-span-full">
-          <div class="mb-3">⏳</div>
-          <div>טוען המלצות...</div>
-        </div>
-      `;
-      loadBIItemCandidates();
-    }
-
-    // === END BI ITEM CANDIDATES FUNCTIONS === //
 
     // Initialize on page load
     $(document).ready(function() {
