@@ -97,6 +97,7 @@ function addRoom() {
       </div>
     </div>`;
   container.appendChild(div);
+
   
   // Add stagger animation
   setTimeout(() => {
@@ -106,7 +107,13 @@ function addRoom() {
   
   // Scroll to new room
   div.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  div.dataset.spaceId = generateSpaceID();
 }
+
+function generateSpaceID() {
+  return Date.now();  // או מזהה זמני עד לשמירה במסד
+}
+
 
 function toggleRoom(btn) {
   const room = btn.closest('.room-card');
@@ -158,31 +165,57 @@ function removeRoom(roomDiv) {
 
 function handleFileUpload(input) {
   const file = input.files[0];
-  const preview = input.closest('.form-group').querySelector('.file-preview');
-  const fileName = preview.querySelector('.file-name');
-  
-  if (file) {
-    if (file.size > 10 * 1024 * 1024) { // 10MB limit
-      showErrorToast('הקובץ גדול מדי. גודל מקסימלי: 10MB');
-      input.value = '';
-      return;
-    }
-    
-    fileName.textContent = file.name;
-    preview.classList.remove('hidden');
-    showSuccessToast('קובץ הועלה בהצלחה');
-  } else {
-    preview.classList.add('hidden');
+  const roomCard = input.closest('.room-card');
+
+  if (!file) {
+    showErrorToast("לא נבחר קובץ");
+    return;
   }
+
+  const formData = new FormData();
+  formData.append("file", file);
+
+  fetch(`${API_BASE_URL}/CustomerDetails/UploadTempVideo`, {
+    method: "POST",
+    body: formData
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      showSuccessToast("הקובץ הועלה בהצלחה");
+      roomCard.dataset.videoLink = data.videoUrl;
+
+      // שמור בלוקאל סטורג'
+      const tempId = roomCard.dataset.spaceId;
+      let saved = JSON.parse(localStorage.getItem("uploadedVideos") || "{}");
+      saved[tempId] = data.videoUrl;
+      localStorage.setItem("uploadedVideos", JSON.stringify(saved));
+
+      // עדכון תצוגה
+      const preview = roomCard.querySelector('.file-preview');
+      preview.classList.remove('hidden');
+      preview.querySelector('.file-name').textContent = file.name;
+
+    } else {
+      showErrorToast(data.message || "שגיאה בהעלאה");
+    }
+  })
+  .catch(err => {
+    console.error("Upload error:", err);
+    showErrorToast("שגיאה בהעלאה");
+  });
 }
+
+
 
 function saveAllRooms() {
   const roomDivs = document.querySelectorAll('.room-card');
   const spaceDetails = [];
   let isValid = true;
   const parquetType = localStorage.getItem('ParquetType');
+  const videoLinks = JSON.parse(localStorage.getItem("uploadedVideos") || "{}");
 
-  roomDivs.forEach((div, index) => {
+  roomDivs.forEach((div) => {
     const select = div.querySelector('select');
     const inputs = div.querySelectorAll('input');
     const textarea = div.querySelector('textarea');
@@ -191,9 +224,8 @@ function saveAllRooms() {
     const sizeInput = inputs[0];
     const size = parseFloat(sizeInput?.value.trim());
     const notes = textarea?.value.trim() || "";
-    const mediaFile = inputs[1]?.files[0];
+    const tempSpaceId = div.dataset.spaceId;
 
-    // Reset previous error states
     div.classList.remove('ring-2', 'ring-red-500', 'ring-opacity-50');
     
     if (!floorType || isNaN(size) || size <= 0) {
@@ -201,11 +233,11 @@ function saveAllRooms() {
       div.classList.add('ring-2', 'ring-red-500', 'ring-opacity-50');
     } else {
       spaceDetails.push({
-        spaceID: index,
+        spaceID: 0, // ייווצר במסד הנתונים
         requestID: 0,
         size: size,
         floorType: floorType,
-        mediaURL: mediaFile ? mediaFile.name : '',
+        mediaURL: videoLinks[tempSpaceId] || '',
         notes: notes,
         ParquetType: parquetType
       });
@@ -226,7 +258,6 @@ function saveAllRooms() {
     return;
   }
 
-  // Show loading state
   const button = event.target;
   button.innerHTML = `
     <svg class="animate-spin w-5 h-5 mx-auto" fill="none" viewBox="0 0 24 24">
@@ -236,7 +267,6 @@ function saveAllRooms() {
   `;
   button.disabled = true;
 
-  // Save data
   const existingData = localStorage.getItem('installationData');
   const parsed = existingData ? JSON.parse(existingData) : {};
   parsed.spaceDetails = spaceDetails;
@@ -247,34 +277,6 @@ function saveAllRooms() {
   setTimeout(() => {
     window.location.href = 'customerDetails.html';
   }, 800);
-}
-
-function showPopup(event) {
-  const popup = document.getElementById('popup');
-  popup.classList.remove('hidden');
-  
-  // Add entrance animation
-  const content = popup.querySelector('.bg-white');
-  content.style.opacity = '0';
-  content.style.transform = 'scale(0.95)';
-  
-  setTimeout(() => {
-    content.style.transition = 'all 0.3s ease';
-    content.style.opacity = '1';
-    content.style.transform = 'scale(1)';
-  }, 50);
-}
-
-function closePopup() {
-  const popup = document.getElementById('popup');
-  const content = popup.querySelector('.bg-white');
-  
-  content.style.opacity = '0';
-  content.style.transform = 'scale(0.95)';
-  
-  setTimeout(() => {
-    popup.classList.add('hidden');
-  }, 300);
 }
 
 function showSuccessToast(message) {
@@ -336,3 +338,10 @@ window.addEventListener('DOMContentLoaded', () => {
     document.body.style.opacity = '1';
   }, 100);
 });
+function saveVideoLink(spaceName, link) {
+  let saved = JSON.parse(localStorage.getItem("uploadedVideos") || "{}");
+  saved[spaceName] = link;
+  localStorage.setItem("uploadedVideos", JSON.stringify(saved));
+  
+}
+
