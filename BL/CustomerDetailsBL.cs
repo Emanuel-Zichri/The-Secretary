@@ -155,6 +155,27 @@ namespace FinalProject.BL
 
             return spaces;
         }
+        public bool UpdateSpaceVideo(int spaceID, string videoLink)
+        {
+            try
+            {
+                int result = _db.UpdateSpaceVideoLink(spaceID, videoLink);
+                return result > 0;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error updating space video: {ex.Message}");
+                return false;
+            }
+        }
+
+        public List<string> GetCustomerVideos(int customerID)
+        {
+            var videos = _db.GetVideosByCustomerID(customerID);
+            return videos ?? new List<string>();  // מחזיר רשימה ריקה אם null
+        }
+
+
 
         private decimal CalculateTotalArea(List<object> data)
         {

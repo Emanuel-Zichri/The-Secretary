@@ -345,6 +345,9 @@ public class DBservices
         { "FloorType", ColumnExists(reader, "FloorType") ? reader["FloorType"].ToString() : null },
         { "ParquetType", ColumnExists(reader, "ParquetType") ? reader["ParquetType"].ToString() : null },
         { "SpaceNotes", ColumnExists(reader, "SpaceNotes") ? reader["SpaceNotes"].ToString() : null },
+        { "MediaURL", ColumnExists(reader, "MediaURL") ? reader["MediaURL"].ToString() : null },
+    
+
 
         // עבור תצוגה מקובצת- כלומר לא נשלח מזהה לקוח
         { "SpaceCount", ColumnExists(reader, "SpaceCount") ? reader["SpaceCount"] : null },
@@ -373,6 +376,60 @@ public class DBservices
 
 
     }
+
+    public List<string> GetVideosByCustomerID(int CustomerID)
+    {
+        SqlConnection con;
+        SqlCommand cmd;
+        List<string> videoLinks = new List<string>();
+
+        try
+        {
+            con = connect("myProjDB"); // מחבר למסד הנתונים שלך
+        }
+        catch (Exception ex)
+        {
+            throw ex; // אפשר להוסיף כאן לוג אם תרצה
+        }
+
+        try
+        {
+            Dictionary<string, object> paramDic = new Dictionary<string, object>
+        {
+            { "@CustomerID", CustomerID }
+        };
+
+            cmd = CreateCommandWithStoredProcedureGeneral("GetVideosByCustomerID", con, paramDic); // צור את הפקודה
+
+            SqlDataReader reader = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+
+            while (reader.Read())
+            {
+                string mediaUrl = reader["MediaURL"] != DBNull.Value ? reader["MediaURL"].ToString() : null;
+                if (!string.IsNullOrEmpty(mediaUrl))
+                {
+                    videoLinks.Add(mediaUrl);
+                }
+            }
+
+            reader.Close();
+        }
+        catch (Exception ex)
+        {
+            throw ex; // אפשר להחליף ב־Console.WriteLine או לוג מתאים
+        }
+        finally
+        {
+            if (con != null)
+            {
+                con.Close();
+            }
+        }
+
+        return videoLinks;
+    }
+
+
 
     private bool ColumnExists(SqlDataReader reader, string columnName)
     {
@@ -2678,6 +2735,71 @@ public class DBservices
     /// <summary>
     /// עדכון פרטי משתמש
     /// </summary>
+    /// 
+
+    public int UpdateSpaceVideoLink(int spaceID, string videoLink)
+    {
+        try
+        {
+            using (SqlConnection conn = new SqlConnection(@"Data Source=Media.ruppin.ac.il;Initial Catalog=igroup14_prod;User ID=igroup14;Password=igroup14_35916"))
+            {
+                string query = "UPDATE SpaceDetails SET MediaURL = @VideoLink WHERE SpaceID = @SpaceID";
+                using (SqlCommand cmd = new SqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@VideoLink", videoLink);
+                    cmd.Parameters.AddWithValue("@SpaceID", spaceID);
+
+                    conn.Open();
+                    int rowsAffected = cmd.ExecuteNonQuery();
+                    return rowsAffected;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error updating MediaURL: {ex.Message}");
+            return 0;
+        }
+    }
+
+    public List<SpaceDetails> GetSpacesByCustomerID(int customerID)
+    {
+        // כאן תממש קריאה ל-DB שלך, לדוגמה קריאת stored procedure שמחזירה את SpaceDetails של הלקוח
+        // דוגמה דמה:
+        // return dbContext.SpaceDetails.Where(s => s.CustomerID == customerID).ToList();
+
+        throw new NotImplementedException("השלם את הקריאה ל-DB כאן");
+    }
+
+    public List<string> GetCustomerVideoLinks(int customerID)
+{
+    List<string> videos = new List<string>();
+    SqlConnection con = connect("myProjDB");
+
+    string query = @"
+        SELECT SD.MediaURL
+        FROM SpaceDetails SD
+        JOIN WorkRequest WR ON SD.RequestID = WR.RequestID
+        WHERE WR.CustomerID = @CustomerID
+        AND SD.MediaURL IS NOT NULL AND SD.MediaURL <> ''
+    ";
+
+    SqlCommand cmd = new SqlCommand(query, con);
+    cmd.Parameters.AddWithValue("@CustomerID", customerID);
+
+    SqlDataReader reader = cmd.ExecuteReader();
+    while (reader.Read())
+    {
+        videos.Add(reader["MediaURL"].ToString());
+    }
+
+    reader.Close();
+    con.Close();
+
+    return videos;
+}
+
+
     public bool UpdateUser(FinalProject.BL.User user)
     {
         SqlConnection con;
