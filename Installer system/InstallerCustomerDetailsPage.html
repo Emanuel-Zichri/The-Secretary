@@ -1910,25 +1910,34 @@
     
     // Load customer videos
     function loadCustomerVideos() {
-      console.log('🎥 טוען סרטוני לקוח עבור ID:', currentCustomerID);
-      
-      // For now, simulate loading videos - you'll need to create the actual API endpoint
-      ajaxCall('GET', `${API_BASE_URL}/CustomerDetails/GetCustomerVideos/${currentCustomerID}`, null,
-        function(videos) {
-          console.log('📹 נטענו סרטוני לקוח:', videos);
-          customerVideos = videos || [];
-          renderCustomerVideos();
+    ajaxCall('GET', `${API_BASE_URL}/CustomerDetails/GetCustomerVideos/${currentCustomerID}`,
+        function (videos) {
+            if (Array.isArray(videos) && videos.length > 0) {
+                customerVideos = videos;
+                currentVideoIndex = 0;
+                displayVideo();
+                $('#videoPlayer').removeClass('hidden');
+                $('#noVideosMessage').addClass('hidden');
+                $('#videoCount').text(`🎥 ${videos.length} סרטונים`);
+            } else {
+                $('#noVideosMessage').removeClass('hidden');
+                $('#videoPlayer').addClass('hidden');
+            }
         },
-        function(error) {
-          console.error('Error loading customer videos:', error);
-          // For now, simulate some videos for testing
-          customerVideos = [
-            // You can add mock data here for testing if needed
-          ];
-          renderCustomerVideos();
+        function (err) {
+            console.error('Error loading customer videos:', err);
         }
-      );
+    );
+}
+
+function displayVideo() {
+    if (customerVideos.length > 0) {
+        $('#currentVideo source').attr('src', customerVideos[currentVideoIndex]);
+        $('#currentVideo')[0].load();
+        $('#videoInfo').text(`סרטון ${currentVideoIndex + 1} מתוך ${customerVideos.length}`);
     }
+}
+
     
     // Render customer videos
     function renderCustomerVideos() {
