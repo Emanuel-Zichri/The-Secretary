@@ -1907,24 +1907,31 @@
     
     // Load customer videos
     function loadCustomerVideos() {
+      console.log('🎥 טוען סרטונים עבור לקוח:', currentCustomerID);
+      
       ajaxCall('GET', `${API_BASE_URL}/CustomerDetails/GetCustomerVideos/${currentCustomerID}`, null,
         function(response) {
+          console.log('📨 תגובה מהשרת:', response);
+          
           if (response && response.success && response.videos && response.videos.length > 0) {
+            console.log('✅ נמצאו סרטונים:', response.videos);
             // Convert MediaURL strings to video objects
             customerVideos = response.videos.map((url, index) => ({
               videoPath: url,
               url: url,
               index: index + 1
             }));
+            console.log('🔄 מערך סרטונים מעובד:', customerVideos);
             currentVideoIndex = 0;
             renderCustomerVideos();
           } else {
+            console.log('⚠️ לא נמצאו סרטונים או תגובה ריקה');
             customerVideos = [];
             renderCustomerVideos();
           }
         },
         function(error) {
-          console.error('Error loading customer videos:', error);
+          console.error('❌ שגיאה בטעינת סרטונים:', error);
           customerVideos = [];
           renderCustomerVideos();
         }
@@ -1934,6 +1941,8 @@
     
     // Render customer videos
     function renderCustomerVideos() {
+      console.log('🖼️ מרנדר סרטונים:', { customerVideos, length: customerVideos.length });
+      
       const videoCountElement = document.getElementById('videoCount');
       const noVideosMessage = document.getElementById('noVideosMessage');
       const videoPlayer = document.getElementById('videoPlayer');
@@ -1941,11 +1950,13 @@
       videoCountElement.innerHTML = `🎥 ${customerVideos.length} סרטונים`;
       
       if (customerVideos.length === 0) {
+        console.log('📋 מציג הודעת "אין סרטונים"');
         noVideosMessage.classList.remove('hidden');
         videoPlayer.classList.add('hidden');
         return;
       }
       
+      console.log('🎬 מציג נגן סרטונים');
       noVideosMessage.classList.add('hidden');
       videoPlayer.classList.remove('hidden');
       
@@ -1958,6 +1969,8 @@
       
       // Render thumbnails
       renderVideoThumbnails();
+      
+      console.log('✅ רינדור סרטונים הושלם');
     }
     
     // Convert Google Drive URL to embeddable format
@@ -1981,6 +1994,7 @@
     // Display specific video
     function displayVideo(index) {
       if (!customerVideos || customerVideos.length === 0 || index < 0 || index >= customerVideos.length) {
+        console.log('❌ לא ניתן להציג סרטון - אינדקס לא תקין או אין סרטונים');
         return;
       }
       
@@ -1990,6 +2004,8 @@
       const videoContainer = videoElement.parentElement;
       const originalUrl = video.videoPath || video.url;
       
+      console.log('🎥 מציג סרטון:', { index, originalUrl, video });
+      
       // Remove any existing iframe
       const existingIframe = videoContainer.querySelector('iframe');
       if (existingIframe) {
@@ -1998,6 +2014,7 @@
       
       // Check if it's a Google Drive URL
       if (originalUrl && originalUrl.includes('drive.google.com')) {
+        console.log('📱 מציג סרטון Google Drive');
         // Hide video element and create iframe
         videoElement.style.display = 'none';
         
@@ -2013,10 +2030,35 @@
         // Insert iframe after video element
         videoElement.parentNode.insertBefore(iframe, videoElement.nextSibling);
       } else {
-        // Show video element for regular videos
+        console.log('🎬 מציג סרטון מקומי');
+        // Show video element for regular/local videos
         videoElement.style.display = 'block';
-        videoElement.src = originalUrl;
+        
+        // Handle local URLs - use the API endpoint
+        let videoSrc = originalUrl;
+        if (videoSrc && videoSrc.startsWith('/uploads/videos/')) {
+          // Extract filename and use API endpoint
+          const fileName = videoSrc.substring('/uploads/videos/'.length);
+          videoSrc = `${API_BASE_URL}/CustomerDetails/GetVideo/${fileName}`;
+          console.log('🔗 משתמש ב-API endpoint:', videoSrc);
+        } else if (videoSrc && !videoSrc.startsWith('http')) {
+          // Convert relative URL to absolute URL as fallback
+          videoSrc = window.location.origin + videoSrc;
+          console.log('🔗 המר URL יחסי לגלובלי:', videoSrc);
+        }
+        
+        videoElement.src = videoSrc;
         videoElement.load();
+        
+        // Add error handling for video element
+        videoElement.onerror = function() {
+          console.error('❌ שגיאה בטעינת הסרטון:', videoSrc);
+          showToast('שגיאה בטעינת הסרטון', 'error');
+        };
+        
+        videoElement.onloadeddata = function() {
+          console.log('✅ סרטון נטען בהצלחה:', videoSrc);
+        };
       }
       
       // Update video info

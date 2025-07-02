@@ -18,6 +18,10 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseCors(policy => policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
+
+// הוספת תמיכה בקבצים סטטיים
+app.UseStaticFiles();
+
 app.UseAuthorization();
 
 app.MapControllers();

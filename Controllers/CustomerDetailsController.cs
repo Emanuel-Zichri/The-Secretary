@@ -201,12 +201,12 @@ namespace FinalProject.Controllers
         {
             try
             {
-                if (request == null || request.CustomerID <= 0 || string.IsNullOrWhiteSpace(request.NewStatus))
+                if (request == null || request.RequestID <= 0 || string.IsNullOrWhiteSpace(request.NewStatus))
                 {
                     return BadRequest(new { success = false, message = "נתונים לא תקינים" });
                 }
 
-                bool success = _customerBL.UpdateCustomerStatus(request.CustomerID, request.NewStatus);
+                bool success = _customerBL.UpdateWorkRequestStatus(request.RequestID, request.NewStatus);
                 
                 if (success)
                 {
@@ -233,8 +233,61 @@ namespace FinalProject.Controllers
 
         public class UpdateStatusRequest
         {
-            public int CustomerID { get; set; }
+            public int RequestID { get; set; }
             public string NewStatus { get; set; }
+        }
+
+        [HttpGet("GetVideo/{fileName}")]
+        public IActionResult GetVideo(string fileName)
+        {
+            try
+            {
+                Console.WriteLine($"🎥 בקשה לקובץ וידאו: {fileName}");
+                
+                if (string.IsNullOrEmpty(fileName))
+                {
+                    return BadRequest("שם קובץ לא תקין");
+                }
+
+                // בדיקת אבטחה - רק קבצים מתיקיית videos
+                if (fileName.Contains("..") || fileName.Contains("/") || fileName.Contains("\\"))
+                {
+                    return BadRequest("שם קובץ לא מותר");
+                }
+
+                var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "videos");
+                var filePath = Path.Combine(uploadsPath, fileName);
+
+                Console.WriteLine($"🔍 מחפש קובץ ב: {filePath}");
+
+                if (!System.IO.File.Exists(filePath))
+                {
+                    Console.WriteLine($"❌ קובץ לא נמצא: {filePath}");
+                    return NotFound($"קובץ {fileName} לא נמצא");
+                }
+
+                Console.WriteLine($"✅ קובץ נמצא, מגיש: {filePath}");
+
+                var fileExtension = Path.GetExtension(fileName).ToLower();
+                string contentType = fileExtension switch
+                {
+                    ".mp4" => "video/mp4",
+                    ".avi" => "video/avi",
+                    ".mov" => "video/quicktime",
+                    ".wmv" => "video/x-ms-wmv",
+                    ".jpg" or ".jpeg" => "image/jpeg",
+                    ".png" => "image/png",
+                    _ => "application/octet-stream"
+                };
+
+                var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+                return File(fileStream, contentType, enableRangeProcessing: true);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ שגיאה בהגשת קובץ {fileName}: {ex.Message}");
+                return StatusCode(500, "שגיאה בהגשת הקובץ");
+            }
         }
     }
 } 

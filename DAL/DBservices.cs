@@ -406,13 +406,25 @@ public class DBservices
             while (reader.Read())
             {
                 string mediaUrl = reader["MediaURL"] != DBNull.Value ? reader["MediaURL"].ToString() : null;
-                if (!string.IsNullOrEmpty(mediaUrl))
+                
+                // סינון נוסף - רק URLs תקינים
+                if (!string.IsNullOrEmpty(mediaUrl) && !string.IsNullOrWhiteSpace(mediaUrl))
                 {
-                    videoLinks.Add(mediaUrl);
+                    // בדיקה אם זה URL תקין (מתחיל ב-http או /)
+                    if (mediaUrl.StartsWith("http") || mediaUrl.StartsWith("/"))
+                    {
+                        videoLinks.Add(mediaUrl);
+                        Console.WriteLine($"✅ נמצא סרטון: {mediaUrl}");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"⚠️ URL לא תקין נדחה: {mediaUrl}");
+                    }
                 }
             }
 
             reader.Close();
+            Console.WriteLine($"🎥 סה\"כ נמצאו {videoLinks.Count} סרטונים עבור לקוח {CustomerID}");
         }
         catch (Exception ex)
         {
