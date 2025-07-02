@@ -102,6 +102,30 @@ namespace FinalProject.BL
             }
         }
 
+        /// <summary>
+        /// עדכון סטטוס לקוח לפי CustomerID
+        /// </summary>
+        public bool UpdateCustomerStatus(int customerID, string newStatus)
+        {
+            try
+            {
+                int result = _db.UpdateCustomerStatus(customerID, newStatus);
+                
+                // אם הסטטוס הוא "התקנה בוצעה" - עדכן תאריך השלמה
+                if (newStatus == "התקנה בוצעה")
+                {
+                    _db.SetCompletedTimeOnStatusChange(customerID);
+                }
+
+                return result > 0;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error updating customer status: {ex.Message}");
+                return false;
+            }
+        }
+
         private Customer MapToCustomer(Dictionary<string, object> data)
         {
             return new Customer

@@ -1468,6 +1468,41 @@ public class DBservices
         }
     }
     //--------------------------------------------------------------------------------------------------
+    // This method sets completed time when status changes
+    //--------------------------------------------------------------------------------------------------
+    public int SetCompletedTimeOnStatusChange(int customerID)
+    {
+        SqlConnection con;
+        SqlCommand cmd;
+        try
+        {
+            con = connect("myProjDB");
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+        Dictionary<string, object> paramDic = new Dictionary<string, object>
+        {
+            { "@CustomerID", customerID }
+        };
+        cmd = CreateCommandWithStoredProcedureGeneral("SetCompletedTimeOnStatusChange", con, paramDic);
+        try
+        {
+            int numEffected = cmd.ExecuteNonQuery();
+            return numEffected;
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+        finally
+        {
+            if (con != null)
+                con.Close();
+        }
+    }
+    //--------------------------------------------------------------------------------------------------
     // This method saves price estimate to database
     //--------------------------------------------------------------------------------------------------
     public int SavePriceEstimate(PriceEstimator estimate)

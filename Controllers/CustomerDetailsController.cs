@@ -74,31 +74,75 @@ namespace FinalProject.Controllers
                 return StatusCode(500, new { success = false, message = "שגיאה בעדכון פרטי הלקוח" });
             }
         }
+
+        /// <summary>
+        /// העלאת קובץ וידאו זמני לשרת המקומי
+        /// </summary>
         [HttpPost("UploadTempVideo")]
         [Consumes("multipart/form-data")]
         public async Task<IActionResult> UploadTempVideo(IFormFile file)
         {
             try
             {
+                Console.WriteLine($"🎬 Starting local video upload. File: {file?.FileName}, Size: {file?.Length}");
+                
                 if (file == null || file.Length == 0)
                 {
+                    Console.WriteLine("❌ No file provided");
                     return BadRequest(new { success = false, message = "לא נבחר קובץ" });
                 }
 
-                var driveService = GoogleDriveHelper.GetDriveService();
-                var uploadedFile = await GoogleDriveHelper.UploadFileAsync(driveService, file, "TemporaryUploads");
-
-                if (uploadedFile == null)
+                // בדיקת גודל קובץ (מקסימום 50MB)
+                if (file.Length > 50 * 1024 * 1024)
                 {
-                    return StatusCode(500, new { success = false, message = "שגיאה בהעלאה לדרייב" });
+                    return BadRequest(new { success = false, message = "הקובץ גדול מדי. מקסימום 50MB" });
                 }
 
-                return Ok(new { success = true, videoUrl = uploadedFile.WebViewLink });
+                // בדיקת סוג קובץ
+                var allowedTypes = new[] { "video/mp4", "video/avi", "video/mov", "video/wmv", "image/jpeg", "image/jpg", "image/png" };
+                if (!allowedTypes.Contains(file.ContentType.ToLower()))
+                {
+                    return BadRequest(new { success = false, message = "סוג קובץ לא נתמך. רק וידאו ותמונות" });
+                }
+
+                // יצירת תיקיית uploads אם לא קיימת
+                var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "videos");
+                if (!Directory.Exists(uploadsPath))
+                {
+                    Directory.CreateDirectory(uploadsPath);
+                    Console.WriteLine($"✅ Created uploads directory: {uploadsPath}");
+                }
+
+                // יצירת שם קובץ ייחודי
+                var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+                var fileExtension = Path.GetExtension(file.FileName);
+                var fileName = $"temp_{timestamp}_{Guid.NewGuid().ToString("N")[..8]}{fileExtension}";
+                var filePath = Path.Combine(uploadsPath, fileName);
+
+                Console.WriteLine($"💾 Saving file to: {filePath}");
+
+                // שמירת הקובץ
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await file.CopyToAsync(stream);
+                }
+
+                // יצירת URL לקובץ
+                var videoUrl = $"/uploads/videos/{fileName}";
+                
+                Console.WriteLine($"✅ File uploaded successfully. URL: {videoUrl}");
+                
+                return Ok(new { 
+                    success = true, 
+                    videoUrl = videoUrl,
+                    fileName = file.FileName,
+                    size = file.Length
+                });
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error uploading temp video: {ex}");
-                return StatusCode(500, new { success = false, message = "שגיאה בשרת" });
+                Console.WriteLine($"❌ Error uploading video: {ex.Message}");
+                return StatusCode(500, new { success = false, message = "שגיאה בהעלאת הקובץ" });
             }
         }
 
@@ -110,7 +154,7 @@ namespace FinalProject.Controllers
                 var videos = _customerBL.GetCustomerVideos(customerID);
                 if (videos == null || videos.Count == 0)
                 {
-                    return NotFound(new { success = false, message = "לא נמצאו סרטונים ללקוח" });
+                    return Ok(new { success = true, videos = new List<string>() });
                 }
 
                 return Ok(new { success = true, videos = videos });
@@ -121,9 +165,6 @@ namespace FinalProject.Controllers
                 return StatusCode(500, new { success = false, message = "שגיאה בקבלת סרטונים" });
             }
         }
-
-
-
 
         [HttpPost("UpdateSpaceVideoLink")]
         public ActionResult UpdateSpaceVideoLink([FromBody] UpdateSpaceVideoRequest request)
@@ -152,8 +193,6 @@ namespace FinalProject.Controllers
             public string VideoLink { get; set; }
         }
 
-
-
         /// <summary>
         /// עדכון סטטוס בקשת עבודה
         /// </summary>
@@ -162,16 +201,16 @@ namespace FinalProject.Controllers
         {
             try
             {
-                if (request == null || request.RequestID <= 0 || string.IsNullOrEmpty(request.NewStatus))
+                if (request == null || request.CustomerID <= 0 || string.IsNullOrWhiteSpace(request.NewStatus))
                 {
-                    return BadRequest(new { success = false, message = "נתוני בקשה לא תקינים" });
+                    return BadRequest(new { success = false, message = "נתונים לא תקינים" });
                 }
 
-                bool success = _customerBL.UpdateWorkRequestStatus(request.RequestID, request.NewStatus);
+                bool success = _customerBL.UpdateCustomerStatus(request.CustomerID, request.NewStatus);
                 
                 if (success)
                 {
-                    return Ok(new { success = true, message = "סטטוס עודכן בהצלחה" });
+                    return Ok(new { success = true, message = "הסטטוס עודכן בהצלחה" });
                 }
                 else
                 {
@@ -180,22 +219,22 @@ namespace FinalProject.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error updating work request status: {ex.Message}");
-                return StatusCode(500, new { success = false, message = "שגיאה בעדכון סטטוס בקשת העבודה" });
+                Console.WriteLine($"Error updating status: {ex.Message}");
+                return StatusCode(500, new { success = false, message = "שגיאה בעדכון הסטטוס" });
             }
         }
-    }
 
-    // מחלקות עזר
-    public class UpdateCustomerDetailsRequest
-    {
-        public Customer Customer { get; set; }
-        public List<SpaceDetails> SpaceDetails { get; set; }
-    }
+        // מחלקות עזר
+        public class UpdateCustomerDetailsRequest
+        {
+            public Customer Customer { get; set; }
+            public List<SpaceDetails> SpaceDetails { get; set; }
+        }
 
-    public class UpdateStatusRequest
-    {
-        public int RequestID { get; set; }
-        public string NewStatus { get; set; }
+        public class UpdateStatusRequest
+        {
+            public int CustomerID { get; set; }
+            public string NewStatus { get; set; }
+        }
     }
 } 

@@ -52,6 +52,18 @@
         from { opacity: 0; transform: translateY(20px); }
         to { opacity: 1; transform: translateY(0); }
       }
+      
+      /* Popup animations */
+      #popup .bg-white {
+        transform: scale(0.95);
+        opacity: 0;
+        transition: all 0.2s ease-out;
+      }
+      
+      #popup:not(.hidden) .bg-white {
+        transform: scale(1);
+        opacity: 1;
+      }
     </style>
   </head>
   <body class="bg-gradient-to-br from-orange-50 to-amber-50 min-h-screen font-heebo">
@@ -59,7 +71,7 @@
     <div class="glass-effect sticky top-0 z-40 border-b border-orange-100">
       <div class="max-w-md mx-auto px-4 py-3">
         <div class="flex items-center justify-between">
-          <button onclick="window.history.back()" class="flex items-center justify-center w-10 h-10 bg-white/80 hover:bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200">
+          <button type="button" onclick="window.history.back()" class="flex items-center justify-center w-10 h-10 bg-white/80 hover:bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200">
             <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19l7-7-7-7"></path>
             </svg>
@@ -106,7 +118,7 @@
       </div>
 
       <!-- Add Room Button -->
-      <button onclick="addRoom()" class="w-full bg-white border-2 border-dashed border-primary/30 text-primary py-4 px-6 rounded-xl hover:border-primary/50 hover:bg-primary/5 transition-all duration-300 mb-6">
+      <button type="button" onclick="addRoom(event)" class="w-full bg-white border-2 border-dashed border-primary/30 text-primary py-4 px-6 rounded-xl hover:border-primary/50 hover:bg-primary/5 transition-all duration-300 mb-6">
         <span class="flex items-center justify-center">
           <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
@@ -119,7 +131,7 @@
     <!-- Fixed Bottom Section -->
     <div class="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-white via-white to-transparent p-4">
       <div class="max-w-md mx-auto">
-        <button onclick="saveAllRooms()" class="w-full bg-primary hover:bg-primary-dark text-white font-semibold py-4 px-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 active:scale-95">
+        <button type="button" onclick="saveAllRooms(event)" class="w-full bg-primary hover:bg-primary-dark text-white font-semibold py-4 px-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 active:scale-95">
           <span class="flex items-center justify-center">
             <span>בואו נמשיך</span>
             <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -137,7 +149,7 @@
         <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 transform transition-all duration-300">
           <div class="flex items-center justify-between mb-4">
             <h3 class="text-lg font-semibold text-gray-800">איך למדוד שטח?</h3>
-            <button onclick="closePopup()" class="p-1 hover:bg-gray-100 rounded-full transition-colors">
+            <button type="button" onclick="closePopup()" class="p-1 hover:bg-gray-100 rounded-full transition-colors">
               <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
               </svg>
