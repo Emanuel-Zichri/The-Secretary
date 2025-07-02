@@ -74,6 +74,8 @@ function renderCalendar() {
     else if (date.getDay() === 5 || date.getDay() === 6) {
       dayElement.classList.add('disabled', 'text-gray-400', 'bg-gray-100');
       dayElement.title = 'אנחנו לא עובדים בסופי שבוע';
+      dayElement.style.cursor = 'not-allowed';
+      // לא מוסיפים event listener לסופי שבוע
     }
     // Available date
     else {
@@ -194,6 +196,21 @@ function nextMonth() {
   renderCalendar();
 }
 
+// פונקציה חדשה להמרת תאריך לפורמט מקומי בלי בעיות timezone
+function formatDateForAPI(date) {
+  if (!date) return null;
+  
+  // יצירת תאריך חדש בזמן מקומי (12:00 באמצע היום)
+  const localDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 12, 0, 0, 0);
+  
+  // פורמט YYYY-MM-DD
+  const year = localDate.getFullYear();
+  const month = String(localDate.getMonth() + 1).padStart(2, '0');
+  const day = String(localDate.getDate()).padStart(2, '0');
+  
+  return `${year}-${month}-${day}T12:00:00.000Z`;
+}
+
 function submitAllData() {
   if (!selectedDate || !selectedSlot) {
     showErrorToast('אנא בחרו תאריך ושעה');
@@ -215,9 +232,9 @@ function submitAllData() {
   const fullData = JSON.parse(localStorage.getItem('installationData')) || {};
   const parquet = localStorage.getItem('ParquetType') || '';
 
-  // Add date and slot to data
+  // Add date and slot to data - תיקון בעיית הזמן
   fullData.selectedParquet = parquet;
-  fullData.preferredDate = selectedDate.toISOString();
+  fullData.preferredDate = formatDateForAPI(selectedDate); // שימוש בפונקציה החדשה
   fullData.preferredSlot = selectedSlot;
 
   // Build request data for API
@@ -225,7 +242,7 @@ function submitAllData() {
     customerDetails: fullData.customerDetails || {},
     spaceDetails: fullData.spaceDetails || [],
     selectedParquet: parquet,
-    preferredDate: selectedDate.toISOString(),
+    preferredDate: formatDateForAPI(selectedDate), // שימוש בפונקציה החדשה
     preferredSlot: selectedSlot
   };
 
@@ -368,6 +385,6 @@ function showErrorToast(message) {
   
   setTimeout(() => {
     toast.classList.add('translate-y-[-100px]', 'opacity-0');
-    setTimeout(() => document.body.removeChild(toast), 300);
+    setTimeout(() => document.body.removeChild(toast), 3000);
   }, 3000);
 }
