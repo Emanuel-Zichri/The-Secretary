@@ -441,12 +441,19 @@
       document.getElementById("filterToDate").value = "";
       document.getElementById("filterDateType").value = "PlannedDate";
       
-      // Clear sort
-      currentSort = { field: null, direction: 'asc' };
+      // Reset to default sort (newest customers first)
+      currentSort = { field: 'CustomerCreatedAt', direction: 'desc' };
       document.querySelectorAll('[id^="sort-"]').forEach(el => {
         el.textContent = '';
         el.className = 'text-gray-400';
       });
+      
+      // Update sort indicator for default sort
+      const indicator = document.getElementById('sort-CustomerCreatedAt');
+      if (indicator) {
+        indicator.textContent = ' ↓';
+        indicator.className = 'text-primary font-bold';
+      }
       
       // Reset pagination
       pagination.currentPage = 1;
@@ -575,6 +582,18 @@
       document.addEventListener("DOMContentLoaded", function() {
         // Initialize status filter for default view
         updateStatusFilter();
+        
+        // Set default sort to newest customers first (by creation date, descending)
+        currentSort.field = 'CustomerCreatedAt';
+        currentSort.direction = 'desc';
+        
+        // Update sort indicator for default sort
+        const indicator = document.getElementById('sort-CustomerCreatedAt');
+        if (indicator) {
+          indicator.textContent = ' ↓';
+          indicator.className = 'text-primary font-bold';
+        }
+        
         loadCustomers();
         
         // Debounced search for name and city
