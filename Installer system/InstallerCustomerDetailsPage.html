@@ -272,9 +272,6 @@
                         <button onclick="playAllVideos()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm">
                           ▶️ נגן הכל
                         </button>
-                        <button onclick="downloadCurrentVideo()" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm">
-                          📥 הורד
-                        </button>
                       </div>
                     </div>
                     
@@ -1910,33 +1907,29 @@
     
     // Load customer videos
     function loadCustomerVideos() {
-    ajaxCall('GET', `${API_BASE_URL}/CustomerDetails/GetCustomerVideos/${currentCustomerID}`,
-        function (videos) {
-            if (Array.isArray(videos) && videos.length > 0) {
-                customerVideos = videos;
-                currentVideoIndex = 0;
-                displayVideo();
-                $('#videoPlayer').removeClass('hidden');
-                $('#noVideosMessage').addClass('hidden');
-                $('#videoCount').text(`🎥 ${videos.length} סרטונים`);
-            } else {
-                $('#noVideosMessage').removeClass('hidden');
-                $('#videoPlayer').addClass('hidden');
-            }
+      ajaxCall('GET', `${API_BASE_URL}/CustomerDetails/GetCustomerVideos/${currentCustomerID}`, null,
+        function(response) {
+          if (response && response.success && response.videos && response.videos.length > 0) {
+            // Convert MediaURL strings to video objects
+            customerVideos = response.videos.map((url, index) => ({
+              videoPath: url,
+              url: url,
+              index: index + 1
+            }));
+            currentVideoIndex = 0;
+            renderCustomerVideos();
+          } else {
+            customerVideos = [];
+            renderCustomerVideos();
+          }
         },
-        function (err) {
-            console.error('Error loading customer videos:', err);
+        function(error) {
+          console.error('Error loading customer videos:', error);
+          customerVideos = [];
+          renderCustomerVideos();
         }
-    );
-}
-
-function displayVideo() {
-    if (customerVideos.length > 0) {
-        $('#currentVideo source').attr('src', customerVideos[currentVideoIndex]);
-        $('#currentVideo')[0].load();
-        $('#videoInfo').text(`סרטון ${currentVideoIndex + 1} מתוך ${customerVideos.length}`);
+      );
     }
-}
 
     
     // Render customer videos
@@ -1967,6 +1960,24 @@ function displayVideo() {
       renderVideoThumbnails();
     }
     
+    // Convert Google Drive URL to embeddable format
+    function getEmbeddableUrl(url) {
+      if (!url) return url;
+      
+      // Check if it's a Google Drive URL
+      if (url.includes('drive.google.com')) {
+        // Extract file ID from Google Drive URL
+        const fileIdMatch = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+        if (fileIdMatch) {
+          const fileId = fileIdMatch[1];
+          // Return embed URL
+          return `https://drive.google.com/file/d/${fileId}/preview`;
+        }
+      }
+      
+      return url;
+    }
+    
     // Display specific video
     function displayVideo(index) {
       if (!customerVideos || customerVideos.length === 0 || index < 0 || index >= customerVideos.length) {
@@ -1976,9 +1987,37 @@ function displayVideo() {
       const video = customerVideos[index];
       const videoElement = document.getElementById('currentVideo');
       const videoInfo = document.getElementById('videoInfo');
+      const videoContainer = videoElement.parentElement;
+      const originalUrl = video.videoPath || video.url;
       
-      // Update video source
-      videoElement.src = video.videoPath || video.url;
+      // Remove any existing iframe
+      const existingIframe = videoContainer.querySelector('iframe');
+      if (existingIframe) {
+        existingIframe.remove();
+      }
+      
+      // Check if it's a Google Drive URL
+      if (originalUrl && originalUrl.includes('drive.google.com')) {
+        // Hide video element and create iframe
+        videoElement.style.display = 'none';
+        
+        const iframe = document.createElement('iframe');
+        iframe.src = getEmbeddableUrl(originalUrl);
+        iframe.width = '100%';
+        iframe.height = '400';
+        iframe.frameBorder = '0';
+        iframe.allowFullscreen = true;
+        iframe.className = 'w-full max-w-4xl mx-auto rounded-lg shadow-lg';
+        iframe.style.maxWidth = '100%';
+        
+        // Insert iframe after video element
+        videoElement.parentNode.insertBefore(iframe, videoElement.nextSibling);
+      } else {
+        // Show video element for regular videos
+        videoElement.style.display = 'block';
+        videoElement.src = originalUrl;
+        videoElement.load();
+      }
       
       // Update video info
       videoInfo.textContent = `סרטון ${index + 1} מתוך ${customerVideos.length}`;
@@ -2107,29 +2146,7 @@ function displayVideo() {
       showToast(`מתחיל נגינת ${customerVideos.length} סרטונים`, 'info');
     }
     
-    // Download current video
-    function downloadCurrentVideo() {
-      if (!customerVideos || customerVideos.length === 0) {
-        showToast('אין סרטון להורדה', 'error');
-        return;
-      }
-      
-      const currentVideo = customerVideos[currentVideoIndex];
-      if (!currentVideo || !currentVideo.videoPath) {
-        showToast('שגיאה בהורדת הסרטון', 'error');
-        return;
-      }
-      
-      // Create download link
-      const link = document.createElement('a');
-      link.href = currentVideo.videoPath;
-      link.download = `customer_${currentCustomerID}_video_${currentVideoIndex + 1}.mp4`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      
-      showToast('הסרטון בהורדה...', 'success');
-    }
+
     
     // === END CUSTOMER VIDEOS FUNCTIONS === //
 
