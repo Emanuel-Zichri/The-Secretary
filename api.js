@@ -1,1 +1,1 @@
-const API_BASE_URL = "https://localhost:7135/api"
+const API_BASE_URL = "https://proj.ruppin.ac.il/igroup14/test2/tar1/api"
